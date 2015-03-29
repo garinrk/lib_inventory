@@ -2,12 +2,8 @@ package garinrphase2;
 
 import java.math.BigInteger;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.*;
-import java.text.*;
 import java.lang.*;
 /**
  * CS 5530 Database Systems
@@ -21,7 +17,7 @@ import java.lang.*;
  */
 public class Bookshelf {
 	
-	static boolean verbose = true;
+	static boolean verbose = false;
 	
 	//TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
 	
@@ -61,11 +57,12 @@ public class Bookshelf {
 
 		
 		System.out.println("Adding a new user: ");
+		System.out.println();
 		System.out.print("New Unique Username: ");
 		newUsername = in.nextLine();
 		
 		//TODO: This should return whether or not said username already exists in table
-		while(!CheckForUser(newUsername))
+		while(CheckForUser(newUsername))
 		{
 			System.out.print(newUsername + " already exists, please choose a new username: ");
 			newUsername = in.nextLine();
@@ -77,7 +74,7 @@ public class Bookshelf {
 		{
 			newID = in.nextLine();
 			
-			if(!Main.IsInteger(newID))
+			if(!Main.IsNumber(newID))
 			{
 				System.out.print(newID + " is not a number, ");
 				System.out.print("Please enter a number for this user's ID: ");
@@ -101,7 +98,7 @@ public class Bookshelf {
 		{
 			newPhoneNumber = in.nextLine();
 			
-			if(!Main.IsInteger(newID))
+			if(!Main.IsNumber(newID))
 			{
 				System.out.print(newPhoneNumber + " is not a number, ");
 				System.out.print("Please enter a number for this user's Phone Number: ");
@@ -138,12 +135,12 @@ public class Bookshelf {
 //		do
 //		{
 //			userSelection = in.nextLine();
-//			if(!Main.IsInteger(userSelection))
+//			if(!Main.IsNumber(userSelection))
 //			{
 //				System.out.print(userSelection + " is not a number, ");
 //				System.out.print("Please enter [1] to return to main menu or [2] to exit: ");
 //			}
-//			if(Main.IsInteger(userSelection))
+//			if(Main.IsNumber(userSelection))
 //			{
 //				choice = Integer.parseInt(userSelection);
 //				if(choice != 1 && choice != 2)
@@ -193,6 +190,9 @@ public class Bookshelf {
 	 */
 	public static void CheckoutBook(Date today)
 	{
+		System.out.println("Checking out a book");
+		System.out.println();
+
 		String ISBN;
 		System.out.print("Please enter the 13 digit ISBN of the book you wish to check out: ");
 		do{
@@ -203,7 +203,7 @@ public class Bookshelf {
 				System.out.println("Length of isbn: " + userSelection.length());
 			}
 			
-			if(/*!Main.IsInteger(userSelection) ||*/ userSelection.length() != 13)
+			if(/*!Main.IsNumber(userSelection) ||*/ userSelection.length() != 13)
 			{
 				System.out.print("Not a valid ISBN, please try again: ");
 			}
@@ -278,12 +278,12 @@ public class Bookshelf {
 	 */
 	public static void PrintUserRecord()
 	{
-		String lookedupUser;
+		String lookedUpUser;
 		System.out.println();
 		System.out.println("Username to view record of: ");
-		lookedupUser = in.nextLine();
+		lookedUpUser = in.nextLine();
 		
-		if(!CheckForUser(lookedupUser))
+		if(!CheckForUser(lookedUpUser))
 		{
 			System.out.println("User does not exist, returning to main menu");
 			System.out.println();
@@ -294,7 +294,7 @@ public class Bookshelf {
 		{
 			if(verbose)
 			{
-				System.out.println("Printing record for " + lookedupUser);
+				System.out.println("Printing record for " + lookedUpUser);
 			}
 			
 			//TODO: Holy SQL batman
@@ -352,7 +352,7 @@ public class Bookshelf {
 		{
 			userSelection = in.nextLine();
 			
-			if(!Main.IsInteger(userSelection))
+			if(!Main.IsNumber(userSelection))
 			{
 				System.out.print(userSelection + " is not a number, ");
 				System.out.print("Please enter the number of authors: ");
@@ -435,14 +435,14 @@ public class Bookshelf {
 			{
 				userSelection = in.nextLine();
 				
-				if(!Main.IsInteger(userSelection))
+				if(!Main.IsNumber(userSelection))
 				{
 					System.out.print(userSelection + " is an invalid option, ");
 					System.out.print("Please make a selection: ");
 				}
 				
 				//if the user did enter a number
-				if(Main.IsInteger(userSelection))
+				if(Main.IsNumber(userSelection))
 				{
 					choice = Integer.parseInt((userSelection));
 					
@@ -499,7 +499,7 @@ public class Bookshelf {
 		{
 			userSelection = in.nextLine();
 			
-			if(!Main.IsInteger(userSelection))
+			if(!Main.IsNumber(userSelection))
 			{
 				System.out.print(userSelection + " is not a number, ");
 				System.out.print("Please enter a number for this user's ID: ");
@@ -556,7 +556,7 @@ public class Bookshelf {
 		int score;
 		String userOpinion;
 		
-		System.out.println("Reviews");
+		System.out.println("Leaving a Review: ");
 		System.out.println();
 		System.out.print("What is the ISBN of the book you wish to leave a review for? :");
 		isbnreview = in.nextLine();
@@ -567,7 +567,7 @@ public class Bookshelf {
 			{
 				userSelection = in.nextLine();
 				
-				if(!Main.IsInteger(userSelection))
+				if(!Main.IsNumber(userSelection))
 				{
 					System.out.print(userSelection + " is not a number, ");
 					System.out.print("Please enter a number for this user's ID: ");
@@ -602,14 +602,14 @@ public class Bookshelf {
 			{
 				userSelection = in.nextLine();
 				
-				if(!Main.IsInteger(userSelection))
+				if(!Main.IsNumber(userSelection))
 				{
 					System.out.print(userSelection + " is an invalid option, ");
 					System.out.print("Please make a selection: ");
 				}
 				
 				//if the user did enter a number
-				if(Main.IsInteger(userSelection))
+				if(Main.IsNumber(userSelection))
 				{
 					choice = Integer.parseInt((userSelection));
 					
@@ -704,14 +704,14 @@ public class Bookshelf {
 			{
 				userSelection = in.nextLine();
 				
-				if(!Main.IsInteger(userSelection))
+				if(!Main.IsNumber(userSelection))
 				{
 					System.out.print(userSelection + " is an invalid option, ");
 					System.out.print("Please make a selection: ");
 				}
 				
 				//if the user did enter a number
-				if(Main.IsInteger(userSelection))
+				if(Main.IsNumber(userSelection))
 				{
 					choice = Integer.parseInt((userSelection));
 					
@@ -816,14 +816,14 @@ public class Bookshelf {
 			{
 				userSelection = in.nextLine();
 				
-				if(!Main.IsInteger(userSelection))
+				if(!Main.IsNumber(userSelection))
 				{
 					System.out.print(userSelection + " is an invalid option, ");
 					System.out.print("Please make a selection: ");
 				}
 				
 				//if the user did enter a number
-				if(Main.IsInteger(userSelection))
+				if(Main.IsNumber(userSelection))
 				{
 					choice = Integer.parseInt((userSelection));
 					
@@ -880,10 +880,206 @@ public class Bookshelf {
 		//TODO: Create sql command with appropriate fields to search for
 		//TODO: Group results by specified method
 	}
-	
+
+	/**
+	 * Returning a book
+	 * A book can be marked as returned or lost. Record the day it was returned or when it was marked as lost
+	 *
+	 *
+	 * If the book was returned, show the list of people on the wait list for said book
+	 */
 	public static void ReturnBook()
 	{
-		
+
+		String ISBN;
+		String month;
+		String day;
+		String year;
+
+		int monthNumber = 0;
+		int dayNumber = 0;
+		int yearNumber = 0;
+
+		boolean validDate = false;
+		boolean validMonth = false;
+		boolean validDay = false;
+		boolean validYear = false;
+
+		boolean lost;
+
+		System.out.println("Returning a book");
+		System.out.println("");
+
+		System.out.print("Please enter the 13 digit ISBN of the book you wish to return: ");
+		do{
+			userSelection = in.nextLine();
+
+			if(verbose)
+			{
+				System.out.println("Length of isbn: " + userSelection.length());
+			}
+
+			if(/*!Main.IsNumber(userSelection) ||*/ userSelection.length() != 13)
+			{
+				System.out.print("Not a valid ISBN, please try again: ");
+			}
+			else
+			{
+				ISBN = userSelection;
+				break;
+			}
+
+		}while(true);
+
+		do {
+
+			System.out.println("Please enter the date of which this book was returned: ");
+			System.out.print("What month was this book returned? [1 - 12]: ");
+			month = in.nextLine();
+			System.out.print("What day was this book returned? [1 - 31]: ");
+			day = in.nextLine();
+			System.out.print("What year was this book returned? [YYYY]: ");
+			year = in.nextLine();
+
+			//check for valid input
+			if(!Main.IsNumber(month))
+			{
+				System.out.println(month + " is not a valid month [1 - 12]");
+				validMonth = false;
+
+			}
+
+			if(!Main.IsNumber(day))
+			{
+				System.out.println(day + " is not a valid day [1 - 31]");
+				validDay = false;
+			}
+
+			if(!Main.IsNumber(year))
+			{
+				System.out.println(year + " is not a valid year [YYYY]");
+				validYear = false;
+			}
+
+			if(Main.IsNumber(month))
+			{
+				monthNumber = Integer.parseInt(month);
+				if(monthNumber > 12 || monthNumber < 1)
+				{
+					System.out.println(month + " is not a valid month [1 - 12]");
+				}
+				else
+					validMonth = true;
+			}
+
+			if(Main.IsNumber(day))
+			{
+				dayNumber = Integer.parseInt(day);
+				if(dayNumber > 31 || dayNumber < 1)
+				{
+					System.out.println(day + " is not a valid day [1 - 31]");
+				}
+				else
+					validDay = true;
+			}
+
+			if(Main.IsNumber(year))
+			{
+				yearNumber = Integer.parseInt(year);
+				validYear = true;
+			}
+
+			if(validMonth && validDay && validYear)
+			{
+				validDate = true;
+			}
+
+			if(verbose)
+			{
+
+				System.out.println("The user has presented a valid date: " + validDate);
+			}
+
+			if(validDate == false)
+			{
+				System.out.println("Retrying...");
+				System.out.println();
+			}
+
+
+		}
+		while (validDate == false);
+
+
+
+		if(verbose)
+		{
+			System.out.println("User returning book on " +  monthNumber + "/" + dayNumber + "/" + yearNumber);
+		}
+
+		System.out.print("Was this book properly returned or lost? [1] yes [0] no: ");
+
+		try
+		{
+			do
+			{
+				userSelection = in.nextLine();
+
+				if(!Main.IsNumber(userSelection))
+				{
+					System.out.print(userSelection + " is an invalid option, ");
+					System.out.print("Please make a selection: ");
+				}
+
+				//if the user did enter a number
+				if(Main.IsNumber(userSelection))
+				{
+					choice = Integer.parseInt((userSelection));
+
+					//check to see if it's a valid option
+					if(choice != 0 && choice != 1)
+					{
+						System.out.print(choice + " is an invalid option ");
+						System.out.print("please make a selection: ");
+
+					}
+
+					//case where the user did enter a valid option number
+					else
+					{
+						break;
+					}
+
+				}
+			} while (true);
+		}
+		catch (Exception e)
+		{
+
+		}
+
+		//determine whether book was lost
+		if(choice == 1)
+		{
+			lost = true;
+		}
+		else
+		{
+			lost = false;
+		}
+
+		if(lost)
+		{
+			//specify checkout record as lost
+		}
+
+		else
+		{
+			//TODO: Return wait list for specified book via ISBN
+		}
+
+
+		//TODO: Check if a book with specified isbn has been checked out by currently logged in user
 	}
 	
 	public static void PrintBookRecord()

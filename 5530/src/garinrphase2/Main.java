@@ -129,10 +129,10 @@ public class Main {
 
 	/**
 	 * Check if the user's input was an integer or not
-	 * @param i
+	 * @param i, a string to test if it is an integer
 	 * @return
 	 */
-	public static boolean IsInteger(String i)
+	public static boolean IsNumber(String i)
 	{
 		try
 		{
@@ -221,6 +221,10 @@ public class Main {
 		}
 		
 		//print user statistics
+		else if(selection == 12)
+		{
+			Bookshelf.PrintUserStatistics();
+		}
 		else if(selection == 13)
 		{
 			ExitProgram();
@@ -282,14 +286,14 @@ public class Main {
 			{
 				userSelection = in.nextLine();
 				
-				if(!IsInteger(userSelection))
+				if(!IsNumber(userSelection))
 				{
 					System.out.print(userSelection + " is an invalid option, ");
 					System.out.print("Please make a selection: ");
 				}
 				
 				//if the user did enter a number
-				if(IsInteger(userSelection))
+				if(IsNumber(userSelection))
 				{
 					choice = Integer.parseInt((userSelection));
 					
@@ -373,14 +377,14 @@ public class Main {
 			{
 				userSelection = in.nextLine();
 				
-				if(!IsInteger(userSelection))
+				if(!IsNumber(userSelection))
 				{
 					System.out.print(userSelection + " is an invalid option, ");
 					System.out.print("Please make a selection: ");
 				}
 				
 				//if the user did enter a number
-				if(IsInteger(userSelection))
+				if(IsNumber(userSelection))
 				{
 					choice = Integer.parseInt((userSelection));
 					
