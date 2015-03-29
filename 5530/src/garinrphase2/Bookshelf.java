@@ -1,5 +1,6 @@
 package garinrphase2;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -20,6 +21,8 @@ import java.text.*;
 public class Bookshelf {
 	
 	static boolean verbose = true;
+	
+	//TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
 	
 //	private static String DBUSER = "cs5530u18";
 //	private static String DBPASS = "f96qb5pr";
@@ -59,6 +62,13 @@ public class Bookshelf {
 		System.out.println("Adding a new user: ");
 		System.out.print("New Unique Username: ");
 		newUsername = in.nextLine();
+		
+		//TODO: This should return whether or not said username already exists in table
+		while(!CheckForUser(newUsername))
+		{
+			System.out.print(newUsername + " already exists, please choose a new username: ");
+			newUsername = in.nextLine();
+		}
 		
 		/* User must enter a number for an ID */
 		System.out.print("New ID (Number): ");
@@ -116,6 +126,12 @@ public class Bookshelf {
 		//TODO: Construct query from provided information, send to server
 		//TODO: If successful, return success and throw user back to main menu
 		
+		//if there wasn't a previously set user, as in this is a new user being created upon start
+		if(loggedInUser == null)
+			return;
+		else
+			Main.MainMenu();
+		
 //		System.out.print("[1] to exit or [2] to return to main menu");
 //		
 //		do
@@ -142,10 +158,7 @@ public class Bookshelf {
 //			}
 //		}
 //		while (true);
-		if(loggedInUser == null)
-			return;
-		else
-			Main.MainMenu();
+
 //		if(choice == 1)
 //			Main.MainMenu();
 //		else
@@ -153,7 +166,7 @@ public class Bookshelf {
 		
 	}//end of AddUser
 	
-	public static void Login(String username)
+	public static void setLoggedInUser(String username)
 	{
 		loggedInUser = username;
 	}
@@ -179,18 +192,23 @@ public class Bookshelf {
 	 */
 	public static void CheckoutBook(Date today)
 	{
-		int ISBN;
+		String ISBN;
 		System.out.print("Please enter the 13 digit ISBN of the book you wish to check out: ");
 		do{
 			userSelection = in.nextLine();
 			
-			if(!Main.IsInteger(userSelection) || userSelection.length() != 13)
+			if(verbose)
+			{
+				System.out.println("Length of isbn: " + userSelection.length());
+			}
+			
+			if(/*!Main.IsInteger(userSelection) ||*/ userSelection.length() != 13)
 			{
 				System.out.print("Not a valid ISBN, please try again: ");
 			}
 			else
 			{
-				ISBN = Integer.parseInt(userSelection);
+				ISBN = userSelection;
 				break;
 			}
 			
@@ -203,6 +221,7 @@ public class Bookshelf {
 		
 		//compute due date to be 30 days from today
 		c.setTime(today);
+		
 		if(verbose)
 		{
 			System.out.println("It is currently " + c.get(Calendar.MONTH) + " the " + c.get(Calendar.DAY_OF_MONTH));
@@ -227,9 +246,448 @@ public class Bookshelf {
 		
 		//TODO: The user can only check out the book when they have been on said walist the longest.
 		
+		//return to main menu
+		Main.MainMenu();
 		
+	}//end of CheckoutBook
+
+	/**
+	 * The following should be printed:
+	 * 
+	 * Personal Data of User:
+	 * 		name
+	 * 		username
+	 * 		id
+	 * 		address
+	 * 		phone number
+	 * 		email address
+	 * Full book history:
+	 * 		All books checked out in the past
+	 * 			ISBN
+	 * 			Title
+	 * 			Dates of checkout and return
+	 *	Full list of books lost by user
+	 *	Full list of books requested for future checkout (User is currently on waitlist for)
+	 *	Full list of review they have written for books
+	 *		Score
+	 *		Text
+	 * 		
+	 */
+	public static void PrintUserRecord()
+	{
+		String lookedupUser;
+		System.out.println();
+		System.out.println("Username to view record of: ");
+		lookedupUser = in.nextLine();
+		
+		if(!CheckForUser(lookedupUser))
+		{
+			System.out.println("User does not exist, returning to main menu");
+			System.out.println();
+			Main.MainMenu();
+		}
+		
+		else
+		{
+			if(verbose)
+			{
+				System.out.println("Printing record for " + lookedupUser);
+			}
+			
+			//TODO: Holy SQL batman
+		}
+		
+		//return to main menu
+		Main.MainMenu();
+
+		
+	}
+	
+	/**
+	 * Adds a new record of a book to the library, but not a copy
+	 * Prompt user for:
+	 * 		ISBN
+	 * 		title
+	 * 		author
+	 * 		publisher
+	 * 		year of publication
+	 * 		format
+	 * 		subject
+	 * 		book summary
+	 * 
+	 * Set the following to null/empty
+	 * 		individual book copy location
+	 * 		availability
+	 */
+	public static void AddBookRecord()
+	{
+		BigInteger newISBN;
+		String newTitle;
+		String newPublisher;
+		String newYearPub;
+		String newFormat;
+		String newSubject;
+		String newSummary;
+		
+		int numberOfAuthors;
+		
+		boolean multipleAuthors;
+		
+		
+		System.out.println("Entering new book data...");
+		System.out.println();
+		
+		System.out.println("ISBN: ");
+		newISBN = new BigInteger(in.nextLine());
+		System.out.print("Title: ");
+		newTitle = in.nextLine();
+		
+		
+		System.out.print("How many authors are there for this title? :");
+		
+		do
+		{
+			userSelection = in.nextLine();
+			
+			if(!Main.IsInteger(userSelection))
+			{
+				System.out.print(userSelection + " is not a number, ");
+				System.out.print("Please enter the number of authors: ");
+			}
+			else
+			{
+				numberOfAuthors = Integer.parseInt(userSelection);
+				break;
+			}
+		} while (true);
+		
+		//create an array to hold the names of multiple authors for the title
+		String[] authors = new String[numberOfAuthors];
+		
+		//only one author, grab name and carry on
+		if(numberOfAuthors == 1)
+		{
+			System.out.print("Author: ");
+			authors[0] = in.nextLine();
+			multipleAuthors = false;
+		}
+		else
+		{			
+			//there is more than one author for this title
+			multipleAuthors = true;
+			
+			//add authors to arrays 
+			for(int i = 0; i < numberOfAuthors; i++)
+			{
+				System.out.print("Author #" + i + ": ");
+				authors[i] = in.nextLine();
+			}
+			
+			multipleAuthors = true;
+		}
+		
+		
+		System.out.print("Publisher: ");
+		newPublisher = in.nextLine();
+		System.out.print("Year of Publication: ");
+		newYearPub = in.nextLine();
+		System.out.println("Subject: ");
+		newSubject = in.nextLine();
+		System.out.println("Format: ");
+		newFormat = in.nextLine();
+		System.out.println("Book Summary: ");
+		newSummary = in.nextLine();
+		
+		
+		/*
+		 * Show inputted information back to user to see if they have made a mistake
+		 */
+		
+		System.out.println("Is the following data correct?");
+		System.out.println("Title: " + newTitle);
+		System.out.println("ISBN: " + newISBN);
+		System.out.print("Author(s): ");
+		
+		for(int i = 0; i < numberOfAuthors; i++)
+		{
+			if(i == numberOfAuthors - 1)
+			{
+				System.out.println(authors[i]);
+			}
+			else
+			{
+				System.out.print(authors[i]);
+			}
+		}
+		System.out.println("Publisher: " + newPublisher);
+		System.out.println("Year of Publication: " + newYearPub);
+		System.out.println("Format: " + newFormat);
+		System.out.println("Subject: " + newSubject);
+		System.out.println("Book Summary: " + newSummary);
+		System.out.print("Please answer [1] for yes and [0] for no: ");
+		
+		try
+		{
+			do
+			{
+				userSelection = in.nextLine();
+				
+				if(!Main.IsInteger(userSelection))
+				{
+					System.out.print(userSelection + " is an invalid option, ");
+					System.out.print("Please make a selection: ");
+				}
+				
+				//if the user did enter a number
+				if(Main.IsInteger(userSelection))
+				{
+					choice = Integer.parseInt((userSelection));
+					
+					//check to see if it's a valid option
+					if(choice != 0 && choice != 1)
+					{
+						System.out.print(choice + " is an invalid option ");
+						System.out.print("please make a selection: ");
+						
+					}
+					
+					//case where the user did enter a valid option number
+					else
+					{
+						break;
+					}
+					
+				}
+			} while (true);
+		}
+		catch (Exception e)
+		{
+			
+		}
+		
+		if(choice == 0)
+		{
+			//the user has detected an error. restart process
+			AddBookRecord();
+		}
+		
+		else
+		{
+			//the user has entered the correct information
+			
+			//TODO: Construct SQL Query to add new book record to database.
+		}
+		
+		
+		//return to main menu
+		Main.MainMenu();
+	}
+	
+	public static void AddBookCopy()
+	{
+		String isbntoaddto;
+		int newcopies;
+		//Specify the isbn and number of copies to add
+		System.out.print("ISBN of book to add copies to: ");
+		isbntoaddto = in.nextLine();
+		System.out.println("How many copies would you like to add? :");
+		
+		do
+		{
+			userSelection = in.nextLine();
+			
+			if(!Main.IsInteger(userSelection))
+			{
+				System.out.print(userSelection + " is not a number, ");
+				System.out.print("Please enter a number for this user's ID: ");
+			}
+			else
+			{
+				newcopies = Integer.parseInt(userSelection);
+				break;
+			}
+		} while (true);
+		
+		//TODO: Lookup book record by ISBN, add x number of copies and return back to user how many copies
+		//there now exists in the database.
+		
+		//return to main menu
+		Main.MainMenu();
 		
 		
 	}
+	
+	public static void CheckLateList()
+	{
+		String month;
+		String day;
+		String year;
+		//have prompt user for date they wish to look up
+		System.out.println("Late Book List Date Lookup");
+		System.out.println();
+		System.out.print("Month: ");
+		month = in.nextLine();
+		System.out.print("Day: ");
+		day = in.nextLine();
+		System.out.println("Year: ");
+		year = in.nextLine();
+		
+		//TODO: Construct sql date object based off of given data
+		
+		
+		//construct date based on input
+		
+		//look up lists of late books (or books that have not been returned and where return date is less than specified date
+		
+		//list book, due date of said book, name of user who had the book at the time, 
+		
+		//list offending user's phone number and email
+		
+		//return to main menu
+		Main.MainMenu();
+	}
+	
+	public static void LeaveReview()
+	{
+		String isbnreview;
+		int score;
+		String userOpinion;
+		
+		System.out.println("Reviews");
+		System.out.println();
+		System.out.print("What is the ISBN of the book you wish to leave a review for? :");
+		isbnreview = in.nextLine();
+		
+		System.out.print("Please enter a score [1 - 10]: " );
+		try{
+			do
+			{
+				userSelection = in.nextLine();
+				
+				if(!Main.IsInteger(userSelection))
+				{
+					System.out.print(userSelection + " is not a number, ");
+					System.out.print("Please enter a number for this user's ID: ");
+				}
+				else
+				{
+					choice = Integer.parseInt(userSelection);
+					if(choice < 0 || choice > 10)
+					{
+						System.out.print("Please enter a number from 1 - 10");
+					}
+					else
+					{
+						break;
+					}
+				}
+			} while (true);
+		}
+		catch(Exception e)
+		{
+			
+		}
+		
+		//save score
+		score = choice;
+		
+		System.out.print("Would you like to leave a short descriptive text? Please answer [1] for yes and [0] for no: ");
+		
+		try
+		{
+			do
+			{
+				userSelection = in.nextLine();
+				
+				if(!Main.IsInteger(userSelection))
+				{
+					System.out.print(userSelection + " is an invalid option, ");
+					System.out.print("Please make a selection: ");
+				}
+				
+				//if the user did enter a number
+				if(Main.IsInteger(userSelection))
+				{
+					choice = Integer.parseInt((userSelection));
+					
+					//check to see if it's a valid option
+					if(choice != 0 && choice != 1)
+					{
+						System.out.print(choice + " is an invalid option ");
+						System.out.print("please make a selection: ");
+						
+					}
+					
+					//case where the user did enter a valid option number
+					else
+					{
+						break;
+					}
+					
+				}
+			} while (true);
+		}
+		catch (Exception e)
+		{
+			
+		}
+		
+		if(choice == 1)
+		{
+			System.out.print("Your Text: ");
+			userOpinion = in.nextLine();
+			System.out.println();
+			System.out.println("Thank you for the following review: ");
+			System.out.println("Username: " + loggedInUser);
+			System.out.println("Score: "  + score);
+		}
+		
+		else{
+			System.out.println("Thank you for the following review: ");
+			System.out.println("Username: " + loggedInUser);
+			System.out.println("Score: "  + score);
+		}
+		
+		//TODO: Create sql statement that would add this to the reviews table
+		
+		//return to main menu
+		Main.MainMenu();
+		
+	}
+	
+	public static void BrowseLibrary()
+	{
+		
+	}
+	
+	public static void ReturnBook()
+	{
+		
+	}
+	
+	public static void PrintBookRecord()
+	{
+		
+	}
+	
+	public static void PrintLibraryStatistics()
+	{
+		
+	}
+	
+	public static void PrintUserStatistics()
+	{
+		
+	}
+	
+	public static boolean CheckForUser(String username)
+	{
+		boolean found = false;
+		
+		//check to see if the user already exists in the database
+	
+		return found;
+	}
+	
 
 }

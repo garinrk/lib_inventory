@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Scanner;
 import java.util.*;
 import java.text.*;
 
@@ -26,6 +26,9 @@ public class Main {
 	private static String DBUSER = "cs5530u18";
 	private static String DBPASS = "f96qb5pr";
 	private static String DBURL = "Jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
+	private static Statement stmt;
+	
+	
 	
 	private static Date today = new Date();
 	private static SimpleDateFormat ft = new SimpleDateFormat("MM/dd/yyyy");
@@ -33,6 +36,8 @@ public class Main {
 	static Scanner in = new Scanner(System.in);
 	static String userSelection = null;
 	static int choice = 0;
+	
+	static boolean verbose = true;
 	
 //	 System.out.println("Today's date is: "+dateFormat.format(date));
 
@@ -52,7 +57,7 @@ public class Main {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 			c = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
 //			System.out.println("Connection established to database");
-			Statement stmt = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			stmt = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			
 			/* Construct query */
 //			String sql = "select * from course";
@@ -164,7 +169,7 @@ public class Main {
 		//prints out record of a specific user
 		else if(selection == 3)
 		{
-			
+			Bookshelf.PrintUserRecord();
 		}
 		
 		//add a new book record to the library database
@@ -218,7 +223,29 @@ public class Main {
 		//print user statistics
 		else if(selection == 13)
 		{
+			ExitProgram();
+		}
+		
+		//log out and log in as new user
+		else if(selection == 14)
+		{
+			//log out by clearing values
+			System.out.println("Logging out of " + currentUser);
+			System.out.println("Good bye");
+			currentUser = null;
+			Bookshelf.loggedInUser = null;
 			
+			//prompt for new username
+			System.out.println("What is your username? : ");
+			
+			//get new username
+			currentUser = in.nextLine();
+			
+			//login as said username
+			Bookshelf.setLoggedInUser(currentUser);
+			
+			//display main menu
+			MainMenu();
 		}
 		else {
 			
@@ -231,7 +258,14 @@ public class Main {
 	 */
 	public static void ExitProgram()
 	{
+		System.out.println();
 		System.out.println("Thanks for using the Library, Goodbye!");
+		try {
+			stmt.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.exit(0);
 	}//end of ExitProgram
 	
@@ -240,7 +274,7 @@ public class Main {
 		System.out.println("Welcome to the library!");
 		System.out.println("Today's date is: " + ft.format(today));	
 		System.out.println();
-		System.out.print("Are you a new [1] or existing [2] user? : ");
+		System.out.print("Are you a new [1] or existing [2] user? Exit with [3]: ");
 		
 		try
 		{
@@ -260,7 +294,7 @@ public class Main {
 					choice = Integer.parseInt((userSelection));
 					
 					//check to see if it's a valid option
-					if(choice != 1 && choice != 2)
+					if(choice != 1 && choice != 2 && choice != 3)
 					{
 						System.out.print(choice + " is an invalid option ");
 						System.out.print("please make a selection: ");
@@ -285,8 +319,11 @@ public class Main {
 		{
 			Bookshelf.AddUser();
 			currentUser = Bookshelf.newUsername;
-			System.out.println("Current User is " + currentUser);
-			Bookshelf.Login(currentUser);
+			if(verbose)
+			{
+				System.out.println("Current User is " + currentUser);
+			}
+			Bookshelf.setLoggedInUser(currentUser);
 			MainMenu();
 		}
 		if(choice == 2)
@@ -294,6 +331,10 @@ public class Main {
 			System.out.print("What is your username? : ");
 			currentUser = in.nextLine();
 			MainMenu();
+		}
+		if(choice == 3)
+		{
+			ExitProgram();
 		}
 		
 		
@@ -321,6 +362,7 @@ public class Main {
 		System.out.println("Print Library statistics[11]");
 		System.out.println("Print User Statistics [12]");
 		System.out.println("Exit Program: [13]");
+		System.out.println("Log in as a new user: [14]");
 		System.out.println();
 		System.out.print("Please make a selection: ");
 
@@ -343,7 +385,7 @@ public class Main {
 					choice = Integer.parseInt((userSelection));
 					
 					//check to see if it's a valid option
-					if(choice < 1 || choice > 13)
+					if(choice < 1 || choice > 14)
 					{
 						System.out.print(choice + " is an invalid option ");
 						System.out.print("please make a selection: ");
