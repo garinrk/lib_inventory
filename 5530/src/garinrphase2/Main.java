@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Scanner;
+import java.util.*;
+import java.text.*;
 
 /**
  * CS 5530 Database Systems
@@ -25,19 +27,25 @@ public class Main {
 	private static String DBPASS = "f96qb5pr";
 	private static String DBURL = "Jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
 	
+	private static Date today = new Date();
+	private static SimpleDateFormat ft = new SimpleDateFormat("MM/dd/yyyy");
 	
 	static Scanner in = new Scanner(System.in);
 	static String userSelection = null;
 	static int choice = 0;
+	
+//	 System.out.println("Today's date is: "+dateFormat.format(date));
+
+	
+
 	
 	//represents the current user accessing the library database
 	static String currentUser = null;
 	
 	public static void main(String[] args) {
 		
-		System.out.println("Welcome to the library!");
-		Connection c = null;
-		   
+		
+		Connection c = null;   
 		//connect to database
 		try
 		{
@@ -65,7 +73,7 @@ public class Main {
 			/* Final method of constructing query */
 			
 			//show initial main menu
-			MainMenu();
+			Welcome();
 			
 			
 			
@@ -150,7 +158,7 @@ public class Main {
 		//checking out a book
 		else if(selection == 2)
 		{
-			
+			Bookshelf.CheckoutBook(today);
 		}
 		
 		//prints out record of a specific user
@@ -227,6 +235,70 @@ public class Main {
 		System.exit(0);
 	}//end of ExitProgram
 	
+	public static void Welcome()
+	{
+		System.out.println("Welcome to the library!");
+		System.out.println("Today's date is: " + ft.format(today));	
+		System.out.println();
+		System.out.print("Are you a new [1] or existing [2] user? : ");
+		
+		try
+		{
+			do
+			{
+				userSelection = in.nextLine();
+				
+				if(!IsInteger(userSelection))
+				{
+					System.out.print(userSelection + " is an invalid option, ");
+					System.out.print("Please make a selection: ");
+				}
+				
+				//if the user did enter a number
+				if(IsInteger(userSelection))
+				{
+					choice = Integer.parseInt((userSelection));
+					
+					//check to see if it's a valid option
+					if(choice != 1 && choice != 2)
+					{
+						System.out.print(choice + " is an invalid option ");
+						System.out.print("please make a selection: ");
+						
+					}
+					
+					//case where the user did enter a valid option number
+					else
+					{
+						break;
+					}
+					
+				}
+			} while (true);
+		}
+		catch (Exception e)
+		{
+			
+		}
+		
+		if(choice == 1)
+		{
+			Bookshelf.AddUser();
+			currentUser = Bookshelf.newUsername;
+			System.out.println("Current User is " + currentUser);
+			Bookshelf.Login(currentUser);
+			MainMenu();
+		}
+		if(choice == 2)
+		{
+			System.out.print("What is your username? : ");
+			currentUser = in.nextLine();
+			MainMenu();
+		}
+		
+		
+	}
+	
 	/**
 	 * Represents the main menu of the application
 	 */
@@ -234,7 +306,7 @@ public class Main {
 	{
 
 		System.out.println("====================================================");
-		System.out.println("What would you like to do?");
+		System.out.println("Hello " + currentUser + " What would you like to do?");
 		System.out.println();
 		System.out.println("Add a new user [1]");
 		System.out.println("Check out a book [2]");
