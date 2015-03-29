@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 import java.text.*;
+import java.lang.*;
 /**
  * CS 5530 Database Systems
  * Phase 2 Code [Bookshelf.java]
@@ -245,6 +246,8 @@ public class Bookshelf {
 		//TODO: Check if there is a waitlist for the book
 		
 		//TODO: The user can only check out the book when they have been on said walist the longest.
+		
+		//TODO: Increment number of times that book has been checkd out by one
 		
 		//return to main menu
 		Main.MainMenu();
@@ -655,9 +658,227 @@ public class Bookshelf {
 		
 	}
 	
+	/**
+	 * User can search for books based on author(s), publisher, title-word, subject, 
+	 * or a mixture of all the above.
+	 * 
+	 * The user should be able to specify to only display books that are
+	 * 	a: Available in the library at all
+	 * 	b: Only available for checkout from the library
+	 *
+	 * The user should be able to sort return results by
+	 * 	c: year published
+	 *	d: average number score of reviews
+	 *	e: popularity (number of times book has been checked out)
+	 */
 	public static void BrowseLibrary()
 	{
+		boolean entireLibrary = false;
+		boolean onlyAvailable = false;
 		
+		boolean sortByYear = false;
+		boolean sortByScore = false;
+		boolean sortByPopularity = false;
+		
+//		boolean searchAuthor = false;
+//		boolean searchPublisher = false;
+//		boolean searchTitle = false;
+//		boolean searchSubject = false;
+//		
+		
+		
+//		boolean wrongInput = false;
+		
+//		String searchOptions = "";
+//		String[] options = new String[3];
+		
+		System.out.println();
+		System.out.println("Browsing the library: ");
+		System.out.println();
+		System.out.print("Would you like to display your results as all in the library [1] or only those of which are available to checkout [2]?: ");
+		
+
+		try
+		{
+			do
+			{
+				userSelection = in.nextLine();
+				
+				if(!Main.IsInteger(userSelection))
+				{
+					System.out.print(userSelection + " is an invalid option, ");
+					System.out.print("Please make a selection: ");
+				}
+				
+				//if the user did enter a number
+				if(Main.IsInteger(userSelection))
+				{
+					choice = Integer.parseInt((userSelection));
+					
+					//check to see if it's a valid option
+					if(choice != 2 && choice != 1)
+					{
+						System.out.print(choice + " is an invalid option ");
+						System.out.print("please make a selection: ");
+						
+					}
+					
+					//case where the user did enter a valid option number
+					else
+					{
+						break;
+					}
+					
+				}
+			} while (true);
+		}
+		catch (Exception e)
+		{
+			
+		}
+		
+		if(choice == 1)
+		{
+			entireLibrary = true;
+		}
+		
+		else if(choice == 2)
+		{
+			onlyAvailable = true;
+		}
+		
+		if(verbose)
+		{
+			System.out.println("User is searching entire library: " + entireLibrary);
+			System.out.println("User is searching only what's available: " + onlyAvailable);
+		}
+		
+		System.out.println("Please input information below, leave empty if you would not want to search via said information");
+//		System.out.println();
+		System.out.print("Please enter Author(s) separated by a comma: ");
+		userSelection = in.nextLine();
+		String[] authors = userSelection.split(",");
+		
+		System.out.print("Please enter publisher(s) separated by a comma: ");
+		userSelection = in.nextLine();
+		String[] publishers = userSelection.split(",");
+		
+		System.out.println("Please enter title words separated by a comma: ");
+		userSelection = in.nextLine();
+		String[] wordsInTitle = userSelection.split(",");
+
+		System.out.println("Please enter subject(s) separated by a comma: ");
+		userSelection = in.nextLine();
+		String subjects[] = userSelection.split(",");
+		
+		if(verbose)
+		{
+			System.out.println("Authors:");
+			
+			for(int i = 0; i < authors.length; i++)
+			{
+				System.out.println(authors[i]);
+			}
+			
+			System.out.println("Publishers:");
+			
+			for(int i = 0; i < publishers.length; i++)
+			{
+				System.out.println(publishers[i]);
+			}
+			
+			System.out.println("Title Words:");
+			
+			for(int i = 0; i < wordsInTitle.length; i++)
+			{
+				System.out.println(wordsInTitle[i]);
+			}
+			
+			System.out.println("Subjects:");
+			
+			for(int i = 0; i < subjects.length; i++)
+			{
+				System.out.println(subjects[i]);
+			}
+			
+			System.out.println();
+		}
+		
+//		 * 	c: year published
+//		 *	d: average number score of reviews
+//		 *	e: popularity (number of times book has been checked out)
+		
+		System.out.print("Do you want to sort your result by year published [1], average review score [2], or book popularity[3]?: ");
+		
+		try
+		{
+			do
+			{
+				userSelection = in.nextLine();
+				
+				if(!Main.IsInteger(userSelection))
+				{
+					System.out.print(userSelection + " is an invalid option, ");
+					System.out.print("Please make a selection: ");
+				}
+				
+				//if the user did enter a number
+				if(Main.IsInteger(userSelection))
+				{
+					choice = Integer.parseInt((userSelection));
+					
+					//check to see if it's a valid option
+					if(choice != 2 && choice != 1 && choice != 3)
+					{
+						System.out.print(choice + " is an invalid option ");
+						System.out.print("please make a selection: ");
+						
+					}
+					
+					//make sure they only entered one digit
+					if(userSelection.length() != 1)
+					{
+						System.out.print("Invalid number of options, please select only one: ");
+					}
+					
+					
+					//case where the user did enter a valid option number
+					else
+					{
+						break;
+					}
+					
+
+				}
+			} while (true);
+		}
+		catch (Exception e)
+		{
+			
+		}
+		
+//		boolean sortByYear = false;
+//		boolean sortByScore = false;
+//		boolean sortByPopularity = false;
+		
+		if(choice == 1)
+		{
+			sortByYear = true;
+		}
+		
+		else if(choice == 2)
+		{
+			sortByScore = true;
+		}
+		
+		else if(choice == 3)
+		{
+			sortByPopularity = true;
+		}
+		
+		
+		//TODO: Create sql command with appropriate fields to search for
+		//TODO: Group results by specified method
 	}
 	
 	public static void ReturnBook()

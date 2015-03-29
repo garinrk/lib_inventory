@@ -175,49 +175,49 @@ public class Main {
 		//add a new book record to the library database
 		else if(selection == 4)
 		{
-			
+			Bookshelf.AddBookRecord();
 		}
 		
 		//add a new copy of a book to the library database
 		else if(selection == 5)
 		{
-			
+			Bookshelf.AddBookCopy();
 		}
 		
 		//check the late book list at a certain date
 		else if(selection == 6)
 		{
-			
+			Bookshelf.CheckLateList();
 		}
 		
 		//leave a review for a book
 		else if(selection == 7)
 		{
-			
+			Bookshelf.LeaveReview();
 		}
 		
 		//browse the library
 		else if(selection == 8)
 		{
-			
+			Bookshelf.BrowseLibrary();
 		}
 		
 		//return a book to the library
 		else if(selection == 9)
 		{
-			
+			Bookshelf.ReturnBook();
 		}
 		
 		//print the book record
 		else if(selection == 10)
 		{
-			
+			Bookshelf.PrintBookRecord();
 		}
 		
 		//print library statistics
 		else if(selection == 11)
 		{
-			
+			Bookshelf.PrintLibraryStatistics();
 		}
 		
 		//print user statistics
@@ -241,14 +241,14 @@ public class Main {
 			//get new username
 			currentUser = in.nextLine();
 			
-			//login as said username
+			//login as said user name
 			Bookshelf.setLoggedInUser(currentUser);
 			
 			//display main menu
 			MainMenu();
 		}
 		else {
-			
+			//error checking is done in main menu function
 		}
 	}
 		
