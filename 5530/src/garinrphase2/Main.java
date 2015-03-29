@@ -8,21 +8,30 @@ import java.sql.Statement;
 import java.util.Scanner;
 
 /**
+ * CS 5530 Database Systems
+ * Phase 2 Code [Main.java]
  * 
+ * This project represents the Phase 2 of the Spring 2015 semester project, the implementation
+ * of a database that would manage a small library. 
  * @author Garin Richards
  *
  */
 
-//TODO: Better parse check for invalid input in user creation?
 
 public class Main {
 
-	static String user = "cs5530u18";
-	static String userpass = "f96qb5pr";
-	static String userurl = "Jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
+	/* Sooper Sekret Database credentials */
+	private static String DBUSER = "cs5530u18";
+	private static String DBPASS = "f96qb5pr";
+	private static String DBURL = "Jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
+	
+	
 	static Scanner in = new Scanner(System.in);
 	static String userSelection = null;
 	static int choice = 0;
+	
+	//represents the current user accessing the library database
+	static String currentUser = null;
 	
 	public static void main(String[] args) {
 		
@@ -33,7 +42,7 @@ public class Main {
 		try
 		{
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			c = DriverManager.getConnection(userurl, user, userpass);
+			c = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
 //			System.out.println("Connection established to database");
 			Statement stmt = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			
@@ -132,127 +141,91 @@ public class Main {
 	 */
 	public static void FunctionParse(int selection)
 	{
+		//adding a user to the library
 		if(selection == 1)
 		{
-			AddUser();
+			Bookshelf.AddUser();
+		}
+		
+		//checking out a book
+		else if(selection == 2)
+		{
+			
+		}
+		
+		//prints out record of a specific user
+		else if(selection == 3)
+		{
+			
+		}
+		
+		//add a new book record to the library database
+		else if(selection == 4)
+		{
+			
+		}
+		
+		//add a new copy of a book to the library database
+		else if(selection == 5)
+		{
+			
+		}
+		
+		//check the late book list at a certain date
+		else if(selection == 6)
+		{
+			
+		}
+		
+		//leave a review for a book
+		else if(selection == 7)
+		{
+			
+		}
+		
+		//browse the library
+		else if(selection == 8)
+		{
+			
+		}
+		
+		//return a book to the library
+		else if(selection == 9)
+		{
+			
+		}
+		
+		//print the book record
+		else if(selection == 10)
+		{
+			
+		}
+		
+		//print library statistics
+		else if(selection == 11)
+		{
+			
+		}
+		
+		//print user statistics
+		else if(selection == 13)
+		{
+			
+		}
+		else {
+			
 		}
 	}
-	
+		
+		
 	/**
-	 * Adds a new user to the library database. Queries the user
-	 * for a unique username and id, full name, address, phone number, and email address
+	 * Exits the program
 	 */
-	public static void AddUser()
-	{
-		//TODO: Check for whether number inputs are numbers
-		//TODO: Check for if user already exists in table
-		
-		String newUsername;
-		String newID;
-		String newFullName;
-		String newAddress;
-		String newPhoneNumber;
-		String newEmail;
-		
-		System.out.println("Adding a new user: ");
-		System.out.print("New Unique Username: ");
-		newUsername = in.nextLine();
-		
-		/* User must enter a number for an ID */
-		System.out.print("New ID (Number): ");
-		do
-		{
-			newID = in.nextLine();
-			
-			if(!IsInteger(newID))
-			{
-				System.out.print(newID + " is not a number, ");
-				System.out.print("Please enter a number for this user's ID: ");
-			}
-			else
-			{
-				break;
-			}
-		} while (true);
-		
-		System.out.print("New User's Full Name: ");
-		newFullName = in.nextLine();
-		System.out.print("New User's Home Address: ");
-		newAddress = in.nextLine();
-		System.out.print("New User's Email Address: ");
-		newEmail = in.nextLine();
-		System.out.print("New User's Phone Number: ");
-		
-		/* User must enter a number for a phone number */
-		do
-		{
-			newPhoneNumber = in.nextLine();
-			
-			if(!IsInteger(newID))
-			{
-				System.out.print(newPhoneNumber + " is not a number, ");
-				System.out.print("Please enter a number for this user's Phone Number: ");
-			}
-			else
-			{
-				break;
-			}
-		} while (true);
-		
-		System.out.println("New User Info: ");
-		System.out.println("Full Name: " + newFullName);
-		System.out.println("Username: " + newUsername);
-		System.out.println("ID: " + newID);
-		System.out.println("Address: " + newAddress);
-		System.out.println("Email: " + newEmail);
-		System.out.println("Phone Number: " + newPhoneNumber);	
-		
-		//TODO: Construct query from provided information, send to server
-		//TODO: If successful, return success and throw user back to main menu
-		
-		System.out.print("[1] to exit or [2] to return to main menu");
-		
-		do
-		{
-			userSelection = in.nextLine();
-			if(!IsInteger(userSelection))
-			{
-				System.out.print(userSelection + " is not a number, ");
-				System.out.print("Please enter [1] to return to main menu or [2] to exit: ");
-			}
-			if(IsInteger(userSelection))
-			{
-				choice = Integer.parseInt(userSelection);
-				if(choice != 1 && choice != 2)
-				{
-					System.out.print(choice + " is not a valid option, ");
-					System.out.print("Please enter [1] to return to main menu or [2] to exit: ");
-				}
-				
-				else
-				{
-					break;
-				}
-			}
-		}
-		while (true);
-		
-		if(choice == 1)
-			MainMenu();
-		else
-			ExitProgram();
-		
-	}//end of AddUser
-	
 	public static void ExitProgram()
 	{
 		System.out.println("Thanks for using the Library, Goodbye!");
 		System.exit(0);
-	}
-	public static boolean CheckInput(String input)
-	{
-		return false;
-	}
+	}//end of ExitProgram
 	
 	/**
 	 * Represents the main menu of the application
@@ -288,12 +261,29 @@ public class Main {
 				
 				if(!IsInteger(userSelection))
 				{
-					System.out.println(userSelection + " is an invalid option");
+					System.out.print(userSelection + " is an invalid option, ");
 					System.out.print("Please make a selection: ");
 				}
-				else
+				
+				//if the user did enter a number
+				if(IsInteger(userSelection))
 				{
-					break;
+					choice = Integer.parseInt((userSelection));
+					
+					//check to see if it's a valid option
+					if(choice < 1 || choice > 13)
+					{
+						System.out.print(choice + " is an invalid option ");
+						System.out.print("please make a selection: ");
+						
+					}
+					
+					//case where the user did enter a valid option number
+					else
+					{
+						break;
+					}
+					
 				}
 			} while (true);
 		}
@@ -302,8 +292,8 @@ public class Main {
 			
 		}
 		
-		choice = Integer.parseInt(userSelection);
+		//send the user to the correct function
 		FunctionParse(choice);
 		
-	}
+	}//end of MainMenu function
 }//end of class
