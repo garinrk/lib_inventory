@@ -5,26 +5,23 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
 import java.lang.*;
+
 /**
  * CS 5530 Database Systems
  * Phase 2 Code [Bookshelf.java]
- * 
- * Part of the Spring 2015 semester long project. Bookshelf contains
- * much of the functionality needed for the inventory to correctly operate.
- * 
+ *
+ *
  * @author Garin Richards, u0738045
  *
  */
 public class Bookshelf {
-	
+
+	/* Display extra information to console? Used for debugging purposes mostly */
 	static boolean verbose = false;
 	
 	//TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
-	
-//	private static String DBUSER = "cs5530u18";
-//	private static String DBPASS = "f96qb5pr";
-//	private static String DBURL = "Jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
-//	
+	//TODO: Remove or standardize try catch blocks around user input prompting
+
 	/* Used for user input and input parsing */
 	static Scanner in = new Scanner(System.in);
 	static int choice = 0;
@@ -52,16 +49,14 @@ public class Bookshelf {
 	public static void AddUser()
 	{
 		
-		//TODO: Check for if user already exists in table
-		
 
 		
 		System.out.println("Adding a new user: ");
 		System.out.println();
 		System.out.print("New Unique Username: ");
 		newUsername = in.nextLine();
-		
-		//TODO: This should return whether or not said username already exists in table
+
+		//TODO: Check for if user already exists in table
 		while(CheckForUser(newUsername))
 		{
 			System.out.print(newUsername + " already exists, please choose a new username: ");
@@ -129,45 +124,18 @@ public class Bookshelf {
 			return;
 		else
 			Main.MainMenu();
-		
-//		System.out.print("[1] to exit or [2] to return to main menu");
-//		
-//		do
-//		{
-//			userSelection = in.nextLine();
-//			if(!Main.IsNumber(userSelection))
-//			{
-//				System.out.print(userSelection + " is not a number, ");
-//				System.out.print("Please enter [1] to return to main menu or [2] to exit: ");
-//			}
-//			if(Main.IsNumber(userSelection))
-//			{
-//				choice = Integer.parseInt(userSelection);
-//				if(choice != 1 && choice != 2)
-//				{
-//					System.out.print(choice + " is not a valid option, ");
-//					System.out.print("Please enter [1] to return to main menu or [2] to exit: ");
-//				}
-//				
-//				else
-//				{
-//					break;
-//				}
-//			}
-//		}
-//		while (true);
 
-//		if(choice == 1)
-//			Main.MainMenu();
-//		else
-//			Main.ExitProgram();
-		
 	}//end of AddUser
-	
+
+	/**
+	 * Used to set user context string in menus and greetings
+	 * @param username
+	 */
 	public static void setLoggedInUser(String username)
 	{
 		loggedInUser = username;
-	}
+
+	}//end of SetLoggedInUser
 
 	/**
 	 * Sends a sql statement to the database on the given connection
@@ -180,7 +148,7 @@ public class Bookshelf {
 		ResultSet rs = null;
 		
 		return rs;
-	}
+	}//end of SendQuery
 	
 	/**
 	 * Checkout a book from the library
@@ -302,9 +270,8 @@ public class Bookshelf {
 		
 		//return to main menu
 		Main.MainMenu();
-
 		
-	}
+	}//end of PrintUserRecord
 	
 	/**
 	 * Adds a new record of a book to the library, but not a copy
@@ -484,7 +451,8 @@ public class Bookshelf {
 		
 		//return to main menu
 		Main.MainMenu();
-	}
+
+	}//end of AddBookRecord
 	
 	public static void AddBookCopy()
 	{
@@ -516,9 +484,8 @@ public class Bookshelf {
 		
 		//return to main menu
 		Main.MainMenu();
-		
-		
-	}
+
+	}//end of AddBookCopy
 	
 	public static void CheckLateList()
 	{
@@ -548,7 +515,7 @@ public class Bookshelf {
 		
 		//return to main menu
 		Main.MainMenu();
-	}
+	}//end of CheckLateList
 	
 	public static void LeaveReview()
 	{
@@ -656,7 +623,7 @@ public class Bookshelf {
 		//return to main menu
 		Main.MainMenu();
 		
-	}
+	}//end of LeaveReview
 	
 	/**
 	 * User can search for books based on author(s), publisher, title-word, subject, 
@@ -679,18 +646,6 @@ public class Bookshelf {
 		boolean sortByYear = false;
 		boolean sortByScore = false;
 		boolean sortByPopularity = false;
-		
-//		boolean searchAuthor = false;
-//		boolean searchPublisher = false;
-//		boolean searchTitle = false;
-//		boolean searchSubject = false;
-//		
-		
-		
-//		boolean wrongInput = false;
-		
-//		String searchOptions = "";
-//		String[] options = new String[3];
 		
 		System.out.println();
 		System.out.println("Browsing the library: ");
@@ -754,7 +709,7 @@ public class Bookshelf {
 		}
 		
 		System.out.println("Please input information below, leave empty if you would not want to search via said information");
-//		System.out.println();
+
 		System.out.print("Please enter Author(s) separated by a comma: ");
 		userSelection = in.nextLine();
 		String[] authors = userSelection.split(",");
@@ -771,42 +726,33 @@ public class Bookshelf {
 		userSelection = in.nextLine();
 		String subjects[] = userSelection.split(",");
 		
-		if(verbose)
-		{
+		if(verbose) {
 			System.out.println("Authors:");
-			
-			for(int i = 0; i < authors.length; i++)
-			{
+
+			for (int i = 0; i < authors.length; i++) {
 				System.out.println(authors[i]);
 			}
-			
+
 			System.out.println("Publishers:");
-			
-			for(int i = 0; i < publishers.length; i++)
-			{
+
+			for (int i = 0; i < publishers.length; i++) {
 				System.out.println(publishers[i]);
 			}
-			
+
 			System.out.println("Title Words:");
-			
-			for(int i = 0; i < wordsInTitle.length; i++)
-			{
+
+			for (int i = 0; i < wordsInTitle.length; i++) {
 				System.out.println(wordsInTitle[i]);
 			}
-			
+
 			System.out.println("Subjects:");
-			
-			for(int i = 0; i < subjects.length; i++)
-			{
+
+			for (int i = 0; i < subjects.length; i++) {
 				System.out.println(subjects[i]);
 			}
-			
+
 			System.out.println();
 		}
-		
-//		 * 	c: year published
-//		 *	d: average number score of reviews
-//		 *	e: popularity (number of times book has been checked out)
 		
 		System.out.print("Do you want to sort your result by year published [1], average review score [2], or book popularity[3]?: ");
 		
@@ -856,10 +802,7 @@ public class Bookshelf {
 		{
 			
 		}
-		
-//		boolean sortByYear = false;
-//		boolean sortByScore = false;
-//		boolean sortByPopularity = false;
+
 		
 		if(choice == 1)
 		{
@@ -875,11 +818,12 @@ public class Bookshelf {
 		{
 			sortByPopularity = true;
 		}
-		
+
+		Main.MainMenu();
 		
 		//TODO: Create sql command with appropriate fields to search for
 		//TODO: Group results by specified method
-	}
+	}//end of BrowseLibrary
 
 	/**
 	 * Returning a book
@@ -1000,7 +944,7 @@ public class Bookshelf {
 				System.out.println("The user has presented a valid date: " + validDate);
 			}
 
-			if(validDate == false)
+			if(!validDate)
 			{
 				System.out.println("Retrying...");
 				System.out.println();
@@ -1008,7 +952,7 @@ public class Bookshelf {
 
 
 		}
-		while (validDate == false);
+		while (!validDate);
 
 
 
@@ -1074,34 +1018,233 @@ public class Bookshelf {
 		}
 
 		else
-		{
+		{	//book is not lost
 			//TODO: Return wait list for specified book via ISBN
 		}
 
 
-		//TODO: Check if a book with specified isbn has been checked out by currently logged in user
-	}
-	
+		//TODO: Check if a book with specified isbn has been checked out by currently logged in user, if not. They can't return it
+		//TODO: Else, set checkout record's specified checking date to given date, lost = false;
+
+		Main.MainMenu();
+
+	}//end of ReturnBook
+
+	/**
+	 * Print a book's full info:
+	 * 	ISBN, title, authors, subject, Publisher, Publishing year, format, summary,
+	 *
+	 * 	Listing of all copies tracked and their locations
+	 *
+	 * 	Listing of users who have checked out the book and the dates of which they had said book
+	 *
+	 * 	Average review score + individual review for the book
+	 *
+	 */
 	public static void PrintBookRecord()
 	{
-		
-	}
+		String title;
+		System.out.println("Print Book Record");
+		System.out.println();
+
+		System.out.print("Please enter the title of the book you wish to look up: ");
+
+		do{
+			userSelection = in.nextLine();
+
+
+			if(Main.IsNumber(userSelection)) //TODO: Check if even said string is a number, integer is too small for 13 digits.
+			{
+				System.out.print("Not a valid title, please try again: ");
+			}
+			else
+			{
+				title = userSelection;
+				break;
+			}
+
+		}while(true);
+
+		//TODO: Given title of book, construct sql query to get the above information
+
+
+	}//end of PrintBookRecord
 	
 	public static void PrintLibraryStatistics()
 	{
-		
-	}
-	
+		int nbooks;
+		System.out.println("Printing Library Statistics: ");
+		System.out.println();
+		System.out.print("How many books would you like to request stats about?: ");
+
+		do
+		{
+			userSelection = in.nextLine();
+
+			if(!Main.IsNumber(userSelection))
+			{
+				System.out.print(userSelection + " is not a number, ");
+				System.out.print("Please enter the amount of books you wish to requests stats about: ");
+			}
+			else
+			{
+				choice = Integer.parseInt(userSelection);
+				break;
+
+			}
+		} while (true);
+
+		nbooks = choice;
+
+		System.out.println("Do you want to..");
+		System.out.println("List " + choice + " most requested books [1]");
+		System.out.println("List " + choice + " most checked out books [2]");
+		System.out.println("List " + choice + " most lost books [3]");
+		System.out.println("List " + choice + " most popular authors [4]");
+
+		do
+		{
+			userSelection = in.nextLine();
+
+			if(!Main.IsNumber(userSelection))
+			{
+				System.out.println(userSelection + " is not a number, ");
+				System.out.print("Please enter a number [1 - 4] for your selection: ");
+			}
+			else
+			{
+				choice = Integer.parseInt(userSelection);
+				if (choice < 1 || choice > 4) {
+					System.out.println(userSelection + " is not a valid selection");
+					System.out.print("Please enter a number [1 - 4] for your selection: ");
+				}
+
+				else
+				{
+					break;
+				}
+
+			}
+		} while (true);
+
+
+
+		//Most requested books
+		if (choice == 1)
+		{
+			//TODO: Construct sql query for most requested books (size of waitlist)
+		}
+
+		//Most checked out books
+		else if (choice == 2)
+		{
+			//TODO: Construct sql query for most checked out books (instances of checked out records)
+		}
+
+		//Most lost books
+		else if (choice == 3)
+		{
+			//TODO: Construct sql query for most lost books (instances of checked out records where lost = true)
+		}
+
+		//most popular authors
+		else if(choice == 4)
+		{
+			//TODO: Construct sql query for most popular authors (instances of checkout records with the most common authors)
+		}
+
+		//display main menu again
+		Main.MainMenu();
+	}//end of PrintLibraryStatistics
+
+	/**
+	 * Print out specified number of users whom:
+	 * 	have checked out the most books
+	 * 	have rated the most number of books
+	 * 	have lost the most books
+	 */
 	public static void PrintUserStatistics()
 	{
-		
-	}
+		int numberOfUsers;
+		System.out.println("Printing User Statistics");
+		System.out.println();
+		System.out.print("How many users would you like to inquire about? :");
+
+		do
+		{
+			userSelection = in.nextLine();
+
+			if(!Main.IsNumber(userSelection))
+			{
+				System.out.println(userSelection + " is not a number, ");
+				System.out.print("Please enter the number of users you wish to inquire about: ");
+			}
+			else
+			{
+				choice = Integer.parseInt(userSelection);
+				break;
+			}
+		} while (true);
+
+		numberOfUsers = choice;
+
+		System.out.println("Do you want to..");
+		System.out.println("List top " + numberOfUsers + " users who have checked out the most books [1]");
+		System.out.println("List top " + numberOfUsers + " users who have rated the most number of books [2]");
+		System.out.println("List top " + numberOfUsers + " users who have lost the most books [3]");
+
+		do
+		{
+			userSelection = in.nextLine();
+
+			if(!Main.IsNumber(userSelection))
+			{
+				System.out.println(userSelection + " is not a number, ");
+				System.out.print("Please enter a number [1 - 3] for your selection: ");
+			}
+			else
+			{
+				choice = Integer.parseInt(userSelection);
+				if (choice < 1 || choice > 3) {
+					System.out.println(userSelection + " is not a valid selection");
+					System.out.print("Please enter a number [1 - 3] for your selection: ");
+				}
+
+				else
+				{
+					break;
+				}
+
+			}
+		} while (true);
+
+		//users who checked out the most books
+		if(choice == 1)
+		{
+			//TODO: Compute highest number of duplicate checkout records. Grab users whom also exhibit that frequency
+		}
+
+		//users who rated the most number of books
+		if(choice == 2)
+		{
+			//TODO: Compute highest number of duplicate reviews, grab users whom also have that same number
+		}
+
+		//users who lost the most books
+		if(choice == 3)
+		{
+			//TODO: Compute highest number of duplicate checkout records where lost == true, grab users whom also display that same frequency
+		}
+
+		Main.MainMenu();
+
+	}//end of PrintUserStatistics
 	
 	public static boolean CheckForUser(String username)
 	{
 		boolean found = false;
 		
-		//check to see if the user already exists in the database
+		//TODO: check to see if the user already exists in the database
 	
 		return found;
 	}
