@@ -56,7 +56,7 @@ public class Main {
 //			System.out.println("Connection established to database");
             stmt = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-            Bookshelf.SetConnection(c, stmt);
+            Bookshelf.SetConnection(c);
 
             //show initial main menu
             Welcome();
