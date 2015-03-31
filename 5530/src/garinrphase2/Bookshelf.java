@@ -3,6 +3,7 @@ package garinrphase2;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.*;
 import java.lang.*;
 
@@ -15,7 +16,7 @@ import java.lang.*;
 public class Bookshelf {
 
     /* Display extra information to console? Used for debugging purposes mostly */
-    static boolean verbose = false;
+    static boolean verbose = true;
 
     //TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
     //TODO: Remove or standardize try catch blocks around user input prompting
@@ -33,11 +34,37 @@ public class Bookshelf {
     static String newPhoneNumber;
     static String newEmail;
 
+    static String invTable = "Inventory";
+    static String bookTable = "Book";
+    static String checkoutTable = "CheckoutRecord";
+    static String inventoryTable = "Inventory";
+    static String reviewTable = "Review";
+    static String userTable = "User";
+    static String waitlistTable = "Waitlist";
+
     /* Represents the currently logged in user using the library */
     static String loggedInUser = null;
 
     /* Used for calculating dates */
     static Calendar c = Calendar.getInstance();
+
+    /* Related to the SQL Connection */
+    static Statement statem = null;
+    static Connection con = null;
+
+    public static void SetConnection(Connection c, Statement s) {
+        try {
+
+            //set statement
+            s = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+            //store connection and statement
+            statem = s;
+            con = c;
+        } catch (Exception e) {
+
+        }
+    }
 
     /**
      * Adds a new user to the library database. Queries the user
@@ -75,7 +102,7 @@ public class Bookshelf {
         System.out.print("New User's Email Address: ");
         newEmail = in.nextLine();
         System.out.print("New User's Phone Number: ");
-		
+
 		/* User must enter a number for a phone number */
         do {
             newPhoneNumber = in.nextLine();
@@ -102,6 +129,8 @@ public class Bookshelf {
         //TODO: Construct query from provided information, send to server
         //TODO: If successful, return success and throw user back to main menu
 
+        setLoggedInUser(newUsername);
+
         //if there wasn't a previously set user, as in this is a new user being created upon start
         if (loggedInUser == null)
             return;
@@ -127,9 +156,17 @@ public class Bookshelf {
      * @param sqlConnection, connection object currently connected to the database defined in main
      * @return a result set containing results from said query
      */
-    public static ResultSet SendQuery(String query, Connection sqlConnection) {
+    public static ResultSet SendQuery(String query) {
         ResultSet rs = null;
 
+        //send query
+        try {
+            rs = statem.executeQuery(query);
+        } catch (Exception e) {
+
+        }
+
+        //return results
         return rs;
     }//end of SendQuery
 
@@ -199,7 +236,7 @@ public class Bookshelf {
 
     /**
      * The following should be printed:
-     * <p>
+     * <p/>
      * Personal Data of User:
      * name
      * username
@@ -223,7 +260,7 @@ public class Bookshelf {
 
         System.out.println("Printing User Record...");
         System.out.println();
-        System.out.println("Username to view record of: ");
+        System.out.print("Username to view record of: ");
         lookedUpUser = in.nextLine();
 
         if (!CheckForUser(lookedUpUser)) {
@@ -254,7 +291,7 @@ public class Bookshelf {
      * format
      * subject
      * book summary
-     * <p>
+     * <p/>
      * Set the following to null/empty
      * individual book copy location
      * availability
@@ -276,12 +313,12 @@ public class Bookshelf {
         System.out.println("Entering new book data...");
         System.out.println();
 
-        System.out.println("ISBN: ");
+        System.out.print("ISBN: ");
         newISBN = new BigInteger(in.nextLine());
         System.out.print("Title: ");
         newTitle = in.nextLine();
 
-
+        //TODO: there cannot be 0 authors
         System.out.print("How many authors are there for this title? :");
 
         do {
@@ -310,7 +347,7 @@ public class Bookshelf {
 
             //add authors to arrays
             for (int i = 0; i < numberOfAuthors; i++) {
-                System.out.print("Author #" + i + ": ");
+                System.out.print("Author # " + (i + 1) + ": ");
                 authors[i] = in.nextLine();
             }
 
@@ -322,18 +359,17 @@ public class Bookshelf {
         newPublisher = in.nextLine();
         System.out.print("Year of Publication: ");
         newYearPub = in.nextLine();
-        System.out.println("Subject: ");
+        System.out.print("Subject: ");
         newSubject = in.nextLine();
-        System.out.println("Format: ");
+        System.out.print("Format: ");
         newFormat = in.nextLine();
-        System.out.println("Book Summary: ");
+        System.out.print("Book Summary: ");
         newSummary = in.nextLine();
-		
-		
+
 		/*
 		 * Show inputted information back to user to see if they have made a mistake
 		 */
-
+        System.out.println();
         System.out.println("Is the following data correct?");
         System.out.println("Title: " + newTitle);
         System.out.println("ISBN: " + newISBN);
@@ -409,7 +445,7 @@ public class Bookshelf {
         //Specify the isbn and number of copies to add
         System.out.print("ISBN of book to add copies to: ");
         isbntoaddto = in.nextLine();
-        System.out.println("How many copies would you like to add? :");
+        System.out.print("How many copies would you like to add? :");
 
         do {
             userSelection = in.nextLine();
@@ -442,7 +478,7 @@ public class Bookshelf {
         month = in.nextLine();
         System.out.print("Day: ");
         day = in.nextLine();
-        System.out.println("Year: ");
+        System.out.print("Year: ");
         year = in.nextLine();
 
         //TODO: Construct sql date object based off of given data
@@ -467,6 +503,11 @@ public class Bookshelf {
 
         System.out.println("Leaving a Review...");
         System.out.println();
+
+        if (verbose) {
+            System.out.println("Currently logged in user: " + loggedInUser);
+        }
+
         System.out.print("What is the ISBN of the book you wish to leave a review for? :");
         isbnreview = in.nextLine();
 
@@ -496,42 +537,40 @@ public class Bookshelf {
 
         System.out.print("Would you like to leave a short descriptive text? Please answer [1] for yes and [0] for no: ");
 
-        try {
-            do {
-                userSelection = in.nextLine();
 
-                if (!Main.IsNumber(userSelection)) {
-                    System.out.print(userSelection + " is an invalid option, ");
-                    System.out.print("Please make a selection: ");
-                }
+        do {
+            userSelection = in.nextLine();
 
-                //if the user did enter a number
-                if (Main.IsNumber(userSelection)) {
-                    choice = Integer.parseInt((userSelection));
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is an invalid option, ");
+                System.out.print("Please make a selection: ");
+            }
 
-                    //check to see if it's a valid option
-                    if (choice != 0 && choice != 1) {
-                        System.out.print(choice + " is an invalid option ");
-                        System.out.print("please make a selection: ");
+            //if the user did enter a number
+            if (Main.IsNumber(userSelection)) {
+                choice = Integer.parseInt((userSelection));
 
-                    }
-
-                    //case where the user did enter a valid option number
-                    else {
-                        break;
-                    }
+                //check to see if it's a valid option
+                if (choice != 0 && choice != 1) {
+                    System.out.print(choice + " is an invalid option ");
+                    System.out.print("please make a selection: ");
 
                 }
-            } while (true);
-        } catch (Exception e) {
 
-        }
+                //case where the user did enter a valid option number
+                else {
+                    break;
+                }
+
+            }
+        } while (true);
+
 
         if (choice == 1) {
             System.out.print("Your Text: ");
             userOpinion = in.nextLine();
             System.out.println();
-            System.out.println("Thank you for the following review: ");
+            System.out.println("Thank you for the following review: " + userOpinion);
             System.out.println("Username: " + loggedInUser);
             System.out.println("Score: " + score);
         } else {
@@ -550,23 +589,27 @@ public class Bookshelf {
     /**
      * User can search for books based on author(s), publisher, title-word, subject,
      * or a mixture of all the above.
-     * <p>
+     * <p/>
      * The user should be able to specify to only display books that are
      * a: Available in the library at all
      * b: Only available for checkout from the library
-     * <p>
+     * <p/>
      * The user should be able to sort return results by
      * c: year published
      * d: average number score of reviews
      * e: popularity (number of times book has been checked out)
      */
     public static void BrowseLibrary() {
+
         boolean entireLibrary = false;
         boolean onlyAvailable = false;
+
 
         boolean sortByYear = false;
         boolean sortByScore = false;
         boolean sortByPopularity = false;
+
+        String publisher;
 
         System.out.println("Browsing the library...");
         System.out.println();
@@ -621,17 +664,17 @@ public class Bookshelf {
         userSelection = in.nextLine();
         String[] authors = userSelection.split(",");
 
-        System.out.print("Please enter publisher(s) separated by a comma: ");
-        userSelection = in.nextLine();
-        String[] publishers = userSelection.split(",");
+        System.out.print("Please enter the publisher: ");
+        publisher = in.nextLine();
 
-        System.out.println("Please enter title words separated by a comma: ");
+        System.out.print("Please enter title words separated by a comma: ");
         userSelection = in.nextLine();
         String[] wordsInTitle = userSelection.split(",");
 
-        System.out.println("Please enter subject(s) separated by a comma: ");
+        System.out.print("Please enter subject(s) separated by a comma: ");
         userSelection = in.nextLine();
         String subjects[] = userSelection.split(",");
+
 
         if (verbose) {
             System.out.println("Authors:");
@@ -640,11 +683,7 @@ public class Bookshelf {
                 System.out.println(authors[i]);
             }
 
-            System.out.println("Publishers:");
-
-            for (int i = 0; i < publishers.length; i++) {
-                System.out.println(publishers[i]);
-            }
+            System.out.println("Publisher: " + publisher);
 
             System.out.println("Title Words:");
 
@@ -660,6 +699,8 @@ public class Bookshelf {
 
             System.out.println();
         }
+
+        //TODO: Not printing above inputted information
 
         System.out.print("Do you want to sort your result by year published [1], average review score [2], or book popularity[3]?: ");
 
@@ -719,8 +760,8 @@ public class Bookshelf {
     /**
      * Returning a book
      * A book can be marked as returned or lost. Record the day it was returned or when it was marked as lost
-     * <p>
-     * <p>
+     * <p/>
+     * <p/>
      * If the book was returned, show the list of people on the wait list for said book
      */
     public static void ReturnBook() {
@@ -889,11 +930,11 @@ public class Bookshelf {
     /**
      * Print a book's full info:
      * ISBN, title, authors, subject, Publisher, Publishing year, format, summary,
-     * <p>
+     * <p/>
      * Listing of all copies tracked and their locations
-     * <p>
+     * <p/>
      * Listing of users who have checked out the book and the dates of which they had said book
-     * <p>
+     * <p/>
      * Average review score + individual review for the book
      */
     public static void PrintBookRecord() {
@@ -1061,11 +1102,41 @@ public class Bookshelf {
 
     }//end of PrintUserStatistics
 
+    /**
+     * Checks if a specific user already exists in the database.
+     *
+     * @param username, name to check for
+     * @return, boolean indicating whether the user was already found in the database
+     */
     public static boolean CheckForUser(String username) {
         boolean found = false;
+        ResultSet r = null;
 
-        //TODO: check to see if the user already exists in the database
+        //construct sql query
+        String sql = "SELECT username FROM " + userTable + " WHERE username = '" + username + "'";
 
+        if (verbose) {
+            System.out.println();
+            System.out.println("SQL : " + sql);
+            System.out.println();
+        }
+
+
+        r = SendQuery(sql);
+
+        //check results for results if database has username
+        try {
+
+            while (r.next()) {
+                if (r.getString("username").matches(username) && found == false) {
+                    found = true;
+                }
+
+            }
+        } catch (Exception e) {
+
+        }
+        
         return found;
     }
 

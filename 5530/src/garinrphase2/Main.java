@@ -12,7 +12,7 @@ import java.text.*;
 /**
  * CS 5530 Database Systems
  * Phase 2 Code [Main.java]
- * <p>
+ * <p/>
  * This project represents the Phase 2 of the Spring 2015 semester project, the implementation
  * of a database that would manage a small library.
  *
@@ -26,7 +26,7 @@ public class Main {
     private static String DBUSER = "cs5530u18";
     private static String DBPASS = "f96qb5pr";
     private static String DBURL = "Jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
-    private static Statement stmt;
+    static Statement stmt;
 
 
     private static Date today = new Date();
@@ -37,6 +37,7 @@ public class Main {
     static int choice = 0;
 
     static boolean verbose = true;
+    static Connection c = null;
 
 //	 System.out.println("Today's date is: "+dateFormat.format(date));
 
@@ -47,7 +48,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-        Connection c = null;
+//        Connection c = null;
         //connect to database
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -55,45 +56,13 @@ public class Main {
 //			System.out.println("Connection established to database");
             stmt = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-			/* Construct query */
-//			String sql = "select * from course";
-//			ResultSet rs = stmt.executeQuery(sql);
-//			while(rs.next())
-//			{
-//				System.out.print("number of students: ");
-//				System.out.print(rs.getString("numberofstudents")+" || ");
-//			}
-//			System.out.println(" ");
-//			rs.close();
-
-//			String userQuery = "This is a query";
-//			PreparedStatement query_statement = c.prepareStatement(userQuery);
-//			query_statement.setString(1, "%" + );
-			
-			
-			/* Final method of constructing query */
+            Bookshelf.SetConnection(c, stmt);
 
             //show initial main menu
             Welcome();
 
 
-            System.out.println("The user selected " + userSelection);
-            System.out.print("Enter name of course: ");
-
-            String name = in.nextLine();
-//			System.out.println("You have selected course: " + name);
-
-            String q = "Select * from course";
-            PreparedStatement qs = c.prepareStatement(q);
-//			qs.setString(0, "%" + name + "%"); //only good if there are ?s in the query 
-            ResultSet rs2 = qs.executeQuery();
-            System.out.println("Executed Query");
-            while (rs2.next()) {
-                System.out.println("Name: " + rs2.getString("cname") + " Number of students: " + rs2.getString("numberofstudents"));
-            }
-            System.out.println("End of program");
-
-            stmt.close();
+//            stmt.close();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Cannot connect to Database Server");
@@ -103,12 +72,12 @@ public class Main {
                     c.close();
                     System.out.println("Database Connection Terminated");
                 } catch (Exception e) {
-					/* Do nothing, ignoring close errors */
+                    /* Do nothing, ignoring close errors */
                 }
             }
         }
 
-        System.out.println("End of Program");
+        ExitProgram();
 
 
     }//end of main
@@ -241,6 +210,8 @@ public class Main {
     }//end of ExitProgram
 
     public static void Welcome() {
+
+        /* Display welcome message and prompt user for input */
         System.out.println("Welcome to the library!");
         System.out.println("Today's date is: " + ft.format(today));
         System.out.println();
@@ -274,6 +245,7 @@ public class Main {
         } while (true);
 
 
+        //add new user to database and show main menu
         if (choice == 1) {
             Bookshelf.AddUser();
             currentUser = Bookshelf.newUsername;
@@ -283,9 +255,23 @@ public class Main {
             Bookshelf.setLoggedInUser(currentUser);
             MainMenu();
         }
+
+        //prompt user for existing username and check if exists
         if (choice == 2) {
+            boolean check;
+
             System.out.print("What is your username? : ");
             currentUser = in.nextLine();
+
+            check = Bookshelf.CheckForUser(currentUser);
+
+            //if the username doesn't exist, prompt user again for existing username
+            while (!check) {
+                System.out.print(currentUser + " does not exist, please enter a valid username: ");
+                currentUser = in.nextLine();
+                check = Bookshelf.CheckForUser(currentUser);
+            }
+
             MainMenu();
         }
         if (choice == 3) {
@@ -293,11 +279,11 @@ public class Main {
         }
 
 
-    }
+    }//end of main
 
     /**
      * Main menu that prompts the user with choices
-     * <p>
+     * <p/>
      * These options specify the 13 specified functionalities of the database
      * You can find their pertinent information in their subsequent
      * functions in Bookshelf
