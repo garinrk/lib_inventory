@@ -178,11 +178,25 @@ public class Main {
             Bookshelf.loggedInUser = null;
 
             //prompt for new username
-            System.out.println("What is your username? : ");
+            System.out.print("What is your username? : ");
+
+
+            boolean check;
+
+            currentUser = in.nextLine();
+
+            check = Bookshelf.CheckForUser(currentUser);
+
+            //if the username doesn't exist, prompt user again for existing username
+            while (!check) {
+                System.out.print(currentUser + " does not exist, please enter a valid username: ");
+                currentUser = in.nextLine();
+                check = Bookshelf.CheckForUser(currentUser);
+            }
 
             //TODO: Check for if user exists1
             //get new username
-            currentUser = in.nextLine();
+//            currentUser = in.nextLine();
 
             //login as said user name
             Bookshelf.setLoggedInUser(currentUser);
@@ -272,6 +286,8 @@ public class Main {
                 currentUser = in.nextLine();
                 check = Bookshelf.CheckForUser(currentUser);
             }
+
+            Bookshelf.setLoggedInUser(currentUser);
 
             MainMenu();
         }

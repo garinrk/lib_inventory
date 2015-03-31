@@ -74,8 +74,9 @@ public class Bookshelf {
     public static void AddUser() {
 
         String sql;
-        ResultSet r;
+        ResultSet r = null;
         PreparedStatement st = null;
+
         System.out.println("Adding a new user...");
         System.out.println();
         System.out.print("New Unique Username: ");
@@ -136,7 +137,7 @@ public class Bookshelf {
 
         sql = "INSERT INTO " + userTable + " (username, cardid, fullname, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?);";
 
-        try{
+        try {
 
             //set sql parameters
             st = con.prepareStatement(sql);
@@ -146,20 +147,17 @@ public class Bookshelf {
             st.setString(4, newEmail);
             st.setString(5, newAddress);
             st.setString(6, newPhoneNumber);
+            st.executeUpdate();
             r = st.executeQuery();
 
 
-
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
-        if(verbose)
-        {
+        if (verbose) {
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
             System.out.println();
-            System.out.println("New Username: " + newUsername);
 
         }
 
@@ -407,7 +405,7 @@ public class Bookshelf {
         newSummary = in.nextLine();
 
 		/*
-		 * Show inputted information back to user to see if they have made a mistake
+         * Show inputted information back to user to see if they have made a mistake
 		 */
         System.out.println();
         System.out.println("Is the following data correct?");
@@ -540,6 +538,7 @@ public class Bookshelf {
         String isbnreview;
         int score;
         String userOpinion;
+        boolean check;
 
         System.out.println("Leaving a Review...");
         System.out.println();
@@ -551,6 +550,15 @@ public class Bookshelf {
         System.out.print("What is the ISBN of the book you wish to leave a review for? :");
         isbnreview = in.nextLine();
 
+        check = Bookshelf.CheckForISBN(isbnreview);
+
+        //if the username doesn't exist, prompt user again for existing username
+        while (!check) {
+            System.out.print(isbnreview + " does not exist, 445454please enter a valid ISBN: ");
+            isbnreview = in.nextLine();
+            check = Bookshelf.CheckForISBN(isbnreview);
+        }
+
         System.out.print("Please enter a score [1 - 10]: ");
         try {
             do {
@@ -561,7 +569,7 @@ public class Bookshelf {
                     System.out.print("Please enter a number for this user's ID: ");
                 } else {
                     choice = Integer.parseInt(userSelection);
-                    if (choice < 0 || choice > 10) {
+                    if (choice < 1 || choice > 10) {
                         System.out.print("Please enter a number from 1 - 10");
                     } else {
                         break;
@@ -610,11 +618,13 @@ public class Bookshelf {
             System.out.print("Your Text: ");
             userOpinion = in.nextLine();
             System.out.println();
-            System.out.println("Thank you for the following review: " + userOpinion);
+            System.out.println("Thank you for the review for " + isbnreview + ", " + loggedInUser + "!");
+//                System.out.println("Thank you for the review for " + isbnreview + ": " + userOpinion);
+            System.out.println("Opinion: " + userOpinion);
             System.out.println("Username: " + loggedInUser);
             System.out.println("Score: " + score);
         } else {
-            System.out.println("Thank you for the following review: ");
+            System.out.println("Thank you for the review for " + isbnreview + ", " + loggedInUser + "!");
             System.out.println("Username: " + loggedInUser);
             System.out.println("Score: " + score);
         }
@@ -625,6 +635,50 @@ public class Bookshelf {
         Main.MainMenu();
 
     }//end of LeaveReview
+
+
+    public static boolean CheckForISBN(String isbn) {
+        boolean found = false;
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        //construct sql query
+        String sql = "SELECT ISBN FROM " + bookTable + " WHERE ISBN = ?";
+
+        try {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+        if (verbose) {
+            System.out.println();
+            System.out.println("SQL RAW STRING: " + sql);
+            System.out.println();
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+        }
+
+        //check results for results if database has username
+        try {
+
+            while (r.next()) {
+                if (r.getString("ISBN").matches(isbn) && found == false) {
+                    found = true;
+                    break;
+                }
+
+            }
+        } catch (Exception e) {
+
+        }
+
+        return found;
+
+    }
 
     /**
      * User can search for books based on author(s), publisher, title-word, subject,
@@ -1158,11 +1212,9 @@ public class Bookshelf {
 
         try {
             st = con.prepareStatement(sql);
-            st.setString(1,username);
+            st.setString(1, username);
             r = st.executeQuery();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
 
         }
@@ -1175,15 +1227,13 @@ public class Bookshelf {
             System.out.println();
         }
 
-
-//        r = SendQuery(sql);
-
         //check results for results if database has username
         try {
 
             while (r.next()) {
                 if (r.getString("username").matches(username) && found == false) {
                     found = true;
+                    break;
                 }
 
             }
