@@ -180,6 +180,7 @@ public class Main {
             //prompt for new username
             System.out.println("What is your username? : ");
 
+            //TODO: Check for if user exists1
             //get new username
             currentUser = in.nextLine();
 
@@ -280,6 +281,17 @@ public class Main {
 
 
     }//end of main
+
+
+    /**
+     * Used to set user context string in menus and greetings
+     *
+     * @param username
+     */
+    public static void setLoggedInUser(String username) {
+        currentUser = username;
+
+    }//end of SetLoggedInUser
 
     /**
      * Main menu that prompts the user with choices

@@ -2,6 +2,7 @@ package garinrphase2;
 
 import java.math.BigInteger;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
@@ -71,12 +72,16 @@ public class Bookshelf {
      * for a unique username and id, full name, address, phone number, and email address
      */
     public static void AddUser() {
+
+        String sql;
+        ResultSet r;
+        PreparedStatement st = null;
         System.out.println("Adding a new user...");
         System.out.println();
         System.out.print("New Unique Username: ");
         newUsername = in.nextLine();
 
-        //TODO: Check for if user already exists in table
+
         while (CheckForUser(newUsername)) {
             System.out.print(newUsername + " already exists, please choose a new username: ");
             newUsername = in.nextLine();
@@ -129,13 +134,38 @@ public class Bookshelf {
         //TODO: Construct query from provided information, send to server
         //TODO: If successful, return success and throw user back to main menu
 
-        setLoggedInUser(newUsername);
+        sql = "INSERT INTO " + userTable + " (username, cardid, fullname, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?);";
 
-        //if there wasn't a previously set user, as in this is a new user being created upon start
-        if (loggedInUser == null)
-            return;
-        else
-            Main.MainMenu();
+        try{
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, newUsername);
+            st.setString(2, newID);
+            st.setString(3, newFullName);
+            st.setString(4, newEmail);
+            st.setString(5, newAddress);
+            st.setString(6, newPhoneNumber);
+            r = st.executeQuery();
+
+
+
+        } catch (Exception e)
+        {
+
+        }
+        if(verbose)
+        {
+            System.out.println("RAW SQL: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+            System.out.println("New Username: " + newUsername);
+
+        }
+
+        Main.setLoggedInUser(newUsername);
+
+        Main.MainMenu();
 
     }//end of AddUser
 
@@ -148,27 +178,37 @@ public class Bookshelf {
         loggedInUser = username;
 
     }//end of SetLoggedInUser
-
-    /**
-     * Sends a sql statement to the database on the given connection
-     *
-     * @param query,         string composed of constructed sql query
-     * @param sqlConnection, connection object currently connected to the database defined in main
-     * @return a result set containing results from said query
-     */
-    public static ResultSet SendQuery(String query) {
-        ResultSet rs = null;
-
-        //send query
-        try {
-            rs = statem.executeQuery(query);
-        } catch (Exception e) {
-
-        }
-
-        //return results
-        return rs;
-    }//end of SendQuery
+//
+//    /**
+//     * Sends a sql statement to the database on the given connection
+//     *
+//     * @param query,         string composed of constructed sql query
+//     * @return a result set containing results from said query
+//     */
+//    public static ResultSet SendQuery(String query) {
+//        ResultSet rs = null;
+//        try {
+//            PreparedStatement st = con.prepareStatement(query);
+//        }
+//        catch (Exception e)
+//        {
+//
+//        }
+////        PreparedStatement query_2_statment = con.prepareStatement(query_2);
+////
+////        query_2_statment.setString(1, "%" + name + "%");
+////        ResultSet rs2=query_2_statment.executeQuery();
+//
+//        //send query
+//        try {
+//            rs = statem.executeQuery(query);
+//        } catch (Exception e) {
+//
+//        }
+//
+//        //return results
+//        return rs;
+//    }//end of SendQuery
 
     /**
      * Checkout a book from the library
@@ -1111,18 +1151,32 @@ public class Bookshelf {
     public static boolean CheckForUser(String username) {
         boolean found = false;
         ResultSet r = null;
+        PreparedStatement st = null;
 
         //construct sql query
-        String sql = "SELECT username FROM " + userTable + " WHERE username = '" + username + "'";
+        String sql = "SELECT username FROM " + userTable + " WHERE username = ?";
+
+        try {
+            st = con.prepareStatement(sql);
+            st.setString(1,username);
+            r = st.executeQuery();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
 
         if (verbose) {
             System.out.println();
-            System.out.println("SQL : " + sql);
+            System.out.println("SQL RAW STRING: " + sql);
+            System.out.println();
+            System.out.println("PREPARED STATEMENT: " + st);
             System.out.println();
         }
 
 
-        r = SendQuery(sql);
+//        r = SendQuery(sql);
 
         //check results for results if database has username
         try {
@@ -1136,7 +1190,7 @@ public class Bookshelf {
         } catch (Exception e) {
 
         }
-        
+
         return found;
     }
 
