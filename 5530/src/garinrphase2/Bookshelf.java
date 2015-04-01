@@ -22,7 +22,7 @@ public class Bookshelf {
     //TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
     //TODO: Make sure dates in tables make sense, e.g, they return before checkout
     //TODO: Constraints, rating between 0 - 10, ISBNs, phone numbers.
-
+    //TODO: AUTHORS!
     /* Used for user input and input parsing */
     static Scanner in = new Scanner(System.in);
     static int choice = 0;
@@ -229,7 +229,6 @@ public class Bookshelf {
         thisYear = c.get(Calendar.YEAR);
 
 
-
         todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
 
         if (verbose) {
@@ -299,11 +298,9 @@ public class Bookshelf {
             System.out.println("Oldest User: " + oldestuser);
         }
 
-        if(oldestuser == null)
-        {
+        if (oldestuser == null) {
             System.out.println("There is no wait list for the book!");
-        }
-        else {
+        } else {
             //determine if the oldest user waiting for book is the currently logged in user
             availableforcheckout = oldestuser.matches(loggedInUser);
         }
@@ -339,15 +336,11 @@ public class Bookshelf {
                 }
             } while (true);
 
-            if(choice == 1)
-            {
+            if (choice == 1) {
                 //add user to waitlist for book
                 AddToWaitList(ISBN, today);
 
-            }
-
-            else
-            {
+            } else {
                 //exit and return to main menu
                 System.out.println("You will not be added to the waitlist, returning to main menu...");
                 Main.MainMenu();
@@ -355,13 +348,11 @@ public class Bookshelf {
         }
 
         //TODO: Book is available to checkout, create checkout record
-        else
-        {
+        else {
             //TODO: Check if user already has copy of book
-            if(!CheckForCheckoutRecord(loggedInUser, ISBN))
-            {
+            if (!CheckForCheckoutRecord(loggedInUser, ISBN)) {
                 //if not, create checkout record
-                CreateCheckoutRecord(loggedInUser,duedate, " ", ISBN );
+                CreateCheckoutRecord(loggedInUser, duedate, " ", ISBN);
             }
 
         }
@@ -376,8 +367,7 @@ public class Bookshelf {
 
     }//end of CheckoutBook
 
-    public static void CreateCheckoutRecord(String username, String duedate, String checkoutdate, String isbn)
-    {
+    public static void CreateCheckoutRecord(String username, String duedate, String checkoutdate, String isbn) {
         //get bookid for book with given isbn
         ResultSet r = null;
         PreparedStatement st = null;
@@ -392,12 +382,11 @@ public class Bookshelf {
 //        # check checkout record for book isbn. If it is checked out, but not returned (date is null) decrease amount
 //        #or the book was returned and marked as lost, decrease amount. If this amount hits 0. There is no book to checkout
 
-        sql = "SELECT count(isbn) as copies from " + bookTable +" where isbn = ?;";
+        sql = "SELECT count(isbn) as copies from " + bookTable + " where isbn = ?;";
 
 //        sql = "SELECT username FROM " + checkoutTable + " c, " + inventoryTable + " i, " + bookTable + " b WHERE c.bookid = i.bookid AND b.bookid = c.bookid AND b.isbn = ? AND  c.username  = ?;";
 
-        try
-        {
+        try {
             st = con.prepareStatement(sql);
             st.setString(1, isbn);
 //            st.setString(2, username);
@@ -405,26 +394,20 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
-                if(r.getString("copies").matches("0"))
-                {
+            while (r.next()) {
+                if (r.getString("copies").matches("0")) {
                     System.out.println("There are no copies of the book to checkout. Returning to main menu...");
                     backtomenu = true;
-                }
-
-                else{
+                } else {
                     copies = Integer.parseInt(r.getString("copies"));
                 }
             }
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
 
-        if(backtomenu)
-        {
+        if (backtomenu) {
             Main.MainMenu();
         }
 
@@ -439,32 +422,28 @@ public class Bookshelf {
 
 //        SELECT isbn, count(isbn) as unavailablecopies from CheckoutRecord JOIN Book ON CheckoutRecord.bookid = Book.bookid WHERE CheckoutRecord.lost = 1 OR CheckoutRecord.returndate = '0000-00-00' AND Book.isbn = ?
 
-            sql = "SELECT isbn, count(isbn) as unavailablecopies from "
-                    + checkoutTable + " JOIN " + bookTable + " ON " + checkoutTable +
-                    ".bookid = " + bookTable +".bookid WHERE " + checkoutTable + ".lost = 1 OR " +
-                    "" + checkoutTable + ".returndate  = '0000-00-00' AND " + bookTable + ".isbn = ?";
+        sql = "SELECT isbn, count(isbn) as unavailablecopies from "
+                + checkoutTable + " JOIN " + bookTable + " ON " + checkoutTable +
+                ".bookid = " + bookTable + ".bookid WHERE " + checkoutTable + ".lost = 1 OR " +
+                "" + checkoutTable + ".returndate  = '0000-00-00' AND " + bookTable + ".isbn = ?";
 
-        try
-        {
+        try {
             st = con.prepareStatement(sql);
             st.setString(1, isbn);
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 //get the number of unavailable copies
                 unavailablecopies = Integer.parseInt(r.getString("unavailablecopies"));
-                if(copies - unavailablecopies <= 0)
-                {
+                if (copies - unavailablecopies <= 0) {
                     System.out.println("There are no copies of the book to checkout. Returning to main menu...");
                     backtomenu = true;
                 }
 
             }
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
 
@@ -475,16 +454,14 @@ public class Bookshelf {
             System.out.println("PREPARED STATEMENT: " + st);
             System.out.println();
         }
-        if(backtomenu)
-        {
+        if (backtomenu) {
             Main.MainMenu();
         }
 
 
     }//end of CreateCheckoutRecord
 
-    public static boolean CheckForCheckoutRecord(String username, String isbn)
-    {
+    public static boolean CheckForCheckoutRecord(String username, String isbn) {
         ResultSet r = null;
         PreparedStatement st = null;
         String sql;
@@ -492,8 +469,7 @@ public class Bookshelf {
 
         sql = "SELECT username FROM " + checkoutTable + " c, " + inventoryTable + " i, " + bookTable + " b WHERE c.bookid = i.bookid AND b.bookid = c.bookid AND b.isbn = ? AND  c.username  = ?;";
 
-        try
-        {
+        try {
             st = con.prepareStatement(sql);
             st.setString(1, isbn);
             st.setString(2, username);
@@ -501,16 +477,13 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
-                if(r.getString("username").matches(loggedInUser) && found == false)
-                {
+            while (r.next()) {
+                if (r.getString("username").matches(loggedInUser) && found == false) {
                     found = true;
                     break;
                 }
             }
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
 
@@ -519,10 +492,10 @@ public class Bookshelf {
 
     /**
      * Adds user to the waitlist for a specified ISBN
+     *
      * @param isbn
      */
-    public static void AddToWaitList(String isbn, Date today)
-    {
+    public static void AddToWaitList(String isbn, Date today) {
         String sql;
         ResultSet r = null;
         PreparedStatement st = null;
@@ -543,10 +516,8 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
-                if(r.getString("username").matches(loggedInUser) && found == false)
-                {
+            while (r.next()) {
+                if (r.getString("username").matches(loggedInUser) && found == false) {
                     found = true;
                     break;
                 }
@@ -556,13 +527,10 @@ public class Bookshelf {
 
         }
 
-        if(found)
-        {
+        if (found) {
             System.out.println("You are already on a Wait List for this book, returning to Main Menu...");
             Main.MainMenu();
         }
-
-
 
 
         sql = "INSERT INTO " + waitlistTable + " (username, isbn, dateadded) VALUES (?, ?, ?);";
@@ -570,7 +538,6 @@ public class Bookshelf {
         thisMonth = cal.get(Calendar.MONTH) + 1;
         thisDay = cal.get(Calendar.DAY_OF_MONTH);
         thisYear = cal.get(Calendar.YEAR);
-
 
 
         todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
@@ -581,7 +548,7 @@ public class Bookshelf {
             st.setString(1, loggedInUser);
             st.setString(2, isbn);
             st.setString(3, todayDate);
-           st.executeUpdate();
+            st.executeUpdate();
 //            r = st.executeQuery();
 
 
@@ -589,8 +556,7 @@ public class Bookshelf {
 
         }
 
-        if(verbose)
-        {
+        if (verbose) {
             System.out.println();
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
@@ -663,10 +629,9 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
-                System.out.println("Full Name: "+ r.getString("fullname"));
-                System.out.println("Username: "+ r.getString("username"));
+            while (r.next()) {
+                System.out.println("Full Name: " + r.getString("fullname"));
+                System.out.println("Username: " + r.getString("username"));
                 System.out.println("CardID: " + r.getString("cardid"));
                 System.out.println("Email: " + r.getString("email"));
                 System.out.println("Address: " + r.getString("address"));
@@ -678,8 +643,7 @@ public class Bookshelf {
 
         }
 
-        if(verbose)
-        {
+        if (verbose) {
             System.out.println();
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
@@ -703,8 +667,7 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 System.out.println("ISBN: " + r.getString("isbn") + "\t ");
                 System.out.println("Title: " + r.getString("title") + "\t ");
                 System.out.println("Checkout Date: " + r.getString("checkoutdate") + "\t ");
@@ -717,8 +680,7 @@ public class Bookshelf {
 
         }
 
-        if(verbose)
-        {
+        if (verbose) {
             System.out.println();
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
@@ -738,9 +700,8 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
-                System.out.println("ISBN: "+ r.getString("isbn") + "\t ");
+            while (r.next()) {
+                System.out.println("ISBN: " + r.getString("isbn") + "\t ");
                 System.out.println("Title: " + r.getString("title") + "\t ");
                 System.out.println("Date marked as Lost: " + r.getString("returndate") + "\t ");
                 System.out.println();
@@ -750,8 +711,7 @@ public class Bookshelf {
 
         }
 
-        if(verbose)
-        {
+        if (verbose) {
             System.out.println();
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
@@ -773,8 +733,7 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 System.out.println("Title: " + r.getString("title") + "\t ");
                 System.out.println("Date added to waitlist: " + r.getString("dateadded") + "\t ");
                 System.out.println();
@@ -784,8 +743,7 @@ public class Bookshelf {
 
         }
 
-        if(verbose)
-        {
+        if (verbose) {
             System.out.println();
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
@@ -804,8 +762,7 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 System.out.println("Title: " + r.getString("title") + "\t ");
                 System.out.println("Score: " + r.getString("score") + "\t ");
                 System.out.println("Optional Text: " + r.getString("opinion"));
@@ -816,8 +773,7 @@ public class Bookshelf {
 
         }
 
-        if(verbose)
-        {
+        if (verbose) {
             System.out.println();
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
@@ -878,12 +834,9 @@ public class Bookshelf {
             if (!Main.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is not a number, ");
                 System.out.print("Please enter the number of authors: ");
-            }
-            else if(userSelection.matches("0"))
-            {
+            } else if (userSelection.matches("0")) {
                 System.out.print("There must be at least one author, please enter the positive number of authors: ");
-            }
-            else {
+            } else {
                 numberOfAuthors = Integer.parseInt(userSelection);
                 break;
             }
@@ -1038,8 +991,7 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 isbn = r.getString("ISBN");
                 title = r.getString("title");
                 summary = r.getString("bookSummary");
@@ -1063,8 +1015,7 @@ public class Bookshelf {
             System.out.println();
         }
 
-        for(int i = 0; i < newcopies; i++)
-        {
+        for (int i = 0; i < newcopies; i++) {
 
             sql = "INSERT INTO " + inventoryTable + " VALUES(0)";
 
@@ -1073,11 +1024,10 @@ public class Bookshelf {
                 //set sql parameters
                 st = con.prepareStatement(sql);
 //                st.setString(1, isbntoaddto);
-            st.executeUpdate();
+                st.executeUpdate();
 //                r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     System.out.println("Max book id: " + r.getString("max"));
                     maxid = r.getString("max");
                 }
@@ -1096,8 +1046,7 @@ public class Bookshelf {
 //            st.executeUpdate();
                 r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     System.out.println("Max book id: " + r.getString("max"));
                     maxid = r.getString("max");
                 }
@@ -1130,7 +1079,7 @@ public class Bookshelf {
                 st.setString(7, pubyear);
                 st.setString(8, publisher);
                 st.setString(9, loc);
-            st.executeUpdate();
+                st.executeUpdate();
 //                r = st.executeQuery();
 
 //                while(r.next())
@@ -1297,7 +1246,7 @@ public class Bookshelf {
                 st.setString(2, isbnreview);
                 st.setString(3, Integer.toString(score));
                 st.setString(4, userOpinion);
-            st.executeUpdate();
+                st.executeUpdate();
 //                r = st.executeQuery();
 
             } catch (Exception e) {
@@ -1312,7 +1261,6 @@ public class Bookshelf {
                 System.out.println("PREPARED STATEMENT: " + st);
                 System.out.println();
             }
-
 
 
         } else {
@@ -1602,17 +1550,21 @@ public class Bookshelf {
         System.out.print("Please enter the ISBN of the book you wish to return: ");
         do {
             userSelection = in.nextLine();
+            ISBN = userSelection;
 
             if (verbose) {
                 System.out.println("Length of isbn: " + userSelection.length());
             }
 
-            if (/*!Main.IsNumber(userSelection) ||*/ userSelection.length() != 13) {
-                System.out.print("Not a valid ISBN, please try again: ");
-            } else {
-                ISBN = userSelection;
-                break;
-            }
+            break;
+
+            //TODO: ERROR Check if ISBN Exists
+//            if (/*!Main.IsNumber(userSelection) ||*/ userSelection.length() != 13) {
+//                System.out.print("Not a valid ISBN, please try again: ");
+//            } else {
+////                ISBN = userSelection;
+//                break;
+//            }
 
         } while (true);
 
@@ -1778,8 +1730,7 @@ public class Bookshelf {
             userSelection = in.nextLine();
 
 
-            if (Main.IsNumber(userSelection))
-            {
+            if (Main.IsNumber(userSelection)) {
                 System.out.print("Not a valid ISBN, please try again: ");
             } else {
                 isbn = userSelection;
@@ -1799,7 +1750,7 @@ public class Bookshelf {
             r = st.executeQuery();
 
 
-            while(r.next()) {
+            while (r.next()) {
                 isbn = r.getString("ISBN");
                 title = r.getString("title");
                 summary = r.getString("bookSummary");
@@ -1817,7 +1768,7 @@ public class Bookshelf {
 
         System.out.println();
         //print book info
-        System.out.println("Book Info:" );
+        System.out.println("Book Info:");
         System.out.println("Title: " + title);
         System.out.println("ISBN: " + isbn);
         System.out.println("Summary: " + summary);
@@ -1828,8 +1779,6 @@ public class Bookshelf {
         System.out.println();
 
 
-
-
         try {
 
             //set sql parameters
@@ -1838,8 +1787,7 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 isbn = r.getString("ISBN");
                 title = r.getString("title");
                 loc = r.getString("loc");
@@ -1873,8 +1821,7 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 System.out.println("User: " + r.getString("username"));
                 System.out.println("\t\t\t" + "Checkout Date: " + r.getString("checkoutdate") + "\t" + "Return Date: " + r.getString("returndate"));
 
@@ -1899,8 +1846,7 @@ public class Bookshelf {
 //            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 System.out.println("User: " + r.getString("username"));
 
                 System.out.println("\t\t\t" + "Score: " + r.getString("score") + "\t" + "Optional Opinion: " + r.getString("opinion"));
@@ -1916,18 +1862,18 @@ public class Bookshelf {
 //        Select avg(score) from Review where isbn = '201410348-7';
 
         //TODO: Not using proper table vars
-        sql = "SELECT AVG(score) as avg FROM Review where isbn = ? ;";
+        sql = "SELECT AVG(score) as avg FROM Review WHERE isbn = ? ";
 
         try {
+
 
             //set sql parameters
             st = con.prepareStatement(sql);
             st.setString(1, isbn);
-//            st.executeUpdate();
+
             r = st.executeQuery();
 
-            while(r.next())
-            {
+            while (r.next()) {
                 System.out.println("Average Review Score: " + r.getString("avg"));
 
             }
@@ -1939,8 +1885,6 @@ public class Bookshelf {
         System.out.println();
 
         Main.MainMenu();
-
-
 
 
     }//end of PrintBookRecord
@@ -2069,8 +2013,7 @@ public class Bookshelf {
                 st = con.prepareStatement(sql);
                 r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     topFrequency = r.getString("maxcheckoutcount");
                 }
             } catch (Exception e) {
@@ -2094,11 +2037,9 @@ public class Bookshelf {
                 st = con.prepareStatement(sql);
                 r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     count = r.getString("count");
-                    if(count.matches(topFrequency))
-                    {
+                    if (count.matches(topFrequency)) {
                         System.out.println("User: " + r.getString("username") + " Books checked out: " + count);
                     }
                 }
@@ -2132,8 +2073,7 @@ public class Bookshelf {
                 st = con.prepareStatement(sql);
                 r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     topFrequency = r.getString("reviewcount");
                 }
             } catch (Exception e) {
@@ -2157,11 +2097,9 @@ public class Bookshelf {
                 st = con.prepareStatement(sql);
                 r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     count = r.getString("count");
-                    if(count.matches(topFrequency))
-                    {
+                    if (count.matches(topFrequency)) {
                         System.out.println("User: " + r.getString("username") + " Books Reviewed: " + count);
                     }
                 }
@@ -2195,8 +2133,7 @@ public class Bookshelf {
                 st = con.prepareStatement(sql);
                 r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     topFrequency = r.getString("lostcount");
                 }
             } catch (Exception e) {
@@ -2220,11 +2157,9 @@ public class Bookshelf {
                 st = con.prepareStatement(sql);
                 r = st.executeQuery();
 
-                while(r.next())
-                {
+                while (r.next()) {
                     count = r.getString("count");
-                    if(count.matches(topFrequency))
-                    {
+                    if (count.matches(topFrequency)) {
                         System.out.println("User: " + r.getString("username") + " Books lost: " + count);
                     }
                 }
@@ -2261,7 +2196,7 @@ public class Bookshelf {
 
         //construct sql query
         String sql = "SELECT username FROM " + userTable + " WHERE username = ?";
-
+    //TODO: ERROR showing error when ? was used, just built string
         try {
             st = con.prepareStatement(sql);
             st.setString(1, username);
