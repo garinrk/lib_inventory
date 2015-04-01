@@ -1230,7 +1230,7 @@ public class Bookshelf {
                 } else {
                     choice = Integer.parseInt(userSelection);
                     if (choice < 1 || choice > 10) {
-                        System.out.print("Please enter a number from 1 - 10");
+                        System.out.print("Please enter a number from 1 - 10: ");
                     } else {
                         break;
                     }
@@ -1287,7 +1287,7 @@ public class Bookshelf {
 //            Insert into Review (username, ISBN, score, opinion) VALUES("garin", "376418621-6", 13, "duerp")
 
             //TODO: SG Not using proper naming vars
-            sql = "Insert into Review (username, ISBN, score, opinion) VALUES(?, ?, ?, ?,)";
+            sql = "Insert into Review (username, ISBN, score, opinion) VALUES(?, ?, ?, ?)";
 
             try {
 
@@ -1305,10 +1305,48 @@ public class Bookshelf {
             }
 
 
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
+
+
         } else {
             System.out.println("Thank you for the review for " + isbnreview + ", " + loggedInUser + "!");
             System.out.println("Username: " + loggedInUser);
             System.out.println("Score: " + score);
+
+            //TODO: SG Not using proper naming vars
+            sql = "Insert into Review (username, ISBN, score) VALUES(?, ?, ?)";
+
+            try {
+
+                //set sql parameters
+                st = con.prepareStatement(sql);
+                st.setString(1, loggedInUser);
+                st.setString(2, isbnreview);
+                st.setString(3, Integer.toString(score));
+
+                st.executeUpdate();
+//                r = st.executeQuery();
+
+            } catch (Exception e) {
+
+            }
+
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
         }
 
         //TODO: Create sql statement that would add this to the reviews table
@@ -1750,7 +1788,7 @@ public class Bookshelf {
 
         } while (true);
 
-        sql = "SELECT * FROM " + bookTable + " where isbn = ?";
+        sql = "SELECT * FROM " + bookTable + " where isbn = ? ";
 
         try {
 
@@ -1984,29 +2022,20 @@ public class Bookshelf {
      * have lost the most books
      */
     public static void PrintUserStatistics() {
-        int numberOfUsers;
+        String sql;
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String topFrequency = null;
+        String count = null;
+
         System.out.println("Printing User Statistics...");
         System.out.println();
-        System.out.print("How many users would you like to inquire about? :");
-
-        do {
-            userSelection = in.nextLine();
-
-            if (!Main.IsNumber(userSelection)) {
-                System.out.println(userSelection + " is not a number, ");
-                System.out.print("Please enter the number of users you wish to inquire about: ");
-            } else {
-                choice = Integer.parseInt(userSelection);
-                break;
-            }
-        } while (true);
-
-        numberOfUsers = choice;
 
         System.out.println("Do you want to..");
-        System.out.println("List top " + numberOfUsers + " users who have checked out the most books [1]");
-        System.out.println("List top " + numberOfUsers + " users who have rated the most number of books [2]");
-        System.out.println("List top " + numberOfUsers + " users who have lost the most books [3]");
+        System.out.println("List top users who have checked out the most books [1]");
+        System.out.println("List top users who have rated the most number of books [2]");
+        System.out.println("List top users who have lost the most books [3]");
+        System.out.print("Please make a selection: ");
 
         do {
             userSelection = in.nextLine();
@@ -2028,17 +2057,191 @@ public class Bookshelf {
 
         //users who checked out the most books
         if (choice == 1) {
-            //TODO: Compute highest number of duplicate checkout records. Grab users whom also exhibit that frequency
+
+            System.out.println();
+            System.out.println("Printing users who have checked out the most books");
+            System.out.println();
+            //construct sql query
+            //TODO: Not using proper table vars
+            sql = "SELECT COUNT(username) AS maxcheckoutcount FROM CheckoutRecord GROUP BY username ORDER BY maxcheckoutcount DESC LIMIT 1";
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    topFrequency = r.getString("maxcheckoutcount");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
+            //TODO: Not using proper table vars
+            sql = "Select username, count(username) as count from CheckoutRecord group by username";
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    count = r.getString("count");
+                    if(count.matches(topFrequency))
+                    {
+                        System.out.println("User: " + r.getString("username") + " Books checked out: " + count);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+            System.out.println("The top user checked out " + topFrequency + " books");
+
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
         }
 
         //users who rated the most number of books
         if (choice == 2) {
-            //TODO: Compute highest number of duplicate reviews, grab users whom also have that same number
+            System.out.println();
+            System.out.println("Printing users who have reviewed the most books");
+            System.out.println();
+            //construct sql query
+            //TODO: Not using proper table vars
+            sql = "SELECT COUNT(username) AS reviewcount FROM Review GROUP BY username ORDER BY reviewcount DESC LIMIT 1";
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    topFrequency = r.getString("reviewcount");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
+            //TODO: Not using proper table vars
+            sql = "Select username, count(username) as count from Review group by username";
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    count = r.getString("count");
+                    if(count.matches(topFrequency))
+                    {
+                        System.out.println("User: " + r.getString("username") + " Books Reviewed: " + count);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+            System.out.println("The top user reviewed " + topFrequency + " books");
+
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
         }
 
         //users who lost the most books
         if (choice == 3) {
-            //TODO: Compute highest number of duplicate checkout records where lost == true, grab users whom also display that same frequency
+            System.out.println();
+            System.out.println("Printing users who have lost the most books");
+            System.out.println();
+            //construct sql query
+            //TODO: Not using proper table vars
+            sql = "SELECT COUNT(username) AS lostcount FROM CheckoutRecord where CheckoutRecord.lost = 1 GROUP BY username ORDER BY lostcount DESC LIMIT 1";
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    topFrequency = r.getString("lostcount");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
+            //TODO: Not using proper table vars
+            sql = "Select username, count(username) as count from CheckoutRecord where CheckoutRecord.lost = 1 group by username";
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    count = r.getString("count");
+                    if(count.matches(topFrequency))
+                    {
+                        System.out.println("User: " + r.getString("username") + " Books lost: " + count);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+            System.out.println("The top user lost " + topFrequency + " books");
+
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
         }
 
         Main.MainMenu();
