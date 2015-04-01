@@ -17,7 +17,7 @@ import java.lang.*;
 public class Bookshelf {
 
     /* Display extra information to console? Used for debugging purposes mostly */
-    static boolean verbose = true;
+    static boolean verbose = false;
 
     //TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
 
@@ -174,37 +174,6 @@ public class Bookshelf {
         loggedInUser = username;
 
     }//end of SetLoggedInUser
-//
-//    /**
-//     * Sends a sql statement to the database on the given connection
-//     *
-//     * @param query,         string composed of constructed sql query
-//     * @return a result set containing results from said query
-//     */
-//    public static ResultSet SendQuery(String query) {
-//        ResultSet rs = null;
-//        try {
-//            PreparedStatement st = con.prepareStatement(query);
-//        }
-//        catch (Exception e)
-//        {
-//
-//        }
-////        PreparedStatement query_2_statment = con.prepareStatement(query_2);
-////
-////        query_2_statment.setString(1, "%" + name + "%");
-////        ResultSet rs2=query_2_statment.executeQuery();
-//
-//        //send query
-//        try {
-//            rs = statem.executeQuery(query);
-//        } catch (Exception e) {
-//
-//        }
-//
-//        //return results
-//        return rs;
-//    }//end of SendQuery
 
     /**
      * Checkout a book from the library
@@ -214,10 +183,16 @@ public class Bookshelf {
      */
     public static void CheckoutBook(Date today) {
         String ISBN;
-        String checkoutDate;
+        String duedate;
         boolean check;
+        boolean availableforcheckout = false;
         String sql;
         String oldestuser = null;
+        int thisMonth = 0;
+        int thisYear = 0;
+        int thisDay = 0;
+        String todayDate;
+
 
         ResultSet r = null;
         PreparedStatement st = null;
@@ -244,13 +219,22 @@ public class Bookshelf {
             System.out.println("The ISBN to be checked out is: " + ISBN);
         }
 
-        //compute due date to be 30 days from today
+        //get today's date
         c.setTime(today);
+
+        thisMonth = c.get(Calendar.MONTH) + 1;
+        thisDay = c.get(Calendar.DAY_OF_MONTH);
+        thisYear = c.get(Calendar.YEAR);
+
+
+
+        todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
 
         if (verbose) {
             System.out.println("It is currently " + (c.get(Calendar.MONTH) + 1) + " the " + c.get(Calendar.DAY_OF_MONTH));
         }
 
+        //compute 30 days ahead
         c.add(Calendar.DATE, 30);
 
         //save duedate
@@ -264,95 +248,45 @@ public class Bookshelf {
         }
 
 
+        //create date string that will be inserted
+        duedate = Integer.toString(futureYear) + "-" + Integer.toString(futureMonth) + "-" + Integer.toString(futureDay);
 
-          checkoutDate = Integer.toString(futureYear) + "-" + Integer.toString(futureMonth) + "-" + Integer.toString(futureDay);
-
-        if(verbose)
-        {
-            System.out.println("RAW DATE STRING: " + checkoutDate);
+        if (verbose) {
+            System.out.println("RAW DATE STRING: " + duedate);
             System.out.println();
         }
-//        sql = "SELECT EXISTS (SELECT 1 FROM " + waitlistTable + " WHERE " + waitlistTable + ".ISBN = ?);";
 
-            sql = "SELECT ISBN as r FROM " + waitlistTable + " WHERE " + waitlistTable + ".ISBN = ?";
+        sql = "SELECT ISBN as r FROM " + waitlistTable + " WHERE " + waitlistTable + ".ISBN = ?";
         //        INSERT INTO table_name(today)
 //        VALUES(STR_TO_DATE('07-25-2012','%m-%d-%y'));
 //        String aString = Integer.toString(aInt);
 
-        //TODO: ERROR CHECKING Check if there is a waitlist for the book, result set returning null
-        if(verbose)
-        {
-            System.out.println("User: " + loggedInUser + " is going to check out book ISBN: " + ISBN + " with a checkin date of " + checkoutDate);
+        if (verbose) {
+            System.out.println("User: " + loggedInUser + " is going to check out book ISBN: " + ISBN + " with a check in date of " + duedate);
 
 
         }
 
-//        try
-//        {
-//            st = con.prepareStatement(sql);
-//            st.setString(1, ISBN);
-//            st.executeUpdate();
-//            r = st.executeQuery();
-//
-//
-//            if(r.wasNull())
-//            {
-//                System.out.println("The result of the lookup was " + r.toString());
-//            }
-//
-//        } catch (Exception e)
-//        {
-//
-//        }
-
-
-
-//        Select dateadded from Waitlist where ISBN = '641787528-8' and username = 'garin'
-
-//        sql = "SELECT dateadded from Waitlist WHERE ISBN = ? and username = ?;";
-//        select username as oldestuser from Waitlist where dateadded = (select min(dateadded) from Waitlist)
-
-        sql = "SELECT username as oldestuser FROM Waitlist where dateadded == (SELECT MIN(dateadded) from Waitlist);";
-        try{
+        sql = "SELECT username AS oldestuserforisbn FROM " + waitlistTable + " WHERE isbn = ? AND dateadded = (SELECT MIN(dateadded) from " + waitlistTable + " where isbn =  ? )";
+        try {
 
 
             st = con.prepareStatement(sql);
-//            st.setString(1, ISBN);
-//            st.setString(2, loggedInUser);
-            st.executeUpdate();
+            st.setString(1, ISBN);
+            st.setString(2, ISBN);
+//            st.executeUpdate();
             r = st.executeQuery();
 
-            while(r.next())
-            {
-                oldestuser = r.getString("oldestuser");
+            if (!r.wasNull()) {
+                while (r.next()) {
+                    oldestuser = r.getString("oldestuserforisbn");
+                }
+
+
             }
 
-//            st = con.prepareStatement(sql);
-//            st.setString(1, newUsername);
-//            st.setString(2, newID);
-//            st.setString(3, newFullName);
-//            st.setString(4, newEmail);
-//            st.setString(5, newAddress);
-//            st.setString(6, newPhoneNumber);
-//            st.executeUpdate();
-//            r = st.executeQuery();
+        } catch (Exception e) {
 
-//            System.out.println("Was the result null? : " + r.wasNull());
-
-//            while(r.next())
-//            {
-////                System.out.println("Name: " + rs2.getString("cname") + " Number of students: " + rs2.getString("numberofstudents"));
-//                System.out.println("Date added for " + loggedInUser + ": " + r.getString("dateadded"));
-//            }
-
-        } catch (Exception e)
-        {
-
-        }
-
-        if(!oldestuser.matches(loggedInUser))
-        {
-            System.out.print("There is a Wait List for this book, and you are not at the front of the line, would you like to be added to the waitlist for this book?");
         }
 
 
@@ -360,42 +294,75 @@ public class Bookshelf {
             System.out.println("RAW SQL: " + sql);
             System.out.println("PREPARED STATEMENT: " + st);
             System.out.println();
-
+            System.out.println("Oldest User: " + oldestuser);
         }
 
-//        sql = SELECT MIN(dateadded) as oldest, username FROM Waitlist
-//        sql = "SELECT MIN(dateadded) as oldest, username FROM " + waitlistTable";";
-        try
+        if(oldestuser == null)
         {
+            System.out.println("There is no wait list for the book!");
+        }
+        else {
+            //determine if the oldest user waiting for book is the currently logged in user
+            availableforcheckout = oldestuser.matches(loggedInUser);
+        }
+        //Check to see if current user is the user waiting the longest for the book
+        if (!availableforcheckout && oldestuser != null) {
 
-        } catch (Exception e)
-        {
 
+            System.out.print("There is a Wait List for this book, and you are not at top of the list, would you like to be added to the Wait List for this book? [0] No [1] Yes: ");
+
+            do {
+                userSelection = in.nextLine();
+
+                if (!Main.IsNumber(userSelection)) {
+                    System.out.print(userSelection + " is an invalid option, ");
+                    System.out.print("Please make a selection: ");
+                }
+
+                //if the user did enter a number
+                if (Main.IsNumber(userSelection)) {
+                    choice = Integer.parseInt((userSelection));
+
+                    //check to see if it's a valid option
+                    if (choice != 0 && choice != 1) {
+                        System.out.print(choice + " is an invalid option ");
+                        System.out.print("please make a selection: ");
+                    }
+
+                    //case where the user did enter a valid option number
+                    else {
+                        break;
+                    }
+
+                }
+            } while (true);
+
+            if(choice == 1)
+            {
+                //add user to waitlist for book
+                AddToWaitList(ISBN, today);
+
+            }
+
+            else
+            {
+                //exit and return to main menu
+                System.out.println("You will not be added to the waitlist, returning to main menu...");
+                Main.MainMenu();
+            }
         }
 
-//        try {
-//
-//            //set sql parameters
-//            st = con.prepareStatement(sql);
-//            st.setString(1, newUsername);
-//            st.setString(2, newID);
-//            st.setString(3, newFullName);
-//            st.setString(4, newEmail);
-//            st.setString(5, newAddress);
-//            st.setString(6, newPhoneNumber);
-//            st.executeUpdate();
-//            r = st.executeQuery();
-//
-//
-//        } catch (Exception e) {
-//
-//        }
-//        if (verbose) {
-//            System.out.println("RAW SQL: " + sql);
-//            System.out.println("PREPARED STATEMENT: " + st);
-//            System.out.println();
-//
-//        }
+        //TODO: Book is available to checkout, create checkout record
+        else
+        {
+            //TODO: Check if user already has copy of book
+            if(!CheckForCheckoutRecord(loggedInUser, ISBN))
+            {
+                //if not, create checkout record
+                CreateCheckoutRecord(loggedInUser,duedate, " ", ISBN );
+            }
+
+        }
 
 
         //TODO: The user can only check out the book when they have been on said walist the longest.
@@ -407,9 +374,237 @@ public class Bookshelf {
 
     }//end of CheckoutBook
 
+    public static void CreateCheckoutRecord(String username, String duedate, String checkoutdate, String isbn)
+    {
+        //get bookid for book with given isbn
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String sql;
+        boolean backtomenu = false;
+        int copies = 0;
+        int unavailablecopies = 0;
+
+        //TODO: Check if there are copies available to checkout
+//        # get count of times that isbn shows up in book table
+//
+//        # check checkout record for book isbn. If it is checked out, but not returned (date is null) decrease amount
+//        #or the book was returned and marked as lost, decrease amount. If this amount hits 0. There is no book to checkout
+
+        sql = "SELECT count(isbn) as copies from " + bookTable +" where isbn = ?;";
+
+//        sql = "SELECT username FROM " + checkoutTable + " c, " + inventoryTable + " i, " + bookTable + " b WHERE c.bookid = i.bookid AND b.bookid = c.bookid AND b.isbn = ? AND  c.username  = ?;";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+//            st.setString(2, username);
+
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                if(r.getString("copies").matches("0"))
+                {
+                    System.out.println("There are no copies of the book to checkout. Returning to main menu...");
+                    backtomenu = true;
+                }
+
+                else{
+                    copies = Integer.parseInt(r.getString("copies"));
+                }
+            }
+
+        } catch (Exception e)
+        {
+
+        }
+
+        if(backtomenu)
+        {
+            Main.MainMenu();
+        }
+
+        if (verbose) {
+            System.out.println();
+            System.out.println("SQL RAW STRING: " + sql);
+            System.out.println();
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+        }
+
+
+//        SELECT isbn, count(isbn) as unavailablecopies from CheckoutRecord JOIN Book ON CheckoutRecord.bookid = Book.bookid WHERE CheckoutRecord.lost = 1 OR CheckoutRecord.returndate = '0000-00-00' AND Book.isbn = ?
+
+            sql = "SELECT isbn, count(isbn) as unavailablecopies from "
+                    + checkoutTable + " JOIN " + bookTable + " ON " + checkoutTable +
+                    ".bookid = " + bookTable +".bookid WHERE " + checkoutTable + ".lost = 1 OR " +
+                    "" + checkoutTable + ".returndate  = '0000-00-00' AND " + bookTable + ".isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                //get the number of unavailable copies
+                unavailablecopies = Integer.parseInt(r.getString("unavailablecopies"));
+                if(copies - unavailablecopies <= 0)
+                {
+                    System.out.println("There are no copies of the book to checkout. Returning to main menu...");
+                    backtomenu = true;
+                }
+
+            }
+
+        } catch (Exception e)
+        {
+
+        }
+
+        if (verbose) {
+            System.out.println();
+            System.out.println("SQL RAW STRING: " + sql);
+            System.out.println();
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+        }
+        if(backtomenu)
+        {
+            Main.MainMenu();
+        }
+
+
+    }//end of CreateCheckoutRecord
+
+    public static boolean CheckForCheckoutRecord(String username, String isbn)
+    {
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String sql;
+        boolean found = false;
+
+        sql = "SELECT username FROM " + checkoutTable + " c, " + inventoryTable + " i, " + bookTable + " b WHERE c.bookid = i.bookid AND b.bookid = c.bookid AND b.isbn = ? AND  c.username  = ?;";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            st.setString(2, username);
+
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                if(r.getString("username").matches(loggedInUser) && found == false)
+                {
+                    found = true;
+                    break;
+                }
+            }
+        } catch (Exception e)
+        {
+
+        }
+
+        return found;
+    }
+
+    /**
+     * Adds user to the waitlist for a specified ISBN
+     * @param isbn
+     */
+    public static void AddToWaitList(String isbn, Date today)
+    {
+        String sql;
+        ResultSet r = null;
+        PreparedStatement st = null;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(today);
+        int thisMonth = 0;
+        int thisDay = 0;
+        int thisYear = 0;
+        String todayDate;
+        boolean found = false;
+
+        sql = "SELECT username FROM " + waitlistTable + " where isbn = ?;";
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                if(r.getString("username").matches(loggedInUser) && found == false)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        if(found)
+        {
+            System.out.println("You are already on a Wait List for this book, returning to Main Menu...");
+            Main.MainMenu();
+        }
+
+
+
+
+        sql = "INSERT INTO " + waitlistTable + " (username, isbn, dateadded) VALUES (?, ?, ?);";
+
+        thisMonth = cal.get(Calendar.MONTH) + 1;
+        thisDay = cal.get(Calendar.DAY_OF_MONTH);
+        thisYear = cal.get(Calendar.YEAR);
+
+
+
+        todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, loggedInUser);
+            st.setString(2, isbn);
+            st.setString(3, todayDate);
+           st.executeUpdate();
+//            r = st.executeQuery();
+
+
+        } catch (Exception e) {
+
+        }
+
+        if(verbose)
+        {
+            System.out.println();
+            System.out.println("RAW SQL: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+//            System.out.println("Today is " + thisYear + "-" + thisMonth + "-" + thisDay);
+        }
+
+        System.out.println("You have been added to the Wait List for book with ISBN: " + isbn + " with a Date Added of " + todayDate);
+
+        //return to main menu
+        Main.MainMenu();
+    }
+
     /**
      * The following should be printed:
-     * <p/>
+     * <p>
      * Personal Data of User:
      * name
      * username
@@ -430,7 +625,11 @@ public class Bookshelf {
      */
     public static void PrintUserRecord() {
         String lookedUpUser;
+        String sql;
+        ResultSet r = null;
+        PreparedStatement st = null;
 
+        System.out.println();
         System.out.println("Printing User Record...");
         System.out.println();
         System.out.print("Username to view record of: ");
@@ -439,14 +638,191 @@ public class Bookshelf {
         if (!CheckForUser(lookedUpUser)) {
             System.out.println("User does not exist, returning to main menu");
             System.out.println();
-            Main.MainMenu();
+
         } else {
             if (verbose) {
                 System.out.println("Printing record for " + lookedUpUser);
             }
 
-            //TODO: Holy SQL batman
+
         }
+
+        System.out.println();
+        //Printing personal data of user
+        System.out.println("Personal data for " + lookedUpUser);
+
+        sql = "SELECT * FROM " + userTable + " where username = ?";
+
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, lookedUpUser);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("Full Name: "+ r.getString("fullname"));
+                System.out.println("Username: "+ r.getString("username"));
+                System.out.println("CardID: " + r.getString("cardid"));
+                System.out.println("Email: " + r.getString("email"));
+                System.out.println("Address: " + r.getString("address"));
+                System.out.println("Phone Number: " + r.getString("phonenumber"));
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        if(verbose)
+        {
+            System.out.println();
+            System.out.println("RAW SQL: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+
+        }
+
+
+        System.out.println();
+        System.out.println("Checkout History for " + lookedUpUser);
+
+        //print book checkout history for user
+
+        sql = "SELECT isbn, title, checkoutdate, returndate FROM " + checkoutTable + " JOIN " + bookTable + " on " + checkoutTable + ".bookid = " + bookTable + ".bookid AND username = ?;";
+
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, lookedUpUser);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("ISBN: " + r.getString("isbn") + "\t ");
+                System.out.println("Title: " + r.getString("title") + "\t ");
+                System.out.println("Checkout Date: " + r.getString("checkoutdate") + "\t ");
+                System.out.println("Return Date: " + r.getString("returndate") + "\t ");
+                System.out.println();
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        if(verbose)
+        {
+            System.out.println();
+            System.out.println("RAW SQL: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+//            System.out.println("Today is " + thisYear + "-" + thisMonth + "-" + thisDay);
+        }
+
+        System.out.println("Books lost by: " + lookedUpUser);
+
+        //print books lost by user
+        sql = "SELECT isbn, title, returndate FROM " + checkoutTable + " JOIN " + bookTable + " on " + checkoutTable + ".bookid = " + bookTable + ".bookid AND username = ? and lost = 1;";
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, lookedUpUser);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("ISBN: "+ r.getString("isbn") + "\t ");
+                System.out.println("Title: " + r.getString("title") + "\t ");
+                System.out.println("Date marked as Lost: " + r.getString("returndate") + "\t ");
+                System.out.println();
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        if(verbose)
+        {
+            System.out.println();
+            System.out.println("RAW SQL: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+//            System.out.println("Today is " + thisYear + "-" + thisMonth + "-" + thisDay);
+        }
+
+        //print books books that user is on waitlist for
+        System.out.println("Books requested for future checkout by "+ lookedUpUser);
+        System.out.println();
+
+//        Select title from Waitlist JOIN Book on Waitlist.isbn = Book.isbn AND Waitlist.username = 'mrtestuser'
+        sql = "SELECT title, dateadded from " + waitlistTable + " JOIN " + bookTable + " on " + waitlistTable + ".ISBN = " + bookTable + ".ISBN AND " + waitlistTable + ".username = ?";
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, lookedUpUser);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("Title: " + r.getString("title") + "\t ");
+                System.out.println("Date added to waitlist: " + r.getString("dateadded") + "\t ");
+                System.out.println();
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        if(verbose)
+        {
+            System.out.println();
+            System.out.println("RAW SQL: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+//            System.out.println("Today is " + thisYear + "-" + thisMonth + "-" + thisDay);
+        }
+
+        //print reviews
+//        SELECT title, score, opinion FROM Review JOIN Book on Review.ISBN = Book.ISBN WHERE username = 'garin'
+        sql = "SELECT title, score, opinion FROM " + reviewTable + " JOIN " + bookTable + " on " + reviewTable + ".ISBN = " + bookTable + ".isbn WHERE username = ?;";
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, lookedUpUser);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("Title: " + r.getString("title") + "\t ");
+                System.out.println("Score: " + r.getString("score") + "\t ");
+                System.out.println("Optional Text: " + r.getString("opinion"));
+                System.out.println();
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        if(verbose)
+        {
+            System.out.println();
+            System.out.println("RAW SQL: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+            System.out.println();
+//            System.out.println("Today is " + thisYear + "-" + thisMonth + "-" + thisDay);
+        }
+
 
         //return to main menu
         Main.MainMenu();
@@ -464,13 +840,13 @@ public class Bookshelf {
      * format
      * subject
      * book summary
-     * <p/>
+     * <p>
      * Set the following to null/empty
      * individual book copy location
      * availability
      */
     public static void AddBookRecord() {
-        BigInteger newISBN;
+        String newISBN;
         String newTitle;
         String newPublisher;
         String newYearPub;
@@ -487,11 +863,11 @@ public class Bookshelf {
         System.out.println();
 
         System.out.print("ISBN: ");
-        newISBN = new BigInteger(in.nextLine());
+        newISBN = in.nextLine();
         System.out.print("Title: ");
         newTitle = in.nextLine();
 
-        //TODO: there cannot be 0 authors
+        //TODO: ERROR CHECK for existing isbn
         System.out.print("How many authors are there for this title? :");
 
         do {
@@ -500,7 +876,12 @@ public class Bookshelf {
             if (!Main.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is not a number, ");
                 System.out.print("Please enter the number of authors: ");
-            } else {
+            }
+            else if(userSelection.matches("0"))
+            {
+                System.out.print("There must be at least one author, please enter the positive number of authors: ");
+            }
+            else {
                 numberOfAuthors = Integer.parseInt(userSelection);
                 break;
             }
@@ -562,36 +943,34 @@ public class Bookshelf {
         System.out.println("Book Summary: " + newSummary);
         System.out.print("Please answer [1] for yes and [0] for no: ");
 
-        try {
-            do {
-                userSelection = in.nextLine();
 
-                if (!Main.IsNumber(userSelection)) {
-                    System.out.print(userSelection + " is an invalid option, ");
-                    System.out.print("Please make a selection: ");
-                }
+        do {
+            userSelection = in.nextLine();
 
-                //if the user did enter a number
-                if (Main.IsNumber(userSelection)) {
-                    choice = Integer.parseInt((userSelection));
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is an invalid option, ");
+                System.out.print("Please make a selection: ");
+            }
 
-                    //check to see if it's a valid option
-                    if (choice != 0 && choice != 1) {
-                        System.out.print(choice + " is an invalid option ");
-                        System.out.print("please make a selection: ");
+            //if the user did enter a number
+            if (Main.IsNumber(userSelection)) {
+                choice = Integer.parseInt((userSelection));
 
-                    }
-
-                    //case where the user did enter a valid option number
-                    else {
-                        break;
-                    }
+                //check to see if it's a valid option
+                if (choice != 0 && choice != 1) {
+                    System.out.print(choice + " is an invalid option ");
+                    System.out.print("please make a selection: ");
 
                 }
-            } while (true);
-        } catch (Exception e) {
 
-        }
+                //case where the user did enter a valid option number
+                else {
+                    break;
+                }
+
+            }
+        } while (true);
+
 
         if (choice == 0) {
             //the user has detected an error. restart process
@@ -631,6 +1010,8 @@ public class Bookshelf {
                 break;
             }
         } while (true);
+
+
 
         //TODO: Lookup book record by ISBN, add x number of copies and return back to user how many copies
         //there now exists in the database.
@@ -818,11 +1199,11 @@ public class Bookshelf {
     /**
      * User can search for books based on author(s), publisher, title-word, subject,
      * or a mixture of all the above.
-     * <p/>
+     * <p>
      * The user should be able to specify to only display books that are
      * a: Available in the library at all
      * b: Only available for checkout from the library
-     * <p/>
+     * <p>
      * The user should be able to sort return results by
      * c: year published
      * d: average number score of reviews
@@ -989,8 +1370,8 @@ public class Bookshelf {
     /**
      * Returning a book
      * A book can be marked as returned or lost. Record the day it was returned or when it was marked as lost
-     * <p/>
-     * <p/>
+     * <p>
+     * <p>
      * If the book was returned, show the list of people on the wait list for said book
      */
     public static void ReturnBook() {
@@ -1159,11 +1540,11 @@ public class Bookshelf {
     /**
      * Print a book's full info:
      * ISBN, title, authors, subject, Publisher, Publishing year, format, summary,
-     * <p/>
+     * <p>
      * Listing of all copies tracked and their locations
-     * <p/>
+     * <p>
      * Listing of users who have checked out the book and the dates of which they had said book
-     * <p/>
+     * <p>
      * Average review score + individual review for the book
      */
     public static void PrintBookRecord() {

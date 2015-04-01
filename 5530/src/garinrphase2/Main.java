@@ -35,6 +35,7 @@ public class Main {
     static Scanner in = new Scanner(System.in);
     static String userSelection = null;
     static int choice = 0;
+    static Calendar cal;
 
     static boolean verbose = true;
     static Connection c = null;
@@ -165,12 +166,47 @@ public class Main {
         //print user statistics
         else if (selection == 12) {
             Bookshelf.PrintUserStatistics();
-        } else if (selection == 13) {
+        }
+
+        else if(selection == 14) {
+
+            boolean check = false;
+            String ISBN;
+
+            System.out.println("Adding self to Wait List...");
+            System.out.println();
+            System.out.print("Please enter the ISBN of the book you wish to be put on a Wait List for: ");
+
+            do {
+                userSelection = in.nextLine();
+                check = Bookshelf.CheckForISBN(userSelection);
+
+
+                if (!check) {
+                    System.out.print("ISBN doesn't exist. Please try again: ");
+                } else {
+                    ISBN = userSelection;
+                    break;
+                }
+
+            } while (true);
+
+            cal = Calendar.getInstance();
+            cal.setTime(today);
+            Bookshelf.AddToWaitList(ISBN, today);
+        }
+
+        else if (selection == 13) {
             ExitProgram();
         }
 
+        else if(selection == 15)
+        {
+            Bookshelf.PrintUserRecord();
+        }
+
         //log out and log in as new user
-        else if (selection == 14) {
+        else if (selection == 16) {
             //log out by clearing values
             System.out.println("Logging out of " + currentUser);
             System.out.println("Good bye");
@@ -334,7 +370,9 @@ public class Main {
         System.out.println("Print Library statistics[11]");
         System.out.println("Print User Statistics [12]");
         System.out.println("Exit Program: [13]");
-        System.out.println("Log in as a new user: [14]");
+        System.out.println("Put yourself on a Wait List for a Book: [14]");
+        System.out.println("Print out User Record: [15]");
+        System.out.println("Log in as a new user: [16]");
         System.out.println();
         System.out.print("Please make a selection: ");
 
@@ -351,7 +389,7 @@ public class Main {
                 choice = Integer.parseInt((userSelection));
 
                 //check to see if it's a valid option
-                if (choice < 1 || choice > 14) {
+                if (choice < 1 || choice > 16) {
                     System.out.print(choice + " is an invalid option ");
                     System.out.print("please make a selection: ");
 
