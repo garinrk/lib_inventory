@@ -1507,9 +1507,15 @@ public class Bookshelf {
 
         if (choice == 1) {
             sortByYear = true;
+
+
         } else if (choice == 2) {
+
+
             sortByScore = true;
         } else if (choice == 3) {
+
+
             sortByPopularity = true;
         }
 
