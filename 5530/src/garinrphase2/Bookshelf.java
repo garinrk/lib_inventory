@@ -43,6 +43,7 @@ public class Bookshelf {
     static String reviewTable = "Review";
     static String userTable = "User";
     static String waitlistTable = "Waitlist";
+    static String authorTable = "Authors";
 
     /* Represents the currently logged in user using the library */
     static String loggedInUser = null;
@@ -811,10 +812,13 @@ public class Bookshelf {
         String newFormat;
         String newSubject;
         String newSummary;
+        String sql;
 
         int numberOfAuthors;
-
+        ResultSet r = null;
+        PreparedStatement st = null;
         boolean multipleAuthors;
+
 
 
         System.out.println("Entering new book data...");
@@ -933,7 +937,30 @@ public class Bookshelf {
         } else {
             //the user has entered the correct information
 
-            //TODO: Construct SQL Query to add new book record to database.
+
+//            INSERT into Book (ISBN, title, booksummary, subject, format, pubyear, publisher) VALUES(?, ?, ?, ?, ?, ?, ?);
+
+            sql = "INSERT into Inventory (ISBN, title, booksummary, subject, format, pubyear, publisher) VALUES(?, ?, ?, ?, ?, ?, ?)";
+
+            try {
+
+                //set sql parameters
+                st = con.prepareStatement(sql);
+                st.setString(1, newISBN);
+                st.setString(2, newTitle);
+                st.setString(3, newSummary);
+                st.setString(4, newSubject);
+                st.setString(5, newFormat);
+                st.setString(6, newYearPub);
+                st.setString(7, newPublisher);
+            st.executeUpdate();
+//                r = st.executeQuery();
+
+
+            } catch (Exception e) {
+
+            }
+
         }
 
 
@@ -981,7 +1008,7 @@ public class Bookshelf {
             }
         } while (true);
 
-        sql = "SELECT * FROM " + bookTable + " where isbn = ?";
+        sql = "SELECT * FROM " + inventoryTable + " where isbn = ?";
 
         try {
 
@@ -999,7 +1026,8 @@ public class Bookshelf {
                 format = r.getString("format");
                 pubyear = r.getString("pubyear");
                 publisher = r.getString("publisher");
-                loc = r.getString("loc");
+                maxid = r.getString("bookid");
+//                loc = r.getString("loc");
 
             }
 
@@ -1017,7 +1045,8 @@ public class Bookshelf {
 
         for (int i = 0; i < newcopies; i++) {
 
-            sql = "INSERT INTO " + inventoryTable + " VALUES(0)";
+            //create new bookid entry
+            sql = "INSERT INTO " + inventoryTable + " (bookid) VALUES(0)";
 
             try {
 
@@ -1036,13 +1065,49 @@ public class Bookshelf {
 
             }
 
-            sql = "SELECT MAX(bookid) as max FROM " + inventoryTable + ";";
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
+            //grab previously added book entry
+            sql = "SELECT MAX(bookid) as max FROM " + inventoryTable;
 
             try {
 
                 //set sql parameters
                 st = con.prepareStatement(sql);
 //                st.setString(1, isbntoaddto);
+//                st.executeUpdate();
+                r = st.executeQuery();
+//
+                while (r.next()) {
+                    System.out.println("Max book id: " + r.getString("max"));
+                    maxid = r.getString("max");
+                }
+
+            } catch (Exception e) {
+
+            }
+
+            if (verbose) {
+                System.out.println();
+                System.out.println("SQL RAW STRING: " + sql);
+                System.out.println();
+                System.out.println("PREPARED STATEMENT: " + st);
+                System.out.println();
+            }
+
+            sql = "SELECT bookid FROM " + bookTable + " WHERE ISBN = ? ;";
+
+            try {
+
+                //set sql parameters
+                st = con.prepareStatement(sql);
+                st.setString(1, isbntoaddto);
 //            st.executeUpdate();
                 r = st.executeQuery();
 
@@ -1078,7 +1143,7 @@ public class Bookshelf {
                 st.setString(6, format);
                 st.setString(7, pubyear);
                 st.setString(8, publisher);
-                st.setString(9, loc);
+                st.setString(9, "83");
                 st.executeUpdate();
 //                r = st.executeQuery();
 
@@ -1101,7 +1166,7 @@ public class Bookshelf {
 
 
         }
-        //TODO: Lookup book record by ISBN, add x number of copies and return back to user how many copies
+        //TODO: books having multiple copies may be kind of broken.
 
         //return to main menu
         Main.MainMenu();
@@ -1711,7 +1776,10 @@ public class Bookshelf {
      */
     public static void PrintBookRecord() {
         String sql;
+        String sqltwo;
         ResultSet r = null;
+        ResultSet r2 = null;
+        PreparedStatement st2 = null;
         PreparedStatement st = null;
         int copies;
 
@@ -1722,8 +1790,13 @@ public class Bookshelf {
         String format = null;
         String pubyear = null;
         String publisher = null;
+        String authors = null;
         String loc = null;
         String bid = null;
+        String[] Authors = null;
+
+        int c = 0;
+        int numberOfAuthors = 0;
 
         System.out.println("Printing Book Record...");
         System.out.println();
@@ -1745,8 +1818,9 @@ public class Bookshelf {
 
         } while (true);
 
-        sql = "SELECT * FROM " + bookTable + " where isbn = ? ";
+        //Grab book information
 
+        sql = "SELECT * FROM " + bookTable + " where isbn = ? ";
         try {
 
             //set sql parameters
@@ -1754,6 +1828,8 @@ public class Bookshelf {
             st.setString(1, isbn);
 //            st.executeUpdate();
             r = st.executeQuery();
+
+
 
 
             while (r.next()) {
@@ -1772,10 +1848,81 @@ public class Bookshelf {
 
         }
 
+//        Select authorname from Authors where isbn = '871027694-7'
+
+        sql = "SELECT authorname FROM " + authorTable + " where isbn = ? ";
+        sqltwo = "SELECT count(authorname) as numberofauthors FROM " + authorTable + " WHERE isbn = ? ";
+
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+
+            st.setString(1, isbn);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            st2 = con.prepareStatement(sqltwo);
+            st2.setString(1, isbn);
+            r2 = st2.executeQuery();
+
+
+
+
+            while(r2.next())
+            {
+                if(r2.getString("numberofauthors").matches("0"))
+                {
+                    numberOfAuthors = 0;
+                }
+
+                else {
+                    numberOfAuthors = Integer.parseInt(r2.getString("numberofauthors"));
+                }
+            }
+
+            Authors = new String[numberOfAuthors];
+
+            while (r.next()) {
+
+                Authors[c] = r.getString("authorname");
+                c++;
+            }
+
+
+        } catch (Exception e) {
+
+        }
+
+        if (verbose) {
+            System.out.println();
+            System.out.println("SQL RAW STRING: " + sql);
+            System.out.println("PREPARED STATEMENT: " + st);
+
+            System.out.println("SQL RAW STRING TWO: " + sqltwo);
+            System.out.println("PREPARED STATEMENT TWO: " + st2);
+
+            System.out.println();
+            for (int i = 0; i < numberOfAuthors; i++)
+            {
+                System.out.println("Author " + i + " " + Authors[i]);
+            }
+        }
+
+
         System.out.println();
         //print book info
         System.out.println("Book Info:");
         System.out.println("Title: " + title);
+        System.out.print("Author(s): \n");
+
+
+
+        for(int i = 0; i < numberOfAuthors; i++)
+        {
+            System.out.println("\t\t" + Authors[i] + " ");
+        }
+
         System.out.println("ISBN: " + isbn);
         System.out.println("Summary: " + summary);
         System.out.println("Subject: " + subject);
@@ -1814,8 +1961,7 @@ public class Bookshelf {
 
         //TODO: SG: query not using proper table vars
         //print users who had the book and the dates they had the book
-        System.out.println("Usernames of previous borrowers and dates: ");
-        System.out.println();
+        System.out.println("Usernames of previous borrowers and dates (if applicable): ");
 
         sql = "SELECT username, checkoutdate, returndate FROM CheckoutRecord c, Book b WHERE c.bookid = b.bookid AND b.ISBN = ?;";
 
@@ -1839,7 +1985,7 @@ public class Bookshelf {
 
 //        Select * from Review where isbn = '201410348-7';
         System.out.println();
-        System.out.println("Book Reviews: ");
+        System.out.println("Book Reviews (if applicable): ");
 
         //TODO: Not using proper table vars
         sql = "SELECT username, score, opinion FROM Review WHERE isbn = ? ;";
@@ -1868,7 +2014,7 @@ public class Bookshelf {
 //        Select avg(score) from Review where isbn = '201410348-7';
 
         //TODO: Not using proper table vars
-        sql = "SELECT AVG(score) as avg FROM Review WHERE isbn = ? ";
+        sql = "SELECT AVG(score) as avg FROM Review WHERE isbn = (?) ";
 
         try {
 
