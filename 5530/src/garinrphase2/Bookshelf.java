@@ -17,7 +17,7 @@ import java.lang.*;
 public class Bookshelf {
 
     /* Display extra information to console? Used for debugging purposes mostly */
-    static boolean verbose = true;
+    static boolean verbose = false;
 
     //TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
     //TODO: Make sure dates in tables make sense, e.g, they return before checkout
@@ -1604,14 +1604,15 @@ public class Bookshelf {
         String day;
         String year;
 
-        int monthNumber = 0;
-        int dayNumber = 0;
-        int yearNumber = 0;
+        ResultSet r = null;
+        PreparedStatement st = null;
+        ResultSet r2 = null;
+        PreparedStatement st2 = null;
 
-        boolean validDate = false;
-        boolean validMonth = false;
-        boolean validDay = false;
-        boolean validYear = false;
+        String returndate;
+
+        String sql, sql2;
+
 
         boolean lost;
 
@@ -1621,14 +1622,18 @@ public class Bookshelf {
         System.out.print("Please enter the ISBN of the book you wish to return: ");
         do {
             userSelection = in.nextLine();
-            ISBN = userSelection;
 
-            if (verbose) {
-                System.out.println("Length of isbn: " + userSelection.length());
+
+
+            if(!CheckForISBN(userSelection))
+            {
+                System.out.print("ISBN does not exist, please try again: " );
             }
-
-            break;
-
+            else
+            {
+                ISBN = userSelection;
+                break;
+            }
             //TODO: ERROR Check if ISBN Exists
 //            if (/*!Main.IsNumber(userSelection) ||*/ userSelection.length() != 13) {
 //                System.out.print("Not a valid ISBN, please try again: ");
@@ -1639,109 +1644,51 @@ public class Bookshelf {
 
         } while (true);
 
-        do {
-
-            System.out.println("Please enter the date of which this book was returned: ");
-            System.out.print("What month was this book returned? [1 - 12]: ");
-            month = in.nextLine();
-            System.out.print("What day was this book returned? [1 - 31]: ");
-            day = in.nextLine();
-            System.out.print("What year was this book returned? [YYYY]: ");
-            year = in.nextLine();
-
-            //check for valid input
-            if (!Main.IsNumber(month)) {
-                System.out.println(month + " is not a valid month [1 - 12]");
-                validMonth = false;
-
-            }
-
-            if (!Main.IsNumber(day)) {
-                System.out.println(day + " is not a valid day [1 - 31]");
-                validDay = false;
-            }
-
-            if (!Main.IsNumber(year)) {
-                System.out.println(year + " is not a valid year [YYYY]");
-                validYear = false;
-            }
-
-            if (Main.IsNumber(month)) {
-                monthNumber = Integer.parseInt(month);
-                if (monthNumber > 12 || monthNumber < 1) {
-                    System.out.println(month + " is not a valid month [1 - 12]");
-                } else
-                    validMonth = true;
-            }
-
-            if (Main.IsNumber(day)) {
-                dayNumber = Integer.parseInt(day);
-                if (dayNumber > 31 || dayNumber < 1) {
-                    System.out.println(day + " is not a valid day [1 - 31]");
-                } else
-                    validDay = true;
-            }
-
-            if (Main.IsNumber(year)) {
-                yearNumber = Integer.parseInt(year);
-                validYear = true;
-            }
-
-            if (validMonth && validDay && validYear) {
-                validDate = true;
-            }
-
-            if (verbose) {
-
-                System.out.println("The user has presented a valid date: " + validDate);
-            }
-
-            if (!validDate) {
-                System.out.println("Retrying...");
-                System.out.println();
-            }
-
-
-        }
-        while (!validDate);
-
+        System.out.println("Please enter the date of which this book was returned: ");
+        System.out.print("What month was this book returned? [1 - 12]: ");
+        month = in.nextLine();
+        System.out.print("What day was this book returned? [1 - 31]: ");
+        day = in.nextLine();
+        System.out.print("What year was this book returned? [YYYY]: ");
+        year = in.nextLine();
 
         if (verbose) {
-            System.out.println("User returning book on " + monthNumber + "/" + dayNumber + "/" + yearNumber);
+            System.out.println("User returning book on " + month + "/" + day + "/" + year);
         }
 
-        System.out.print("Was this book properly returned or lost? [1] yes [0] no: ");
+        //create return date
+        returndate = year + "-" + month + "-" + day;
 
-        try {
-            do {
-                userSelection = in.nextLine();
+        System.out.print("Was this book returned or lost? [1] yes [0] no: ");
 
-                if (!Main.IsNumber(userSelection)) {
-                    System.out.print(userSelection + " is an invalid option, ");
-                    System.out.print("Please make a selection: ");
-                }
 
-                //if the user did enter a number
-                if (Main.IsNumber(userSelection)) {
-                    choice = Integer.parseInt((userSelection));
+        do {
+            userSelection = in.nextLine();
 
-                    //check to see if it's a valid option
-                    if (choice != 0 && choice != 1) {
-                        System.out.print(choice + " is an invalid option ");
-                        System.out.print("please make a selection: ");
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is an invalid option, ");
+                System.out.print("Please make a selection: ");
+            }
 
-                    }
+            //if the user did enter a number
+            if (Main.IsNumber(userSelection)) {
+                choice = Integer.parseInt((userSelection));
 
-                    //case where the user did enter a valid option number
-                    else {
-                        break;
-                    }
+                //check to see if it's a valid option
+                if (choice != 0 && choice != 1) {
+                    System.out.print(choice + " is an invalid option ");
+                    System.out.print("please make a selection: ");
 
                 }
-            } while (true);
-        } catch (Exception e) {
 
-        }
+                //case where the user did enter a valid option number
+                else {
+                    break;
+                }
+
+            }
+        } while (true);
+
 
         //determine whether book was lost
         if (choice == 1) {
@@ -1750,10 +1697,51 @@ public class Bookshelf {
             lost = false;
         }
 
+
+
         if (lost) {
-            //specify checkout record as lost
+            //specify checkout record as lost and set return date
+
+
         } else {    //book is not lost
-            //TODO: Return wait list for specified book via ISBN
+
+
+            sql = "UPDATE CheckoutRecord SET returndate=? where isbn=? and username = ?";
+
+            sql2 = "SELECT username FROM Waitlist WHERE isbn = ?";
+
+            try{
+                st = con.prepareStatement(sql);
+                st.setString(1,returndate);
+                st.setString(2, ISBN);
+                st.setString(3,loggedInUser);
+                st.executeUpdate();
+
+
+
+            } catch (Exception e)
+            {
+
+            }
+
+            try{
+                st2 = con.prepareStatement(sql2);
+                st2.setString(1, ISBN);
+                r2 = st2.executeQuery();
+
+                System.out.println("Current Waitlist: " );
+                while(r2.next())
+                {
+                    System.out.println("\t" + r2.getString("username"));
+                }
+
+            } catch (Exception e)
+            {
+
+            }
+
+            Main.MainMenu();
+
         }
 
 
