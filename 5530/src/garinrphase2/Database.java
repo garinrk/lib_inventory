@@ -1182,7 +1182,7 @@ public class Database {
         //Printing personal data of user
         System.out.println("Personal data for " + lookedUpUser);
 
-        sql = "SELECT * FROM " + userTable + " where username = ?";
+        sql = "SELECT * FROM " + UserTable + " where username = ?";
 
         try {
 
@@ -1193,7 +1193,7 @@ public class Database {
             r = st.executeQuery();
 
             while (r.next()) {
-                System.out.println("Full Name: " + r.getString("fullname"));
+                System.out.println("Full Name: " + r.getString("full_name"));
                 System.out.println("Username: " + r.getString("username"));
                 System.out.println("CardID: " + r.getString("cardid"));
                 System.out.println("Email: " + r.getString("email"));
@@ -1203,7 +1203,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         if (verbose)
@@ -1212,10 +1212,11 @@ public class Database {
 
         System.out.println();
         System.out.println("Checkout History for " + lookedUpUser);
+        System.out.println();
 
         //print book checkout history for user
-
-        sql = "SELECT isbn, title, checkoutdate, returndate FROM " + checkoutTable + " JOIN " + bookTable + " on " + checkoutTable + ".bookid = " + bookTable + ".bookid AND username = ?;";
+//        Select username, isbn, title, checkoutdate, returndate from _CheckoutRecord where username ='garin'
+        sql = "SELECT isbn, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE username = ?";
 
         try {
 
@@ -1244,7 +1245,7 @@ public class Database {
         System.out.println("Books lost by: " + lookedUpUser);
 
         //print books lost by user
-        sql = "SELECT isbn, title, returndate FROM " + checkoutTable + " JOIN " + bookTable + " on " + checkoutTable + ".bookid = " + bookTable + ".bookid AND username = ? and lost = 1;";
+        sql = "SELECT isbn, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE username = ? AND lost = 1";
         try {
 
             //set sql parameters
@@ -1271,8 +1272,8 @@ public class Database {
         System.out.println("Books requested for future checkout by " + lookedUpUser);
         System.out.println();
 
-//        Select title from Waitlist JOIN Book on Waitlist.isbn = Book.isbn AND Waitlist.username = 'mrtestuser'
-        sql = "SELECT title, dateadded from " + waitlistTable + " JOIN " + bookTable + " on " + waitlistTable + ".ISBN = " + bookTable + ".ISBN AND " + waitlistTable + ".username = ?";
+//       Select w.isbn, r.title, w.dateadded from _Records r, _WaitList w where w.isbn = r.isbn and w.username = 'garin'
+        sql = "SELECT r.title, w.dateadded FROM " + RecordsTable + " r, " + WaitListTable + " w WHERE w.isbn = r.isbn AND w.username = ?";
         try {
 
             //set sql parameters
@@ -1295,8 +1296,8 @@ public class Database {
             PrintSQLStatement(st, sql);
 
         //print reviews
-//        SELECT title, score, opinion FROM Review JOIN Book on Review.ISBN = Book.ISBN WHERE username = 'garin'
-        sql = "SELECT title, score, opinion FROM " + reviewTable + " JOIN " + bookTable + " on " + reviewTable + ".ISBN = " + bookTable + ".isbn WHERE username = ?;";
+//        Select r.title, a.score, a. opinion from _Review a, _Records r where r.isbn = a.isbn and a.username = 'garin'
+        sql = "SELECT r.title, a.score, a.opinion FROM " + ReviewTable + " a, " + RecordsTable + " r WHERE r.isbn = a.isbn AND a.username = ?";
         try {
 
             //set sql parameters
@@ -1308,7 +1309,7 @@ public class Database {
             while (r.next()) {
                 System.out.println("Title: " + r.getString("title") + "\t ");
                 System.out.println("Score: " + r.getString("score") + "\t ");
-                System.out.println("Optional Text: " + r.getString("opinion"));
+                System.out.println("Opinion: " + r.getString("opinion"));
                 System.out.println();
             }
 
