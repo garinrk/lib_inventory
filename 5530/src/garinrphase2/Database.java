@@ -116,10 +116,103 @@ public class Database {
             }
         } while (true);
 
+        //create array to hold names of multiple authors for the title
+        String[] authors = new String[numberOfAuthors];
 
+        //add user to enter authors
+        for(int i = 0; i < numberOfAuthors; i++)
+        {
+            System.out.print("Author #" + (i + 1) + ": ");
+            authors[i] = in.nextLine();
+        }
 
+        System.out.print("Publisher: ");
+        newPublisher = in.nextLine();
+        System.out.print("Year of Publication: ");
+        newYearPub = in.nextLine();
+        System.out.print("Subject: ");
+        newSubject = in.nextLine();
+        System.out.print("Format: ");
+        newFormat = in.nextLine();
+        System.out.print("Book Summary: ");
+        newSummary = in.nextLine();
 
-    }
+        //have user verify information
+        System.out.println();
+        System.out.println("Is the following data correct?");
+        System.out.println("Title: " + newTitle);
+        System.out.println("ISBN: " + newISBN);
+        System.out.print("Author(s): ");
+
+        for(int i = 0; i < numberOfAuthors; i++)
+        {
+            System.out.println("\t" + authors[i]);
+        }
+
+        System.out.println("Publisher: " + newPublisher);
+        System.out.println("Year of Publication: " + newYearPub);
+        System.out.println("Format: " + newFormat);
+        System.out.println("Subject: " + newSubject);
+        System.out.println("Book Summary: " + newSummary);
+        System.out.print("Please answer [1] for yes and [0] for no: ");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is an invalid option, ");
+                System.out.print("Please make a selection: ");
+            }
+
+            //if the user did enter a number
+            if (Main.IsNumber(userSelection)) {
+                choice = Integer.parseInt((userSelection));
+
+                //check to see if it's a valid option
+                if (choice != 0 && choice != 1) {
+                    System.out.print(choice + " is an invalid option ");
+                    System.out.print("please make a selection: ");
+
+                }
+
+                //case where the user did enter a valid option number
+                else {
+                    break;
+                }
+
+            }
+        } while (true);
+
+        if(choice == 0)
+        {
+            //the user detected an error, restart process
+            AddBookRecord();
+        }
+        else
+        {
+            //the user entered the correct info! add information to records database
+            sql = "INSERT into " + RecordsTable + " (isbn, title, publisher, pubyear, format, subject, booksummary) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, newISBN);
+                st.setString(2, newTitle);
+                st.setString(3, newSummary);
+                st.setString(4, newSubject);
+                st.setString(5, newFormat);
+                st.setString(6, newYearPub);
+                st.setString(7, newPublisher);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+        }
+
+        Console.MainMenu();
+    }//end of add book record
 
     public static void AddBookCopy()
     {}
