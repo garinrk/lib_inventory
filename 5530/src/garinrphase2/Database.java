@@ -1575,7 +1575,7 @@ public class Database {
         } while (true);
 
         //get book information
-        sql = "SELECT * FROM " + RecordsTable + " where isbn = ? ";
+        sql = "SELECT * FROM " + RecordsTable + " WHERE isbn = ? ";
 
         try
         {
@@ -1652,21 +1652,67 @@ public class Database {
             e.printStackTrace();
         }
 
+
+        //get checkout information
         System.out.println();
         System.out.println("Checkout Information: ");
         System.out.println();
 
-        sql = "SELECT username, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE isbn = ?";
+        sql = "SELECT username, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE isbn = ?";
         try
         {
             st = con.prepareStatement(sql);
             st.setString(1, isbn);
             r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("User: " + r.getString("username"));
+                System.out.println("\t\t\t" + "Checkout Date: " +
+                        r.getString("checkoutdate") + "\t" + "Return Date: " +
+                        r.getString("returndate"));
+            }
         } catch (Exception e)
         {
             e.printStackTrace();
         }
 
+        //get review information
+        System.out.println("Book Reviews (if applicable): ");
+
+        sql = "SELECT username, score, opinion FROM " + ReviewTable + " WHERE isbn = ? ";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("User: " + r.getString("username"));
+                System.out.println("\t\t\t" + "Score: " + r.getString("score") + "\t" + "Optional Opinion: " + r.getString("opinion"));
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        sql = "SELECT AVG(score) AS avg FROM " + ReviewTable + " WHERE isbn = ? ";
+
+        try{
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while (r.next()) {
+                System.out.println("Average Review Score for this book: " + r.getString("avg"));
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
 
 
