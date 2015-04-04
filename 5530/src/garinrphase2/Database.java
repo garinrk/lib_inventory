@@ -215,7 +215,156 @@ public class Database {
     }//end of add book record
 
     public static void AddBookCopy()
-    {}
+    {
+        String isbn;
+        String id;
+        String copiestoadd;
+        int existingcopies = 0;
+        boolean check;
+        boolean noexistingrecord = false;
+
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String sql;
+
+        System.out.println("Adding new copies of a book...");
+        System.out.println();
+
+        System.out.print("ISBN to add copies to: ");
+
+        do {
+            isbn = in.nextLine();
+
+            check = CheckForISBN(isbn);
+
+            if(!check)
+            {
+                System.out.print("That ISBN does not exist in the database, please enter an existing isbn: ");
+
+            }
+            else
+                break;
+
+        } while(true);
+
+        System.out.print("How many copies would you like to add? :");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is not a number, ");
+                System.out.print("Please enter a number for the number of copies to add: ");
+            } else {
+                copiestoadd = userSelection;
+                break;
+            }
+        } while (true);
+
+        //we must check if there already exists a record for this isbn in the inventory database
+
+        sql = "SELECT copies FROM " + InventoryTable + " where isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+
+            //if the query returned nothing, we need to add a new record
+            if(!r.next())
+            {
+                 noexistingrecord = true;
+            }
+
+            //else, there already is a record.
+            else
+            {
+                existingcopies = Integer.parseInt(r.getString("copies"));
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+
+        if(noexistingrecord)
+        {
+            //we have to create a record in the inventory table
+            //we need to get the book's r_id for the entry
+            id = GetRecordID(isbn);
+            sql = "INSERT INTO " + InventoryTable + " (r_id, isbn, copies) VALUES(?, ?, ?)";
+
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, id);
+                st.setString(2, isbn);
+                st.setString(3, copiestoadd);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            System.out.println("You have added " + copiestoadd + " copies of book with ISBN: " + isbn + " to the database, thank you!");
+        }
+
+        else
+        {
+            //there already exists a record in the inventory table, update that existing record with the new number of copies
+
+//            sql = "UPDATE " + RecordsTable + " SET checkoutcount = checkoutcount + 1 WHERE isbn = ?";
+            sql = "UPDATE " + InventoryTable + " SET copies = copies + ? WHERE isbn = ?";
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, copiestoadd);
+                st.setString(2,isbn);
+                st.executeUpdate();
+
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            System.out.println("You have added " + copiestoadd + " copies of book with ISBN: " + isbn + " to the database, thank you!");
+        }
+
+        //return to main menu
+        Console.MainMenu();
+
+    }
+
+    public static String GetRecordID(String isbn)
+    {
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String sql;
+        String id = "";
+
+        sql = "SELECT r_id FROM " + RecordsTable + " WHERE isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                id = r.getString("r_id");
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return id;
+
+    }//end of GetRecordID
 
     /**
      * Adds user to the waitlist for a specified ISBN
