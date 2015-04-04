@@ -604,6 +604,39 @@ public class Database {
 
     }
 
+    public static boolean CheckForReview(String username, String isbn)
+    {
+        boolean found = false;
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        String sql = "SELECT username FROM " + ReviewTable + " WHERE username = ? AND isbn = ?";
+
+        try{
+            st = con.prepareStatement(sql);
+            st.setString(1, username);
+            st.setString(2, isbn);
+            r = st.executeQuery();
+
+            if(!r.next())
+            {
+                return found;
+            }
+
+            else
+            {
+                found = true;
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+
+        return found;
+    }
+
     public static boolean CheckForUser(String username)
     {
         boolean found = false;
@@ -950,7 +983,6 @@ public class Database {
         String userOpinion;
         boolean check;
 
-        //TODO: ERROR CHECK has user already left a review for this book? That isn't allowed...
 
         String sql;
         ResultSet r = null;
@@ -959,20 +991,22 @@ public class Database {
         System.out.println("Leaving a Review...");
         System.out.println();
 
-        if (verbose) {
-            System.out.println("Currently logged in user: " + loggedInUser);
-        }
-
         System.out.print("What is the ISBN of the book you wish to leave a review for? :");
         isbnreview = in.nextLine();
 
-        check = Bookshelf.CheckForISBN(isbnreview);
+        check = Database.CheckForISBN(isbnreview);
 
         //if the username doesn't exist, prompt user again for existing username
         while (!check) {
             System.out.print(isbnreview + " does not exist, please enter a valid ISBN: ");
             isbnreview = in.nextLine();
-            check = Bookshelf.CheckForISBN(isbnreview);
+            check = Database.CheckForISBN(isbnreview);
+        }
+
+        if(CheckForReview(loggedInUser, isbnreview))
+        {
+            System.out.println("You already have left a review for that book, you cannot enter duplicate reviews. Returning to main menu...");
+            Main.MainMenu();
         }
 
         System.out.print("Please enter a score [1 - 10]: ");
@@ -1042,7 +1076,7 @@ public class Database {
 //            Insert into Review (username, ISBN, score, opinion) VALUES("garin", "376418621-6", 13, "duerp")
 
 
-            sql = "INSERT INTO " + reviewTable + " (username, ISBN, score, opinion) VALUES(?, ?, ?, ?)";
+            sql = "INSERT INTO " + ReviewTable + " (username, ISBN, score, opinion) VALUES(?, ?, ?, ?)";
 
             try {
 
