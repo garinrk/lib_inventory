@@ -43,7 +43,7 @@ public class Database {
 //    static String waitlistTable = "Waitlist";
 //    static String authorTable = "Authors";
 
-    static String AuthorListTable = "_Authors";
+    static String AuthorListTable = "_AuthorList";
     static String CheckoutRecordTable = "_CheckoutRecord";
     static String InventoryTable = "_Inventory";
     static String RecordsTable = "_Records";
@@ -389,7 +389,7 @@ public class Database {
      */
     public static void AddToWaitList(String isbn, Date today) {
 
-        //TODO: INCREMENT WAITCOUNT on isbn in records table
+
         String sql;
         ResultSet r = null;
         PreparedStatement st = null;
@@ -448,6 +448,18 @@ public class Database {
 
         } catch (Exception e) {
 
+        }
+
+        //increment waitcount in recordstable
+        sql = "UPDATE " + RecordsTable + " SET waitcount = waitcount + 1 WHERE isbn = ?";
+
+        try{
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            st.executeUpdate();
+        } catch(Exception e)
+        {
+            e.printStackTrace();
         }
 
         if(verbose)
@@ -810,6 +822,24 @@ public class Database {
             availableforcheckout = oldestuser.matches(loggedInUser);
         }
 
+        //they will be removed from the waitlist count
+        if(oldestuser.matches(loggedInUser))
+        {
+            //decrement waitcount in records table
+            sql = "UPDATE " + RecordsTable + " SET waitcount = waitcount - 1 WHERE isbn = ?";
+
+            try{
+                st = con.prepareStatement(sql);
+                st.setString(1, isbn);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+
+        }
+
         //if the book isn't available to checkout, and they aren't at the top of the list to check out
         //prompt the user with the option to be added to the book's waitlist
 
@@ -858,7 +888,7 @@ public class Database {
             }
         }
 
-        //However, if the book IS available to checkout, create a checkout record for the user
+        //However, if the book IS available to checkout they were , create a checkout record for the user
         else
         {
             check = CheckForCheckoutRecord(loggedInUser, isbn);
@@ -875,7 +905,7 @@ public class Database {
             }
         }
 
-        Main.MainMenu();
+        Console.MainMenu();
 
 
     }//end of checkoutbook
@@ -974,6 +1004,7 @@ public class Database {
             e.printStackTrace();
         }
 
+
         //finally, we must also decrement the number of copies that we have of this book in the library
         sql = "UPDATE " + InventoryTable + " SET copies = copies - 1 WHERE isbn = ?";
 
@@ -989,6 +1020,8 @@ public class Database {
         System.out.println("Thank you " + loggedInUser + " you now have a checkout record for " + title);
         System.out.println();
 
+
+
         Console.MainMenu();
 
     }
@@ -1000,7 +1033,7 @@ public class Database {
         int score;
         String userOpinion;
         boolean check;
-
+        String newAverage = "";
 
         String sql;
         ResultSet r = null;
@@ -1141,6 +1174,38 @@ public class Database {
             if(verbose)
                 PrintSQLStatement(st, sql);
 
+        }
+
+        //TODO: Add average review score to records table
+        sql = "SELECT AVG(score) AS avg FROM " + ReviewTable + " WHERE isbn = ? ";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbnreview);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                newAverage = r.getString("avg");
+            }
+        } catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //add average to its corresponding record in Records table
+        sql = "UPDATE " + RecordsTable + " SET avgreviewscore = ? WHERE isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, newAverage);
+            st.setString(2, isbnreview);
+            st.executeUpdate();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
         //return to main menu
@@ -1632,7 +1697,6 @@ public class Database {
         System.out.println();
 
         System.out.println("Location information: ");
-        System.out.println();
 
         //get location information for book from inventory table
         sql = "SELECT copies, location FROM " + InventoryTable + " WHERE isbn = ?";
@@ -1645,7 +1709,7 @@ public class Database {
 
             while(r.next())
             {
-                System.out.println("There are " + r.getString("copies") + " located on shelf: " + r.getString("location"));
+                System.out.println("There are " + r.getString("copies") + " copies located on shelf: " + r.getString("location"));
             }
         } catch (Exception e)
         {
@@ -1670,7 +1734,7 @@ public class Database {
                 System.out.println("User: " + r.getString("username"));
                 System.out.println("\t\t\t" + "Checkout Date: " +
                         r.getString("checkoutdate") + "\t" + "Return Date: " +
-                        r.getString("returndate"));
+                        r.getString("returndate") + "\n");
             }
         } catch (Exception e)
         {
@@ -1678,7 +1742,7 @@ public class Database {
         }
 
         //get review information
-        System.out.println("Book Reviews (if applicable): ");
+        System.out.println("Book Reviews (if applicable): \n");
 
         sql = "SELECT username, score, opinion FROM " + ReviewTable + " WHERE isbn = ? ";
 
@@ -1691,7 +1755,7 @@ public class Database {
             while(r.next())
             {
                 System.out.println("User: " + r.getString("username"));
-                System.out.println("\t\t\t" + "Score: " + r.getString("score") + "\t" + "Optional Opinion: " + r.getString("opinion"));
+                System.out.println("\t\t\t" + "Score: " + r.getString("score") + "\t" + "Optional Opinion: " + r.getString("opinion") + "\n");
             }
 
         } catch (Exception e)
@@ -1715,17 +1779,80 @@ public class Database {
         }
 
 
-
-
-
-
-
-
-
+        //return to main menu
+        Console.MainMenu();
     }
 
     public static void PrintLibraryStatistics()
-    {}
+    {
+        int nbooks;
+        System.out.println("Printing Library Statistics...");
+        System.out.println();
+        System.out.print("How many books would you like to request stats about?: ");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is not a number, ");
+                System.out.print("Please enter the amount of books you wish to requests stats about: ");
+            } else {
+                choice = Integer.parseInt(userSelection);
+                break;
+
+            }
+        } while (true);
+
+        nbooks = choice;
+
+        System.out.println("Do you want to..");
+        System.out.println("List " + choice + " most requested books [1]");
+        System.out.println("List " + choice + " most checked out books [2]");
+        System.out.println("List " + choice + " most lost books [3]");
+        System.out.println("List " + choice + " most popular authors [4]");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Main.IsNumber(userSelection)) {
+                System.out.println(userSelection + " is not a number, ");
+                System.out.print("Please enter a number [1 - 4] for your selection: ");
+            } else {
+                choice = Integer.parseInt(userSelection);
+                if (choice < 1 || choice > 4) {
+                    System.out.println(userSelection + " is not a valid selection");
+                    System.out.print("Please enter a number [1 - 4] for your selection: ");
+                } else {
+                    break;
+                }
+
+            }
+        } while (true);
+
+
+        //Most requested books
+        if (choice == 1) {
+            //TODO: Construct sql query for most requested books (size of waitlist)
+        }
+
+        //Most checked out books
+        else if (choice == 2) {
+            //TODO: Construct sql query for most checked out books (instances of checked out records)
+        }
+
+        //Most lost books
+        else if (choice == 3) {
+            //TODO: Construct sql query for most lost books (instances of checked out records where lost = true)
+        }
+
+        //most popular authors
+        else if (choice == 4) {
+            //TODO: Construct sql query for most popular authors (instances of checkout records with the most common authors)
+        }
+
+        //display main menu again
+        Main.MainMenu();
+    }
 
     public static void ReturnBook()
     {
