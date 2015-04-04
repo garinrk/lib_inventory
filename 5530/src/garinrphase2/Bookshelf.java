@@ -1,6 +1,5 @@
 package garinrphase2;
 
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +16,7 @@ import java.lang.*;
 public class Bookshelf {
 
     /* Display extra information to console? Used for debugging purposes mostly */
-    static boolean verbose = false;
+    static boolean verbose = true;
 
     //TODO: Check ISBN Legality, ISBNs are Strings. Too large for ints.
     //TODO: Make sure dates in tables make sense, e.g, they return before checkout
@@ -1527,8 +1526,6 @@ public class Bookshelf {
             System.out.println();
         }
 
-        //TODO: Not printing above inputted information
-
         System.out.print("Do you want to sort your result by year published [1], average review score [2], or book popularity[3]?: ");
 
         try {
@@ -1575,9 +1572,9 @@ public class Bookshelf {
 
 
         } else if (choice == 2) {
-
-
             sortByScore = true;
+
+
         } else if (choice == 3) {
 
 
@@ -1634,13 +1631,7 @@ public class Bookshelf {
                 ISBN = userSelection;
                 break;
             }
-            //TODO: ERROR Check if ISBN Exists
-//            if (/*!Main.IsNumber(userSelection) ||*/ userSelection.length() != 13) {
-//                System.out.print("Not a valid ISBN, please try again: ");
-//            } else {
-////                ISBN = userSelection;
-//                break;
-//            }
+
 
         } while (true);
 
@@ -1701,6 +1692,22 @@ public class Bookshelf {
 
         if (lost) {
             //specify checkout record as lost and set return date
+            sql = "UPDATE CheckoutRecord SET returndate=?, lost=1 where isbn=? and username = ?";
+
+            try{
+                st = con.prepareStatement(sql);
+                st.setString(1,returndate);
+                st.setString(2, ISBN);
+                st.setString(3,loggedInUser);
+                st.executeUpdate();
+
+
+
+            } catch (Exception e)
+            {
+
+            }
+
 
 
         } else {    //book is not lost
@@ -1740,13 +1747,8 @@ public class Bookshelf {
 
             }
 
-            Main.MainMenu();
-
         }
 
-
-        //TODO: Check if a book with specified isbn has been checked out by currently logged in user, if not. They can't return it
-        //TODO: Else, set checkout record's specified checking date to given date, lost = false;
 
         Main.MainMenu();
 
@@ -1947,11 +1949,10 @@ public class Bookshelf {
 
         }
 
-        //TODO: SG: query not using proper table vars
         //print users who had the book and the dates they had the book
         System.out.println("Usernames of previous borrowers and dates (if applicable): ");
 
-        sql = "SELECT username, checkoutdate, returndate FROM CheckoutRecord c, Book b WHERE c.bookid = b.bookid AND b.ISBN = ?;";
+        sql = "SELECT username, checkoutdate, returndate FROM " + checkoutTable + " c, " + bookTable + " b WHERE c.bookid = b.bookid AND b.ISBN = ?;";
 
         try {
 
@@ -1975,8 +1976,8 @@ public class Bookshelf {
         System.out.println();
         System.out.println("Book Reviews (if applicable): ");
 
-        //TODO: Not using proper table vars
-        sql = "SELECT username, score, opinion FROM Review WHERE isbn = ? ;";
+
+        sql = "SELECT username, score, opinion FROM " + reviewTable + " WHERE isbn = ? ;";
 
         try {
 
@@ -2001,8 +2002,8 @@ public class Bookshelf {
 
 //        Select avg(score) from Review where isbn = '201410348-7';
 
-        //TODO: Not using proper table vars
-        sql = "SELECT AVG(score) as avg FROM Review WHERE isbn = (?) ";
+
+        sql = "SELECT AVG(score) AS avg FROM " + reviewTable + " WHERE isbn = (?) ";
 
         try {
 

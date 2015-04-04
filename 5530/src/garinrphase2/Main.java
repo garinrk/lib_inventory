@@ -230,10 +230,6 @@ public class Main {
                 check = Bookshelf.CheckForUser(currentUser);
             }
 
-            //TODO: Check for if user exists1
-            //get new username
-//            currentUser = in.nextLine();
-
             //login as said user name
             Bookshelf.setLoggedInUser(currentUser);
 
@@ -254,7 +250,7 @@ public class Main {
         try {
             stmt.close();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
+
             e.printStackTrace();
         }
         System.exit(0);
