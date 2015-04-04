@@ -52,7 +52,7 @@ public class Console {
 //			System.out.println("Connection established to database");
             stmt = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
-            Bookshelf.SetConnection(c);
+            Database.SetConnection(c);
 
             //show initial main menu
             Welcome();
@@ -116,8 +116,32 @@ public class Console {
 
             Database.setLoggedInUser(currentUser);
             MainMenu();
-
         }
+
+        //prompt user for existing username and check if exists
+        if (choice == 2) {
+            boolean check;
+
+            System.out.print("What is your username? : ");
+            currentUser = in.nextLine();
+
+            check = Database.CheckForUser(currentUser);
+
+            //if the username doesn't exist, prompt user again for existing username
+            while (!check) {
+                System.out.print(currentUser + " does not exist, please enter a valid username: ");
+                currentUser = in.nextLine();
+                check = Database.CheckForUser(currentUser);
+            }
+
+            Database.setLoggedInUser(currentUser);
+
+            MainMenu();
+        }
+        if (choice == 3) {
+            ExitProgram();
+        }
+
     }//end of Welcome
 
     /**

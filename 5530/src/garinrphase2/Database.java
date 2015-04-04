@@ -41,6 +41,14 @@ public class Database {
     static String waitlistTable = "Waitlist";
     static String authorTable = "Authors";
 
+    static String AuthorListTable = "_Authors";
+    static String CheckoutRecordTable = "_CheckoutRecord";
+    static String InventoryTable = "_Inventory";
+    static String RecordsTable = "_Records";
+    static String ReviewTable = "_Review";
+    static String UserTable = "_UserTable";
+    static String WaitListTable = "_WaitList";
+
     /* Represents the currently logged in user using the library */
     static String loggedInUser = null;
 
@@ -193,7 +201,7 @@ public class Database {
             System.out.println("Phone Number: " + newPhoneNumber);
         }
 
-        sql = "INSERT INTO " + userTable + " (username, cardid, fullname, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?);";
+        sql = "INSERT INTO " + UserTable + " (username, cardid, full_name, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
 
@@ -206,7 +214,7 @@ public class Database {
             st.setString(5, newAddress);
             st.setString(6, newPhoneNumber);
             st.executeUpdate();
-            r = st.executeQuery();
+//            r = st.executeQuery();
 
 
         } catch (Exception e) {
@@ -269,7 +277,7 @@ public class Database {
         PreparedStatement st = null;
 
         //construct sql query
-        String sql = "SELECT username FROM " + userTable + " WHERE username = ?";
+        String sql = "SELECT username FROM " + UserTable + " WHERE username = ?";
 
         try {
             st = con.prepareStatement(sql);
@@ -330,7 +338,20 @@ public class Database {
     }//end of CheckLateList
 
     public static void CheckoutBook(Date today)
-    {}
+    {
+        String isbn, duedate, oldestuser, todayDate;
+        boolean check = false, availableforcheckout = false;
+        int thisMonth = 0, thisYear = 0, thisDay = 0;
+
+        String sql;
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        System.out.println("Checking out a book...");
+        System.out.println();
+        System.out.print("Please enter the ISBN of the book you wish to print out: ");
+
+    }
 
     public static void LeaveReview() {
         String isbnreview;
