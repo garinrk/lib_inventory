@@ -372,6 +372,8 @@ public class Database {
      * @param isbn
      */
     public static void AddToWaitList(String isbn, Date today) {
+
+        //TODO: INCREMENT WAITCOUNT on isbn in records table
         String sql;
         ResultSet r = null;
         PreparedStatement st = null;
@@ -1529,7 +1531,157 @@ public class Database {
     {}
 
     public static void ReturnBook()
-    {}
+    {
+
+        //TODO: Assuming that the user does have a currently open checkout record for given book, maybe check for if they haven't returned it later
+        //TODO: Assuming that the waitlist isn't displayed when a book is marked as lost
+        String isbn, month, day, year, returndate;
+
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String sql;
+
+        boolean lost = false;
+
+        System.out.println("Returning a book...");
+        System.out.println();
+        System.out.print("Please enter the ISBN of the book you wish to return: ");
+
+        do {
+            userSelection = in.nextLine();
+
+
+
+            if(!CheckForISBN(userSelection))
+            {
+                System.out.print("ISBN does not exist, please try again: " );
+            }
+            else
+            {
+                isbn = userSelection;
+                break;
+            }
+
+        } while (true);
+
+
+        System.out.println("Please enter the date of which this book was returned: ");
+        System.out.print("What month was this book returned? [1 - 12]: ");
+        month = in.nextLine();
+        System.out.print("What day was this book returned? [1 - 31]: ");
+        day = in.nextLine();
+        System.out.print("What year was this book returned? [YYYY]: ");
+        year = in.nextLine();
+
+        //create return date
+        returndate = year + "-" + month + "-" + day;
+
+        System.out.print("Was this book returned or lost? [1] yes [0] no: ");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is an invalid option, ");
+                System.out.print("Please make a selection: ");
+            }
+
+            //if the user did enter a number
+            if (Main.IsNumber(userSelection)) {
+                choice = Integer.parseInt((userSelection));
+
+                //check to see if it's a valid option
+                if (choice != 0 && choice != 1) {
+                    System.out.print(choice + " is an invalid option ");
+                    System.out.print("please make a selection: ");
+
+                }
+
+                //case where the user did enter a valid option number
+                else {
+                    break;
+                }
+
+            }
+        } while (true);
+
+        //determine whether book was lost
+        if (choice == 1) {
+            lost = true;
+        } else {
+            lost = false;
+        }
+
+        if(lost)
+        {
+            System.out.println("Marking book as lost in database...");
+            sql = "UPDATE " + CheckoutRecordTable + " SET returndate = ?, lost = 1 WHERE isbn = ? AND username = ?";
+
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, returndate);
+                st.setString(2, isbn);
+                st.setString(3, loggedInUser);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            //update checkoutrecord with returned date, but don't increment number of copies.
+        }
+        else
+        {
+            //the book wasn't lost, update checkout record, incrememnt number of copies by one, return waitlist for book.
+
+            sql = "UPDATE " + CheckoutRecordTable + " SET returndate = ? WHERE isbn = ? AND username = ?";
+
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, returndate);
+                st.setString(2, isbn);
+                st.setString(3, loggedInUser);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            sql = "UPDATE " + InventoryTable + " SET copies = copies + 1 WHERE isbn = ?";
+
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, isbn);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            System.out.println("Users currently on the waitlist for this book (If Any): ");
+            sql = "SELECT username FROM "+ WaitListTable +" WHERE isbn = ?";
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, isbn);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    System.out.print("\t" + r.getString("username"));
+                }
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+        }
+
+        //return to main menu
+        Console.MainMenu();
+
+    }
 
     public static void SetConnection(Connection c)
     {
