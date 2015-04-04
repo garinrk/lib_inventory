@@ -18,7 +18,7 @@ import java.lang.*;
 public class Database {
 
     /* Globals */
-    static boolean verbose = true;
+    static boolean verbose = false;
 
     /* Used for user input and input parsing */
     static Scanner in = new Scanner(System.in);
@@ -1375,7 +1375,7 @@ public class Database {
             System.out.println("Printing users who have checked out the most books");
             System.out.println();
 
-            sql = "SELECT COUNT(username) AS maxcheckoutcount FROM " + checkoutTable + " GROUP BY username ORDER BY maxcheckoutcount DESC LIMIT 1";
+            sql = "SELECT COUNT(username) AS maxcheckoutcount FROM " + CheckoutRecordTable + " GROUP BY username ORDER BY maxcheckoutcount DESC LIMIT 1";
 
             try {
                 st = con.prepareStatement(sql);
@@ -1394,7 +1394,7 @@ public class Database {
                 PrintSQLStatement(st, sql);
 
 
-            sql = "SELECT username, COUNT(username) AS count FROM " + checkoutTable + " GROUP BY username";
+            sql = "SELECT username, COUNT(username) AS count FROM " + CheckoutRecordTable + " GROUP BY username";
 
             try {
                 st = con.prepareStatement(sql);
@@ -1424,7 +1424,7 @@ public class Database {
             System.out.println("Printing users who have reviewed the most books");
             System.out.println();
 
-            sql = "SELECT COUNT(username) AS reviewcount FROM " + reviewTable + " GROUP BY username ORDER BY reviewcount DESC LIMIT 1";
+            sql = "SELECT COUNT(username) AS reviewcount FROM " + ReviewTable + " GROUP BY username ORDER BY reviewcount DESC LIMIT 1";
 
             try {
                 st = con.prepareStatement(sql);
@@ -1439,16 +1439,11 @@ public class Database {
             }
 
 
-            if (verbose) {
-                System.out.println();
-                System.out.println("SQL RAW STRING: " + sql);
-                System.out.println();
-                System.out.println("PREPARED STATEMENT: " + st);
-                System.out.println();
-            }
+            if (verbose)
+                PrintSQLStatement(st, sql);
 
 
-            sql = "SELKECT username, COUNT(username) AS count FROM " + reviewTable + " GROUP BY username";
+            sql = "SELECT username, COUNT(username) AS count FROM " + ReviewTable + " GROUP BY username";
 
             try {
                 st = con.prepareStatement(sql);
@@ -1478,7 +1473,7 @@ public class Database {
             System.out.println("Printing users who have lost the most books");
             System.out.println();
 
-            sql = "SELECT COUNT(username) AS lostcount FROM " + checkoutTable + " WHERE " + checkoutTable + ".lost = 1 GROUP BY username ORDER BY lostcount DESC LIMIT 1";
+            sql = "SELECT COUNT(username) AS lostcount FROM " + checkoutTable + " c WHERE c.lost = 1 GROUP BY username ORDER BY lostcount DESC LIMIT 1";
 
             try {
                 st = con.prepareStatement(sql);
@@ -1497,7 +1492,7 @@ public class Database {
                 PrintSQLStatement(st, sql);
 
 
-            sql = "SELECT username, COUNT(username) AS count FROM " + checkoutTable + " where " + checkoutTable + ".lost = 1 group by username";
+            sql = "SELECT username, COUNT(username) AS count FROM " + checkoutTable + " c WHERE c.lost = 1 GROUP BY username";
 
             try {
                 st = con.prepareStatement(sql);
