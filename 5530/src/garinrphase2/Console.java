@@ -288,7 +288,7 @@ public class Console {
 
             do {
                 userSelection = in.nextLine();
-                check = Bookshelf.CheckForISBN(userSelection);
+                check = Database.CheckForISBN(userSelection);
 
 
                 if (!check) {
@@ -302,7 +302,7 @@ public class Console {
 
             cal = Calendar.getInstance();
             cal.setTime(today);
-            Bookshelf.AddToWaitList(ISBN, today);
+            Database.AddToWaitList(ISBN, today);
         }
 
         else if (selection == 13) {

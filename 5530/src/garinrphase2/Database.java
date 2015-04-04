@@ -1,5 +1,7 @@
 package garinrphase2;
 
+import com.sun.prism.impl.Disposer;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,7 +62,64 @@ public class Database {
     static Connection con = null;
 
     public static void AddBookRecord()
-    {}
+    {
+        String newISBN;
+        String newTitle;
+        String newPublisher;
+        String newYearPub;
+        String newFormat;
+        String newSubject;
+        String newSummary;
+        String sql;
+        boolean multipleAuthors;
+        int numberOfAuthors;
+        boolean check;
+
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        System.out.println("Entering new book record...");
+        System.out.println();
+        System.out.print("ISBN: ");
+
+        do {
+            newISBN = in.nextLine();
+
+            check = CheckForISBN(newISBN);
+
+            if(check)
+            {
+                System.out.print("That ISBN is already in the database, please enter a new UNIQUE isbn: ");
+                newISBN = in.nextLine();
+            }
+            else
+                break;
+
+        } while(true);
+
+        System.out.print("Title: " );
+        newTitle = in.nextLine();
+
+        System.out.println("How many authors are there for this new record?: ");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Console.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is not a number, ");
+                System.out.print("Please enter the number of authors: ");
+            } else if (userSelection.matches("0")) {
+                System.out.print("There must be at least one author, please enter the positive number of authors: ");
+            } else {
+                numberOfAuthors = Integer.parseInt(userSelection);
+                break;
+            }
+        } while (true);
+
+
+
+
+    }
 
     public static void AddBookCopy()
     {}
@@ -82,7 +141,7 @@ public class Database {
         String todayDate;
         boolean found = false;
 
-        sql = "SELECT username FROM " + waitlistTable + " where isbn = ?;";
+        sql = "SELECT username FROM " + WaitListTable + " where isbn = ?;";
         try {
 
             //set sql parameters
@@ -108,7 +167,7 @@ public class Database {
         }
 
 
-        sql = "INSERT INTO " + waitlistTable + " (username, isbn, dateadded) VALUES (?, ?, ?);";
+        sql = "INSERT INTO " + WaitListTable + " (username, isbn, dateadded) VALUES (?, ?, ?);";
 
         thisMonth = cal.get(Calendar.MONTH) + 1;
         thisDay = cal.get(Calendar.DAY_OF_MONTH);
@@ -232,13 +291,46 @@ public class Database {
     public static void BrowseLibrary()
     {}
 
+    public static boolean CheckForCheckoutRecord(String user, String isbn)
+    {
+        boolean found = false;
+
+        String sql;
+        PreparedStatement st;
+        ResultSet r = null;
+
+
+        sql = "SELECT username FROM " + CheckoutRecordTable + " c WHERE isbn = ? AND username = ?";
+
+        try {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            st.setString(2, user);
+
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while (r.next()) {
+                if (r.getString("username").matches(loggedInUser) && found == false) {
+                    found = true;
+                    break;
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+        return found;
+
+    }//end of CheckForCheckoutRecord
+
     public static boolean CheckForISBN(String isbn) {
         boolean found = false;
         ResultSet r = null;
         PreparedStatement st = null;
 
         //construct sql query
-        String sql = "SELECT ISBN FROM " + bookTable + " WHERE ISBN = ?";
+        String sql = "SELECT isbn FROM " + RecordsTable + " WHERE isbn = ?";
 
         try {
             st = con.prepareStatement(sql);
@@ -339,7 +431,7 @@ public class Database {
 
     public static void CheckoutBook(Date today)
     {
-        String isbn, duedate, oldestuser, todayDate;
+        String isbn, duedate, oldestuser = null, todayDate;
         boolean check = false, availableforcheckout = false;
         int thisMonth = 0, thisYear = 0, thisDay = 0;
 
@@ -351,7 +443,264 @@ public class Database {
         System.out.println();
         System.out.print("Please enter the ISBN of the book you wish to print out: ");
 
+        //make sure that isbn exists in table
+        do {
+            userSelection = in.nextLine();
+            check = CheckForISBN(userSelection);
+
+
+            if (!check) {
+                System.out.print("ISBN doesn't exist. Please try again: ");
+            } else {
+                isbn = userSelection;
+                break;
+            }
+
+        } while (true);
+
+        //get today's date
+        c.setTime(today);
+
+        thisMonth = c.get(Calendar.MONTH) + 1;
+        thisDay = c.get(Calendar.DAY_OF_MONTH);
+        thisYear = c.get(Calendar.YEAR);
+
+
+        todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
+
+        //compute 30 days ahead
+        c.add(Calendar.DATE, 30);
+
+        //save duedate
+        int futureMonth = c.get(Calendar.MONTH) + 1;
+        int futureDay = c.get(Calendar.DAY_OF_MONTH);
+        int futureYear = c.get(Calendar.YEAR);
+
+        //create date string that will be inserted
+        duedate = Integer.toString(futureYear) + "-" + Integer.toString(futureMonth) + "-" + Integer.toString(futureDay);
+
+        sql = "SELECT username AS oldestuserforisbn FROM " + WaitListTable + " WHERE isbn = ? AND dateadded = (SELECT MIN(dateadded) from " + WaitListTable + " where isbn =  ? )";
+
+        try {
+
+
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            st.setString(2, isbn);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            if (!r.wasNull()) {
+                while (r.next()) {
+                    oldestuser = r.getString("oldestuserforisbn");
+                }
+
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        if(verbose)
+            PrintSQLStatement(st, sql);
+
+        //if there was no waitlist for the book
+        if(oldestuser == null)
+        {
+            System.out.println("There was no waitlist for the book, you may check it out!");
+            availableforcheckout = true;
+        }
+        //there is a waitlist for the book
+        else {
+            //the oldest user SHOULD match the current user.
+            availableforcheckout = oldestuser.matches(loggedInUser);
+        }
+
+        //if the book isn't available to checkout, and they aren't at the top of the list to check out
+        //prompt the user with the option to be added to the book's waitlist
+
+        if(!availableforcheckout && oldestuser != null)
+        {
+            System.out.print("There is a waitlist for this book, and you are not at the top if the list" +
+                    " would you like to be added to the waitlist? [1] Yes [2] No: ");
+
+            //ask user for choice, check for correctness
+            do {
+                userSelection = in.nextLine();
+
+                if (!Main.IsNumber(userSelection)) {
+                    System.out.print(userSelection + " is an invalid option, ");
+                    System.out.print("Please make a selection: ");
+                }
+
+                //if the user did enter a number
+                if (Main.IsNumber(userSelection)) {
+                    choice = Integer.parseInt((userSelection));
+
+                    //check to see if it's a valid option
+                    if (choice != 0 && choice != 1) {
+                        System.out.print(choice + " is an invalid option ");
+                        System.out.print("please make a selection: ");
+                    }
+
+                    //case where the user did enter a valid option number
+                    else {
+                        break;
+                    }
+
+                }
+            } while (true);
+
+            //user would like to be added to a waitlist
+            if(choice == 1)
+            {
+                AddToWaitList(isbn, today);
+            }
+            else
+            {
+                //exit and return to main menu
+                System.out.println("You will NOT be added to the waitlist, returning to main menu...\n");
+                Console.MainMenu();
+            }
+        }
+
+        //However, if the book IS available to checkout, create a checkout record for the user
+        else
+        {
+            check = CheckForCheckoutRecord(loggedInUser, isbn);
+
+            //if the user doesn't already have a checkout record for this book,
+            if(!check)
+            {
+                //create one
+                CreateCheckoutRecord(loggedInUser, duedate, todayDate, isbn);
+            }
+            else
+            {
+                System.out.println("You already have a checkout record for this book. Returning to main menu...\n");
+            }
+        }
+
+        Main.MainMenu();
+
+
+    }//end of checkoutbook
+
+    public static void CreateCheckoutRecord(String user, String due, String today, String isbn) {
+
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String sql;
+
+        boolean backtomenu = false;
+        int copies = 0;
+        String title = "DEFAULT";
+
+        //We need to check first if there are copies available to checkout
+
+        sql = "SELECT copies FROM " + InventoryTable + " WHERE isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1,isbn);
+
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                if(r.getString("copies").matches("0"))
+                {
+                    System.out.println("There are no copies of this book to check out!");
+                    backtomenu = true;
+                }
+                else
+                    copies = Integer.parseInt(r.getString("copies"));
+            }
+        } catch (Exception e)
+        {}
+
+        if(verbose)
+            PrintSQLStatement(st, sql);
+
+        if(backtomenu)
+        {
+            Console.MainMenu();
+        }
+
+        //There are copies to checkout! We need to insert a new record into the checkout table and also incremement
+        //the number of times a book has been checked out in the records table, but first we need the book's title.
+
+
+        sql = "SELECT title FROM " + RecordsTable + " WHERE isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1,isbn);
+
+            r = st.executeQuery();
+
+            while(r.next()) {
+                title = r.getString("title");
+            }
+
+        } catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //now that we have the username, isbn, title, and the pertinent dates, we can insert the book into the checkout record table
+        sql = "INSERT INTO " + CheckoutRecordTable + " (username, isbn, title, checkoutdate, duedate) VALUES (?, ?, ?, ?, ?)";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, loggedInUser);
+            st.setString(2, isbn);
+            st.setString(3, title);
+            st.setString(4, today);
+            st.setString(5, due);
+            st.executeUpdate();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //Don't forget, we must incrememnt the number of times that this book has been checked in the records table
+        sql = "UPDATE " + RecordsTable + " SET checkoutcount = checkoutcount + 1 WHERE isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1,isbn);
+            st.executeUpdate();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //finally, we must also decrement the number of copies that we have of this book in the library
+        sql = "UPDATE " + InventoryTable + " SET copies = copies - 1 WHERE isbn = ?";
+
+        try{
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            st.executeUpdate();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        System.out.println("Thank you " + loggedInUser + " you now have a checkout record for " + title);
+        System.out.println();
+
+        Console.MainMenu();
+
     }
+
+
 
     public static void LeaveReview() {
         String isbnreview;
