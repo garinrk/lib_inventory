@@ -34,14 +34,14 @@ public class Database {
     static String newEmail;
 
     //Used in conjunction with sql queries
-    static String invTable = "Inventory";
-    static String bookTable = "Book";
-    static String checkoutTable = "CheckoutRecord";
-    static String inventoryTable = "Inventory";
-    static String reviewTable = "Review";
-    static String userTable = "User";
-    static String waitlistTable = "Waitlist";
-    static String authorTable = "Authors";
+//    static String invTable = "Inventory";
+//    static String bookTable = "Book";
+//    static String checkoutTable = "CheckoutRecord";
+//    static String inventoryTable = "Inventory";
+//    static String reviewTable = "Review";
+//    static String userTable = "User";
+//    static String waitlistTable = "Waitlist";
+//    static String authorTable = "Authors";
 
     static String AuthorListTable = "_Authors";
     static String CheckoutRecordTable = "_CheckoutRecord";
@@ -191,7 +191,7 @@ public class Database {
         else
         {
             //the user entered the correct info! add information to records database
-            sql = "INSERT into " + RecordsTable + " (isbn, title, publisher, pubyear, format, subject, booksummary) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO " + RecordsTable + " (isbn, title, publisher, pubyear, format, subject, booksummary) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             try
             {
@@ -207,6 +207,22 @@ public class Database {
             } catch (Exception e)
             {
                 e.printStackTrace();
+            }
+
+            //add authors to authors table
+            sql = "INSERT INTO " + AuthorListTable + " (isbn, authorname) VALUES (?, ?)";
+
+            for(int i = 0; i < numberOfAuthors; i++) {
+                try {
+                    st = con.prepareStatement(sql);
+                    st.setString(1, newISBN);
+                    st.setString(2, authors[i]);
+                    st.executeUpdate();
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
 
         }
@@ -1106,7 +1122,7 @@ public class Database {
             System.out.println("Username: " + loggedInUser);
             System.out.println("Score: " + score);
 
-            sql = "INSERT INTO " + reviewTable + " (username, ISBN, score) VALUES(?, ?, ?)";
+            sql = "INSERT INTO " + ReviewTable + " (username, ISBN, score) VALUES(?, ?, ?)";
 
             try {
 
@@ -1473,7 +1489,7 @@ public class Database {
             System.out.println("Printing users who have lost the most books");
             System.out.println();
 
-            sql = "SELECT COUNT(username) AS lostcount FROM " + checkoutTable + " c WHERE c.lost = 1 GROUP BY username ORDER BY lostcount DESC LIMIT 1";
+            sql = "SELECT COUNT(username) AS lostcount FROM " + CheckoutRecordTable + " c WHERE c.lost = 1 GROUP BY username ORDER BY lostcount DESC LIMIT 1";
 
             try {
                 st = con.prepareStatement(sql);
@@ -1492,7 +1508,7 @@ public class Database {
                 PrintSQLStatement(st, sql);
 
 
-            sql = "SELECT username, COUNT(username) AS count FROM " + checkoutTable + " c WHERE c.lost = 1 GROUP BY username";
+            sql = "SELECT username, COUNT(username) AS count FROM " + CheckoutRecordTable + " c WHERE c.lost = 1 GROUP BY username";
 
             try {
                 st = con.prepareStatement(sql);
@@ -1520,7 +1536,147 @@ public class Database {
     }//end of PrintUserStatistics
 
     public static void PrintBookRecord()
-    {}
+    {
+        //TODO: Assuming all copies of a book exist in one location
+        String sql;
+        PreparedStatement st = null;
+        ResultSet r = null;
+        boolean check;
+
+        String isbn = "";
+        String title = "";
+        String summary = "";
+        String subject = "";
+        String format = "";
+        String pubyear = "";
+        String publisher = "";
+        String authors = "";
+        String loc = "";
+        int copies;
+
+        System.out.println("Printing Book Record...");
+        System.out.println();
+        System.out.print("Please enter the ISBN of the book you wish to look up: ");
+
+        do {
+            userSelection = in.nextLine();
+
+            check = CheckForISBN(userSelection);
+
+            if(!check)
+            {
+                System.out.print("ISBN does not exist in database, please enter an existing isbn: ");
+            }
+            else
+            {
+                isbn = userSelection;
+                break;
+            }
+        } while (true);
+
+        //get book information
+        sql = "SELECT * FROM " + RecordsTable + " where isbn = ? ";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+
+            while(r.next())
+            {
+                isbn = r.getString("ISBN");
+                title = r.getString("title");
+                summary = r.getString("bookSummary");
+                subject = r.getString("subject");
+                format = r.getString("format");
+                pubyear = r.getString("pubyear");
+                publisher = r.getString("publisher");
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        System.out.println();
+        //print book info
+        System.out.println("Book Info:");
+        System.out.println("Title: " + title);
+        System.out.print("Author(s): \n");
+
+        //get authors for book
+        sql = "SELECT authorname FROM " + AuthorListTable + " WHERE isbn = ?";
+
+        try{
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("\t " + r.getString("authorname"));
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        System.out.println("ISBN: " + isbn);
+        System.out.println("Summary: " + summary);
+        System.out.println("Subject: " + subject);
+        System.out.println("Format: " + format);
+        System.out.println("Publisher: " + publisher);
+        System.out.println("Year Published: " + pubyear);
+        System.out.println();
+
+        System.out.println("Location information: ");
+        System.out.println();
+
+        //get location information for book from inventory table
+        sql = "SELECT copies, location FROM " + InventoryTable + " WHERE isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("There are " + r.getString("copies") + " located on shelf: " + r.getString("location"));
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        System.out.println();
+        System.out.println("Checkout Information: ");
+        System.out.println();
+
+        sql = "SELECT username, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE isbn = ?";
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+
+
+
+
+    }
 
     public static void PrintLibraryStatistics()
     {}
@@ -1623,7 +1779,20 @@ public class Database {
             {
                 e.printStackTrace();
             }
-            //update checkoutrecord with returned date, but don't increment number of copies.
+
+            //increment lost count
+            sql = "UPDATE " + RecordsTable + " SET lostcount = lostcount + 1 WHERE isbn = ?";
+
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, isbn);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
         }
         else
         {
