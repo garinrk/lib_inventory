@@ -53,11 +53,18 @@ public class Database {
     static Calendar c = Calendar.getInstance();
 
     /* Related to the SQL Connection */
-    static Statement statem = null;
+//    static Statement statem = null;
     static Connection con = null;
 
+    /**
+     * Adds a book record to the database
+     *
+     * Prompts user for new information and adds record to _Records table,
+     * and also inserts authors into authors table, using isbn as a key
+     */
     public static void AddBookRecord()
     {
+        //new information to add to the database
         String newISBN;
         String newTitle;
         String newPublisher;
@@ -73,7 +80,9 @@ public class Database {
         ResultSet r = null;
         PreparedStatement st = null;
 
-        System.out.println("Entering new book record...");
+        System.out.println("====================================================");
+        System.out.println("           ENTERING NEW BOOK RECORD");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("ISBN: ");
 
@@ -82,6 +91,7 @@ public class Database {
 
             check = CheckForISBN(newISBN);
 
+            //if isbn already exists in database
             if(check)
             {
                 System.out.print("That ISBN is already in the database, please enter a new UNIQUE isbn: ");
@@ -225,6 +235,11 @@ public class Database {
         Console.MainMenu();
     }//end of add book record
 
+
+    /**
+     * Adds new copies of a book. If a record of a book isn't in the inventory
+     * table, a new one is created. T
+     */
     public static void AddBookCopy()
     {
         String isbn;
@@ -238,8 +253,11 @@ public class Database {
         PreparedStatement st = null;
         String sql;
 
-        System.out.println("Adding new copies of a book...");
+        System.out.println("====================================================");
+        System.out.println("            ADDING NEW BOOK COPIES");
+        System.out.println("====================================================");
         System.out.println();
+
 
         System.out.print("ISBN to add copies to: ");
 
@@ -347,35 +365,9 @@ public class Database {
         //return to main menu
         Console.MainMenu();
 
-    }
+    }//end of add book copy
 
-    public static String GetRecordID(String isbn)
-    {
-        ResultSet r = null;
-        PreparedStatement st = null;
-        String sql;
-        String id = "";
 
-        sql = "SELECT r_id FROM " + RecordsTable + " WHERE isbn = ?";
-
-        try
-        {
-            st = con.prepareStatement(sql);
-            st.setString(1, isbn);
-            r = st.executeQuery();
-
-            while(r.next())
-            {
-                id = r.getString("r_id");
-            }
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return id;
-
-    }//end of GetRecordID
 
     /**
      * Adds user to the waitlist for a specified ISBN
@@ -396,25 +388,36 @@ public class Database {
         String todayDate;
         boolean found = false;
 
-        sql = "SELECT username FROM " + WaitListTable + " where isbn = ?;";
-        try {
+        boolean check = false;
+        String ISBN;
 
-            //set sql parameters
-            st = con.prepareStatement(sql);
-            st.setString(1, isbn);
-//            st.executeUpdate();
-            r = st.executeQuery();
+        System.out.println("====================================================");
+        System.out.println("           ADD USER TO WAIT LIST");
+        System.out.println("====================================================");
+        System.out.println();
+        System.out.print("Please enter the ISBN of the book you wish to be put on a Wait List for: ");
 
-            while (r.next()) {
-                if (r.getString("username").matches(loggedInUser) && found == false) {
-                    found = true;
-                    break;
-                }
+        do {
+            userSelection = in.nextLine();
+            check = Database.CheckForISBN(userSelection);
+
+
+            if (!check) {
+                System.out.print("ISBN doesn't exist. Please try again: ");
+            } else {
+                ISBN = userSelection;
+                break;
             }
 
-        } catch (Exception e) {
+        } while (true);
 
-        }
+        //We're going to use the current date for the day of which they are added to the waitlist
+        cal = Calendar.getInstance();
+        cal.setTime(today);
+
+
+       //see if user is already on waitlist for book
+        found = CheckWaitList(ISBN, loggedInUser);
 
         if (found) {
             System.out.println("You are already on a Wait List for this book, returning to Main Menu...");
@@ -428,6 +431,7 @@ public class Database {
         thisDay = cal.get(Calendar.DAY_OF_MONTH);
         thisYear = cal.get(Calendar.YEAR);
 
+        //create today's date
         todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
 
         try {
@@ -438,11 +442,10 @@ public class Database {
             st.setString(2, isbn);
             st.setString(3, todayDate);
             st.executeUpdate();
-//            r = st.executeQuery();
 
 
         } catch (Exception e) {
-
+            e.PrintStackTrace();
         }
 
         //increment waitcount in recordstable
@@ -466,18 +469,23 @@ public class Database {
         Console.MainMenu();
     }
 
+    /**
+     * Adds a new user to the database
+     */
     public static void AddUser()
     {
         String sql;
         ResultSet r = null;
         PreparedStatement st = null;
 
-        System.out.println("Adding a new user...");
+        System.out.println("====================================================");
+        System.out.println("                 ADD NEW USER");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("New Unique Username: ");
         newUsername = in.nextLine();
 
-
+        //check to see if user already exists in database
         while (CheckForUser(newUsername)) {
             System.out.print(newUsername + " already exists, please choose a new username: ");
             newUsername = in.nextLine();
@@ -517,15 +525,14 @@ public class Database {
         } while (true);
         System.out.println();
 
-        if (verbose) {
-            System.out.println("New User Info: ");
-            System.out.println("Full Name: " + newFullName);
-            System.out.println("Username: " + newUsername);
-            System.out.println("ID: " + newID);
-            System.out.println("Address: " + newAddress);
-            System.out.println("Email: " + newEmail);
-            System.out.println("Phone Number: " + newPhoneNumber);
-        }
+        System.out.println("New User Info: ");
+        System.out.println("Full Name: " + newFullName);
+        System.out.println("Username: " + newUsername);
+        System.out.println("ID: " + newID);
+        System.out.println("Address: " + newAddress);
+        System.out.println("Email: " + newEmail);
+        System.out.println("Phone Number: " + newPhoneNumber);
+
 
         sql = "INSERT INTO " + UserTable + " (username, cardid, full_name, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -556,6 +563,16 @@ public class Database {
 
     }
 
+    /**
+     * Returns a number of results from the library based on a number of criteria:
+     *
+     * Title Word(s)
+     * Author(s)
+     * Subject
+     * Publisher
+     *
+     * User can sort results by avg review score, popularity, or publication year
+     */
     public static void BrowseLibrary()
     {
         //TODO: Assuming that we are only searching books with authors and reviews
@@ -575,7 +592,9 @@ public class Database {
         ResultSet r = null;
         String author;
 
-        System.out.println("Browsing the library...");
+        System.out.println("====================================================");
+        System.out.println("               BROWSING LIBRARY");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("Would you like to display your results as all in the library [1] or only those of which are available to checkout [2]?: ");
 
@@ -608,7 +627,7 @@ public class Database {
 
         //does user want entire library or only those available?
         if (choice == 1) {
-            entireLibrary = true;
+            onlyAvailable = false;
         } else if (choice == 2) {
             onlyAvailable = true;
         }
@@ -651,10 +670,12 @@ public class Database {
 
                 }
 
-                //make sure they only entered one digit
-                if (userSelection.length() != 1) {
-                    System.out.print("Invalid number of options, please select only one: ");
-                }
+                //TODO: TEST THIS
+
+//                //make sure they only entered one digit
+//                if (userSelection.length() != 1) {
+//                    System.out.print("Invalid number of options, please select only one: ");
+//                }
 
 
                 //case where the user did enter a valid option number
@@ -749,14 +770,22 @@ public class Database {
             e.printStackTrace();
         }
 
+
+        //return to main menu
         Console.MainMenu();
 
-    }
+    }//end of browselibrary
 
+
+    /**
+     * Checks to see if there already is a checkout record
+     * for book with isbn for a specific user
+     * @param user, user to check for
+     * @param isbn, isbn to look up
+     * @return
+     */
     public static boolean CheckForCheckoutRecord(String user, String isbn)
     {
-
-
         boolean found = false;
 
         String sql;
@@ -771,7 +800,6 @@ public class Database {
             st.setString(1, isbn);
             st.setString(2, user);
 
-//            st.executeUpdate();
             r = st.executeQuery();
 
             while (r.next()) {
@@ -788,6 +816,12 @@ public class Database {
 
     }//end of CheckForCheckoutRecord
 
+    /**
+     * Checks to see if a specific isbn already exists in the records table, used to test for
+     * uniqueness
+     * @param isbn, to look up
+     * @return found
+     */
     public static boolean CheckForISBN(String isbn) {
         boolean found = false;
         ResultSet r = null;
@@ -808,7 +842,7 @@ public class Database {
         if(verbose)
             PrintSQLStatement(st, sql);
 
-        //check results for results if database has username
+        //check results for if database has username
         try {
 
             while (r.next()) {
@@ -824,8 +858,14 @@ public class Database {
 
         return found;
 
-    }
+    }//end of CheckForISBN
 
+    /**
+     * Check if user already has a review for a specific isbn, only one review per book per use
+     * @param username, to look up
+     * @param isbn, to look up
+     * @return whether an existing review exists or not
+     */
     public static boolean CheckForReview(String username, String isbn)
     {
         boolean found = false;
@@ -857,8 +897,14 @@ public class Database {
 
 
         return found;
-    }
+    }//end of CheckForReview
 
+
+    /**
+     * Checks to see if a user already exists in the database, used to test uniqueness
+     * @param username, to look up
+     * @return whether or not username exists
+     */
     public static boolean CheckForUser(String username)
     {
         boolean found = false;
@@ -880,7 +926,7 @@ public class Database {
         if(verbose)
             PrintSQLStatement(st, sql);
 
-        //check results for results if database has username
+        //check results for if database has username
         try {
 
             while (r.next()) {
@@ -895,8 +941,11 @@ public class Database {
         }
 
         return found;
-    }
+    }//end of CheckForReview
 
+    /**
+     * Checks for books that are checked out and are late for a specific date
+     */
     public static void CheckLateList() {
         String month;
         String day;
@@ -909,7 +958,9 @@ public class Database {
 
 
         //have prompt user for date they wish to look up
-        System.out.println("Late book list lookup...");
+        System.out.println("====================================================");
+        System.out.println("              LATE BOOK LIST LOOKUP");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("Month (Two Digits): ");
         month = in.nextLine();
@@ -919,7 +970,7 @@ public class Database {
         year = in.nextLine();
         System.out.println();
 
-
+        //create date to check for
         checkdate = year + "-" + month + "-" + day;
 
         System.out.println("Books that were still checked out after their due date on " + checkdate);
@@ -948,6 +999,47 @@ public class Database {
         Console.MainMenu();
     }//end of CheckLateList
 
+    /**
+     * Checks to see if a user already exists on the waitilist for a given book
+     * @param isbn, to look up
+     * @param username, to look up
+     * @return whether user already is on waitlist or not
+     */
+    public static boolean CheckWaitList(String isbn, String username)
+    {
+        String sql;
+        PreparedStatement st = null;
+        ResultSet r = null;
+        boolean found;
+
+        sql = "SELECT username FROM " + WaitListTable + " where isbn = ?;";
+        try {
+
+            //set sql parameters
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+//            st.executeUpdate();
+            r = st.executeQuery();
+
+            while (r.next()) {
+                if (r.getString("username").matches(loggedInUser) && found == false) {
+                    found = true;
+                    break;
+                }
+            }
+
+        } catch (Exception e) {
+                e.PrintStackTrace();
+        }
+
+        return found;
+
+    }//end of CheckWaitList
+
+    /**
+     * Allows a user to checkout a book specified by ISBN
+     * @param today, today's date
+     */
     public static void CheckoutBook(Date today)
     {
         String isbn, duedate, oldestuser = null, todayDate;
@@ -958,7 +1050,9 @@ public class Database {
         ResultSet r = null;
         PreparedStatement st = null;
 
-        System.out.println("Checking out a book...");
+        System.out.println("====================================================");
+        System.out.println("                 CHECKOUT BOOK");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("Please enter the ISBN of the book you wish to print out: ");
 
@@ -1149,7 +1243,7 @@ public class Database {
             {
                 if(r.getString("copies").matches("0"))
                 {
-                    System.out.println("There are no copies of this book to check out!");
+                    System.out.println("There are no copies of this book to check out! Returning to menu...");
                     backtomenu = true;
                 }
                 else
@@ -1231,17 +1325,51 @@ public class Database {
             e.printStackTrace();
         }
 
-        System.out.println("Thank you " + loggedInUser + " you now have a checkout record for " + title);
+        System.out.println("Thank you " + loggedInUser + " you now have a checkout record for " + title + " with a due date of " + due);
         System.out.println();
-
-
 
         Console.MainMenu();
 
-    }
+    }//end of CreateCheckoutRecord
+
+    /**
+     * Gets the record of id of a specific isbn, used in making new entries
+     * to the inventory table in AddBookCopy()
+     * @param isbn, the isbn being looked up
+     * @return the record ID to the corresponding isbn
+     */
+    public static String GetRecordID(String isbn)
+    {
+        ResultSet r = null;
+        PreparedStatement st = null;
+        String sql;
+        String id = "";
+
+        sql = "SELECT r_id FROM " + RecordsTable + " WHERE isbn = ?";
+
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                id = r.getString("r_id");
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return id;
+
+    }//end of GetRecordID
 
 
-
+    /**
+     * Allows a user to leave a review for a book, only one review per book per use allowed
+     */
     public static void LeaveReview() {
         String isbnreview;
         int score;
@@ -1253,12 +1381,15 @@ public class Database {
         ResultSet r = null;
         PreparedStatement st = null;
 
-        System.out.println("Leaving a Review...");
+        System.out.println("====================================================");
+        System.out.println("                 REVIEW A BOOK");
+        System.out.println("====================================================");
         System.out.println();
 
         System.out.print("What is the ISBN of the book you wish to leave a review for? :");
         isbnreview = in.nextLine();
 
+        //check to see if isbn even exists
         check = Database.CheckForISBN(isbnreview);
 
         //if the username doesn't exist, prompt user again for existing username
@@ -1338,9 +1469,6 @@ public class Database {
             System.out.println("Username: " + loggedInUser);
             System.out.println("Score: " + score);
 
-//            Insert into Review (username, ISBN, score, opinion) VALUES("garin", "376418621-6", 13, "duerp")
-
-
             sql = "INSERT INTO " + ReviewTable + " (username, ISBN, score, opinion) VALUES(?, ?, ?, ?)";
 
             try {
@@ -1352,10 +1480,9 @@ public class Database {
                 st.setString(3, Integer.toString(score));
                 st.setString(4, userOpinion);
                 st.executeUpdate();
-//                r = st.executeQuery();
 
             } catch (Exception e) {
-
+                    e.PrintStackTrace();
             }
 
 
@@ -1391,7 +1518,7 @@ public class Database {
 
         }
 
-        //TODO: Add average review score to records table
+
         sql = "SELECT AVG(score) AS avg FROM " + ReviewTable + " WHERE isbn = ? ";
 
         try
@@ -1428,6 +1555,12 @@ public class Database {
 
     }//end of LeaveReview
 
+    /**
+     * Debugging method, prints out the raw sql query construted and the corresponding
+     * final PreparedStatement
+     * @param st
+     * @param sql
+     */
     public static void PrintSQLStatement(PreparedStatement st, String sql)
     {
         System.out.println();
@@ -1464,12 +1597,14 @@ public class Database {
         ResultSet r = null;
         PreparedStatement st = null;
 
-        System.out.println();
-        System.out.println("Printing User Record...");
+        System.out.println("====================================================");
+        System.out.println("            DISPLAY USER RECORD");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("Username to view record of: ");
         lookedUpUser = in.nextLine();
 
+        //check to see if user exists
         if (!CheckForUser(lookedUpUser)) {
             System.out.println("User does not exist, returning to main menu");
             System.out.println();
@@ -1513,7 +1648,6 @@ public class Database {
         System.out.println();
 
         //print book checkout history for user
-//        Select username, isbn, title, checkoutdate, returndate from _CheckoutRecord where username ='garin'
         sql = "SELECT isbn, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE username = ?";
 
         try {
@@ -1521,7 +1655,6 @@ public class Database {
             //set sql parameters
             st = con.prepareStatement(sql);
             st.setString(1, lookedUpUser);
-//            st.executeUpdate();
             r = st.executeQuery();
 
             while (r.next()) {
@@ -1570,14 +1703,12 @@ public class Database {
         System.out.println("Books requested for future checkout by " + lookedUpUser);
         System.out.println();
 
-//       Select w.isbn, r.title, w.dateadded from _Records r, _WaitList w where w.isbn = r.isbn and w.username = 'garin'
         sql = "SELECT r.title, w.dateadded FROM " + RecordsTable + " r, " + WaitListTable + " w WHERE w.isbn = r.isbn AND w.username = ?";
         try {
 
             //set sql parameters
             st = con.prepareStatement(sql);
             st.setString(1, lookedUpUser);
-//            st.executeUpdate();
             r = st.executeQuery();
 
             while (r.next()) {
@@ -1594,14 +1725,12 @@ public class Database {
             PrintSQLStatement(st, sql);
 
         //print reviews
-//        Select r.title, a.score, a. opinion from _Review a, _Records r where r.isbn = a.isbn and a.username = 'garin'
         sql = "SELECT r.title, a.score, a.opinion FROM " + ReviewTable + " a, " + RecordsTable + " r WHERE r.isbn = a.isbn AND a.username = ?";
         try {
 
             //set sql parameters
             st = con.prepareStatement(sql);
             st.setString(1, lookedUpUser);
-//            st.executeUpdate();
             r = st.executeQuery();
 
             while (r.next()) {
@@ -1637,7 +1766,9 @@ public class Database {
         String topFrequency = null;
         String count = null;
 
-        System.out.println("Printing User Statistics...");
+        System.out.println("====================================================");
+        System.out.println("               USER STATISTICS");
+        System.out.println("====================================================");
         System.out.println();
 
         System.out.println("Do you want to..");
@@ -1815,6 +1946,15 @@ public class Database {
 
     }//end of PrintUserStatistics
 
+    /**
+     * Prints record of a book:
+     *
+     * Which includes
+     * book info
+     * people who currently have the book checked out
+     * location information of copies
+     * reviews and average review score
+     */
     public static void PrintBookRecord()
     {
         //TODO: Assuming all copies of a book exist in one location
@@ -1996,7 +2136,7 @@ public class Database {
 
         //return to main menu
         Console.MainMenu();
-    }
+    }//end of PrintBookRecord
 
     public static void PrintLibraryStatistics()
     {
@@ -2008,7 +2148,10 @@ public class Database {
         PreparedStatement st = null;
         ResultSet r = null;
         String topFrequency = "";
-        System.out.println("Printing Library Statistics...");
+
+        System.out.println("====================================================");
+        System.out.println("             LIBRARY STATISTICS");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("How many books would you like to request stats about?: ");
 
@@ -2179,8 +2322,12 @@ public class Database {
 
         //display main menu again
         Console.MainMenu();
-    }
+    }//end of PrintLibraryStatistics
 
+    /**
+     * Marks a user's checkout record as returned. If the book was lost, the date returned is when the book was lost
+     * and the book is marked as lost. The number of copies is not incremented.
+     */
     public static void ReturnBook()
     {
 
@@ -2194,14 +2341,14 @@ public class Database {
 
         boolean lost = false;
 
-        System.out.println("Returning a book...");
+        System.out.println("====================================================");
+        System.out.println("                 BOOK RETURN");
+        System.out.println("====================================================");
         System.out.println();
         System.out.print("Please enter the ISBN of the book you wish to return: ");
 
         do {
             userSelection = in.nextLine();
-
-
 
             if(!CheckForISBN(userSelection))
             {
@@ -2345,14 +2492,18 @@ public class Database {
         //return to main menu
         Console.MainMenu();
 
-    }
+    }//end of ReturnBook()
 
+    /**
+     * Sets the database connection to use in the appropriate functions
+     * @param c
+     */
     public static void SetConnection(Connection c)
     {
         try {
 
             //set statement
-            statem = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+//            statem = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
             //store connection
             con = c;

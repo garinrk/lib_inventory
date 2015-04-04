@@ -279,29 +279,7 @@ public class Console {
 
         else if(selection == 14) {
 
-            boolean check = false;
-            String ISBN;
 
-            System.out.println("Adding self to Wait List...");
-            System.out.println();
-            System.out.print("Please enter the ISBN of the book you wish to be put on a Wait List for: ");
-
-            do {
-                userSelection = in.nextLine();
-                check = Database.CheckForISBN(userSelection);
-
-
-                if (!check) {
-                    System.out.print("ISBN doesn't exist. Please try again: ");
-                } else {
-                    ISBN = userSelection;
-                    break;
-                }
-
-            } while (true);
-
-            cal = Calendar.getInstance();
-            cal.setTime(today);
             Database.AddToWaitList(ISBN, today);
         }
 
