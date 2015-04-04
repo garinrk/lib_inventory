@@ -33,16 +33,6 @@ public class Database {
     static String newPhoneNumber;
     static String newEmail;
 
-    //Used in conjunction with sql queries
-//    static String invTable = "Inventory";
-//    static String bookTable = "Book";
-//    static String checkoutTable = "CheckoutRecord";
-//    static String inventoryTable = "Inventory";
-//    static String reviewTable = "Review";
-//    static String userTable = "User";
-//    static String waitlistTable = "Waitlist";
-//    static String authorTable = "Authors";
-
     static String AuthorListTable = "_AuthorList";
     static String CheckoutRecordTable = "_CheckoutRecord";
     static String InventoryTable = "_Inventory";
@@ -423,7 +413,7 @@ public class Database {
 
         if (found) {
             System.out.println("You are already on a Wait List for this book, returning to Main Menu...");
-            Main.MainMenu();
+            Console.MainMenu();
         }
 
 
@@ -468,7 +458,7 @@ public class Database {
         System.out.println("You have been added to the Wait List for book with ISBN: " + isbn + " with a Date Added of " + todayDate);
 
         //return to main menu
-        Main.MainMenu();
+        Console.MainMenu();
     }
 
     public static void AddUser()
@@ -557,7 +547,8 @@ public class Database {
         setLoggedInUser(newUsername);
         Main.setLoggedInUser(newUsername);
 
-        Main.MainMenu();
+        Console.MainMenu();
+
     }
 
     public static void BrowseLibrary()
@@ -565,6 +556,8 @@ public class Database {
 
     public static boolean CheckForCheckoutRecord(String user, String isbn)
     {
+
+        //TODO: They should be able to check out a book a second time, as long as the previous was returned.
         boolean found = false;
 
         String sql;
@@ -709,29 +702,51 @@ public class Database {
         String month;
         String day;
         String year;
+        String sql;
+        String checkdate;
+
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+
         //have prompt user for date they wish to look up
         System.out.println("Late book list lookup...");
         System.out.println();
-        System.out.print("Month: ");
+        System.out.print("Month (Two Digits): ");
         month = in.nextLine();
-        System.out.print("Day: ");
+        System.out.print("Day (Two Digits): ");
         day = in.nextLine();
-        System.out.print("Year: ");
+        System.out.print("Year (Four Digits): ");
         year = in.nextLine();
+        System.out.println();
 
-        //TODO: Construct sql date object based off of given data
 
+        checkdate = year + "-" + month + "-" + day;
 
-        //construct date based on input
+        System.out.println("Books that were still checked out after their due date on " + checkdate);
+        sql = "SELECT c.title, c.duedate, c.username, u.full_name, u.phonenumber, u.email FROM " + CheckoutRecordTable + " c, " + UserTable + " u WHERE (duedate < ? AND returndate > ?) and c.username = u.username ";
+        try
+        {
+            st = con.prepareStatement(sql);
+            st.setString(1, checkdate);
+            st.setString(2, checkdate);
+            r = st.executeQuery();
 
-        //look up lists of late books (or books that have not been returned and where return date is less than specified date
+            while(r.next())
+            {
+                System.out.println("Book Title: "
+                        + r.getString("title") + "\tDate Due: " + r.getString("duedate") +
+                        "\tUsername: " + r.getString("username") +
+                        "\tFull Name: " + r.getString("full_name") +
+                        "\tPhone Number: " + r.getString("phonenumber") +
+                        "\tEmail: " + r.getString("email"));
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
-        //list book, due date of said book, name of user who had the book at the time,
-
-        //list offending user's phone number and email
-
-        //return to main menu
-        Main.MainMenu();
+        Console.MainMenu();
     }//end of CheckLateList
 
     public static void CheckoutBook(Date today)
@@ -1057,7 +1072,7 @@ public class Database {
         if(CheckForReview(loggedInUser, isbnreview))
         {
             System.out.println("You already have left a review for that book, you cannot enter duplicate reviews. Returning to main menu...");
-            Main.MainMenu();
+            Console.MainMenu();
         }
 
         System.out.print("Please enter a score [1 - 10]: ");
@@ -1209,7 +1224,7 @@ public class Database {
         }
 
         //return to main menu
-        Main.MainMenu();
+        Console.MainMenu();
 
     }//end of LeaveReview
 
@@ -1405,7 +1420,7 @@ public class Database {
 
 
         //return to main menu
-        Main.MainMenu();
+        Console.MainMenu();
 
     }//end of PrintUserRecord
 
@@ -1596,7 +1611,7 @@ public class Database {
                 PrintSQLStatement(st, sql);
         }
 
-        Main.MainMenu();
+        Console.MainMenu();
 
     }//end of PrintUserStatistics
 
@@ -1785,7 +1800,14 @@ public class Database {
 
     public static void PrintLibraryStatistics()
     {
+
+        //TODO: Stretch Goal, Select * is expensive, have it return only those whom match that previosusly discovered max number
         int nbooks;
+        int count = 0;
+        String sql;
+        PreparedStatement st = null;
+        ResultSet r = null;
+        String topFrequency = "";
         System.out.println("Printing Library Statistics...");
         System.out.println();
         System.out.print("How many books would you like to request stats about?: ");
@@ -1810,6 +1832,7 @@ public class Database {
         System.out.println("List " + choice + " most checked out books [2]");
         System.out.println("List " + choice + " most lost books [3]");
         System.out.println("List " + choice + " most popular authors [4]");
+        System.out.print("Please enter a number [1 - 4] for your selection: ");
 
         do {
             userSelection = in.nextLine();
@@ -1829,20 +1852,124 @@ public class Database {
             }
         } while (true);
 
+        System.out.println();
+
 
         //Most requested books
         if (choice == 1) {
-            //TODO: Construct sql query for most requested books (size of waitlist)
+
+            sql = "SELECT MAX(waitcount) AS maxwaitcount FROM " + RecordsTable;
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while (r.next()) {
+                    topFrequency = r.getString("maxwaitcount");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+            sql = "SELECT * FROM " + RecordsTable;
+
+            try{
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    if(r.getString("waitcount").matches(topFrequency))
+                    {
+                        if(count < nbooks) {
+                            System.out.println("Title: " + r.getString("title") + "\t Size of Waitlist: " + topFrequency);
+                            count++;
+                        }
+                    }
+                }
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         //Most checked out books
         else if (choice == 2) {
-            //TODO: Construct sql query for most checked out books (instances of checked out records)
+           sql = "SELECT MAX(checkoutcount) AS maxcheckoutcount FROM " + RecordsTable;
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while (r.next()) {
+                    topFrequency = r.getString("maxcheckoutcount");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+            sql = "SELECT * FROM " + RecordsTable;
+
+            try{
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    if(r.getString("checkoutcount").matches(topFrequency))
+                    {
+                        if(count < nbooks) {
+                            System.out.println("Title: " + r.getString("title") + "\t Checkout Count: " + topFrequency);
+                            count++;
+                        }
+                    }
+                }
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
+
 
         //Most lost books
         else if (choice == 3) {
-            //TODO: Construct sql query for most lost books (instances of checked out records where lost = true)
+            sql = "SELECT MAX(lostcount) AS maxlostcount FROM " + RecordsTable;
+
+            try {
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while (r.next()) {
+                    topFrequency = r.getString("maxlostcount");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+            sql = "SELECT * FROM " + RecordsTable;
+
+            try{
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    if(r.getString("lostcount").matches(topFrequency))
+                    {
+                        if(count < nbooks) {
+                            System.out.println("Title: " + r.getString("title") + "\t Lost Count: " + topFrequency);
+                            count++;
+                        }
+                    }
+                }
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
         }
 
         //most popular authors
@@ -1851,7 +1978,7 @@ public class Database {
         }
 
         //display main menu again
-        Main.MainMenu();
+        Console.MainMenu();
     }
 
     public static void ReturnBook()
