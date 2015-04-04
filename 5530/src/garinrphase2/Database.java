@@ -552,12 +552,169 @@ public class Database {
     }
 
     public static void BrowseLibrary()
-    {}
+    {
+        //TODO: Assuming that we are only searching books with authors and reviews
+        boolean entireLibrary = false;
+        boolean onlyAvailable = false;
+
+
+        boolean sortByYear = false;
+        boolean sortByScore = false;
+        boolean sortByPopularity = false;
+
+        String publisher;
+        String sql;
+
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        System.out.println("Browsing the library...");
+        System.out.println();
+        System.out.print("Would you like to display your results as all in the library [1] or only those of which are available to checkout [2]?: ");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is an invalid option, ");
+                System.out.print("Please make a selection: ");
+            }
+
+            //if the user did enter a number
+            if (Main.IsNumber(userSelection)) {
+                choice = Integer.parseInt((userSelection));
+
+                //check to see if it's a valid option
+                if (choice != 2 && choice != 1) {
+                    System.out.print(choice + " is an invalid option ");
+                    System.out.print("please make a selection: ");
+
+                }
+
+                //case where the user did enter a valid option number
+                else {
+                    break;
+                }
+
+            }
+        } while (true);
+
+        //does user want entire library or only those available?
+        if (choice == 1) {
+            entireLibrary = true;
+        } else if (choice == 2) {
+            onlyAvailable = true;
+        }
+
+        System.out.print("Please enter Author(s) separated by a comma: ");
+        userSelection = in.nextLine();
+        String[] authors = userSelection.split(",");
+
+        System.out.print("Please enter the publisher: ");
+        publisher = in.nextLine();
+
+        System.out.print("Please enter title words separated by a comma: ");
+        userSelection = in.nextLine();
+        String[] wordsInTitle = userSelection.split(",");
+
+        System.out.print("Please enter subject: ");
+        userSelection = in.nextLine();
+        String subject = userSelection;
+
+        System.out.print("Do you want to sort your result by year published [1], average review score [2], or book popularity[3]?: ");
+
+        do {
+            userSelection = in.nextLine();
+
+            if (!Main.IsNumber(userSelection)) {
+                System.out.print(userSelection + " is an invalid option, ");
+                System.out.print("Please make a selection: ");
+            }
+
+            //if the user did enter a number
+            if (Main.IsNumber(userSelection)) {
+                choice = Integer.parseInt((userSelection));
+
+                //check to see if it's a valid option
+                if (choice != 2 && choice != 1 && choice != 3) {
+                    System.out.print(choice + " is an invalid option ");
+                    System.out.print("please make a selection: ");
+
+                }
+
+                //make sure they only entered one digit
+                if (userSelection.length() != 1) {
+                    System.out.print("Invalid number of options, please select only one: ");
+                }
+
+
+                //case where the user did enter a valid option number
+                else {
+                    break;
+                }
+
+
+            }
+        } while (true);
+
+        if (choice == 1) {
+            sortByYear = true;
+
+
+        } else if (choice == 2) {
+            sortByScore = true;
+
+
+        } else if (choice == 3) {
+            sortByPopularity = true;
+        }
+
+        //construct awesome sql query
+
+        sql = "SELECT * FROM " + RecordsTable +" r, " + AuthorListTable + " a, " + InventoryTable + " i WHERE r.isbn = a.isbn";
+
+        //add title words
+        for(int i = 0; i < wordsInTitle.length; i++)
+        {
+            if(wordsInTitle.length != 0)
+                sql = sql.concat("\n AND title LIKE '%" + wordsInTitle[i] + "%'");
+        }
+
+        //add publisher
+        sql = sql.concat("\n AND publisher LIKE '%" + publisher + "%'");
+
+        //add subject
+        sql = sql.concat("\n AND subject LIKE '%" + subject + "%'");
+
+        //add authors
+        for(int i = 0; i < wordsInTitle.length; i++)
+        {
+            if(authors.length != 0)
+                sql = sql.concat("\n AND authorname LIKE '%" + authors[i] + "%'");
+        }
+
+        //only available copies?
+        if(onlyAvailable)
+            sql = sql.concat("\n AND copies > 0");
+
+        if(sortByYear)
+            sql = sql.concat("\n ORDER BY pubyear DESC");
+
+        if(sortByScore)
+            sql = sql.concat("\n ORDER BY avgreviewscore DESC");
+
+        if(sortByPopularity)
+            sql = sql.concat("\n ORDER BY checkoutcount DESC");
+
+        if(verbose)
+            System.out.println("HERES YOUR JAVA QUERY!: " + sql);
+
+    }
 
     public static boolean CheckForCheckoutRecord(String user, String isbn)
     {
 
-        //TODO: They should be able to check out a book a second time, as long as the previous was returned.
+
         boolean found = false;
 
         String sql;
@@ -576,7 +733,7 @@ public class Database {
             r = st.executeQuery();
 
             while (r.next()) {
-                if (r.getString("username").matches(loggedInUser) && found == false) {
+                if (r.getString("username").matches(loggedInUser) && found == false && !r.getString("lost").matches("9999-12-31")) {
                     found = true;
                     break;
                 }
