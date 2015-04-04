@@ -17,8 +17,12 @@ import java.lang.*;
  */
 public class Database {
 
+    //TODO: Code Cleanup
+    //TODO: Make database example data make sense
+    //TODO: Output Cleanup
+
     /* Globals */
-    static boolean verbose = false;
+    static boolean verbose = true;
 
     /* Used for user input and input parsing */
     static Scanner in = new Scanner(System.in);
@@ -554,6 +558,7 @@ public class Database {
     public static void BrowseLibrary()
     {
         //TODO: Assuming that we are only searching books with authors and reviews
+        //TODO: MISSING, search with multiple authors
         boolean entireLibrary = false;
         boolean onlyAvailable = false;
 
@@ -567,6 +572,7 @@ public class Database {
 
         PreparedStatement st = null;
         ResultSet r = null;
+        String author;
 
         System.out.println("Browsing the library...");
         System.out.println();
@@ -606,9 +612,11 @@ public class Database {
             onlyAvailable = true;
         }
 
-        System.out.print("Please enter Author(s) separated by a comma: ");
-        userSelection = in.nextLine();
-        String[] authors = userSelection.split(",");
+//        System.out.print("Please enter Author(s) separated by a comma: ");
+//        userSelection = in.nextLine();
+//        String[] authors = userSelection.split(",");
+        System.out.print("Please enter an Author: ");
+        author = in.nextLine();
 
         System.out.print("Please enter the publisher: ");
         publisher = in.nextLine();
@@ -686,12 +694,15 @@ public class Database {
         //add subject
         sql = sql.concat("\n AND subject LIKE '%" + subject + "%'");
 
-        //add authors
-        for(int i = 0; i < wordsInTitle.length; i++)
-        {
-            if(authors.length != 0)
-                sql = sql.concat("\n AND authorname LIKE '%" + authors[i] + "%'");
-        }
+//        //add authors
+//        for(int i = 0; i < wordsInTitle.length; i++)
+//        {
+//            if(authors.length != 0)
+//                sql = sql.concat("\n AND authorname LIKE '%" + authors[i] + "%'");
+//        }
+
+        //add author
+        sql = sql.concat("\n AND authorname LIKE '%" + author + "%'");
 
         //only available copies?
         if(onlyAvailable)
@@ -706,8 +717,38 @@ public class Database {
         if(sortByPopularity)
             sql = sql.concat("\n ORDER BY checkoutcount DESC");
 
-        if(verbose)
-            System.out.println("HERES YOUR JAVA QUERY!: " + sql);
+//        if(verbose)
+//            System.out.println("HERES YOUR JAVA QUERY!: " + sql);
+        System.out.println();
+        System.out.println("====================================================");
+        System.out.println("                    RESULTS");
+        System.out.println("====================================================");
+        System.out.println();
+        try
+        {
+            st = con.prepareStatement(sql);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                System.out.println("ISBN: " + r.getString("isbn"));
+                System.out.println("Title: " + r.getString("title"));
+                System.out.println("Publisher: " + r.getString("publisher"));
+                System.out.println("Publication Year: " + r.getString("pubyear"));
+                System.out.println("Format: " + r.getString("format"));
+                System.out.println("Subject: " + r.getString("subject"));
+                System.out.println("booksummary: " + r.getString("booksummary"));
+                System.out.println("Average Review Score: " + r.getString("avgreviewscore"));
+                System.out.println("Amount of times checked out: " + r.getString("checkoutcount"));
+                System.out.println();
+                System.out.println();
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        Console.MainMenu();
 
     }
 
@@ -2131,7 +2172,7 @@ public class Database {
 
         //most popular authors
         else if (choice == 4) {
-            //TODO: Construct sql query for most popular authors (instances of checkout records with the most common authors)
+            //TODO: MISSING Construct sql query for most popular authors (instances of checkout records with the most common authors)
         }
 
         //display main menu again
