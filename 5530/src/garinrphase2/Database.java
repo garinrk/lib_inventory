@@ -1,6 +1,6 @@
 package garinrphase2;
 
-import com.sun.prism.impl.Disposer;
+
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +20,7 @@ public class Database {
     //TODO: Code Cleanup
     //TODO: Make database example data make sense
     //TODO: Output Cleanup
+    //TODO: Commenting
 
     /* Globals */
     static boolean verbose = true;
@@ -1382,6 +1383,7 @@ public class Database {
 //                r = st.executeQuery();
 
             } catch (Exception e) {
+                e.printStackTrace();
 
             }
             if(verbose)
@@ -1532,7 +1534,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         if (verbose)
@@ -1558,7 +1560,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         if (verbose)
@@ -1585,7 +1587,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         if (verbose)
@@ -1610,7 +1612,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         if (verbose)
@@ -2355,7 +2357,7 @@ public class Database {
             //store connection
             con = c;
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
