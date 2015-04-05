@@ -40,6 +40,8 @@ public class Console {
 
     static String currentUser = "DEFAULT";
 
+    private static boolean firstTimeAddUser = true;
+
 
 
 
@@ -111,7 +113,7 @@ public class Console {
         if(choice == 1)
         {
             /* Add new user to the database and show menu */
-            Database.AddUser();
+            Database.AddUser(true);
             currentUser = Database.newUsername;
 
             Database.setLoggedInUser(currentUser);
@@ -156,22 +158,22 @@ public class Console {
         System.out.println("====================================================");
         System.out.println("Hello " + currentUser + " What would you like to do?");
         System.out.println();
-        System.out.println("Add a new user [1]");
-        System.out.println("Check out a book [2]");
-        System.out.println("Print out the record of a specific user [3]");
-        System.out.println("Add a new book record to the library database [4]");
-        System.out.println("Add a new copy of a book to the library database [5]");
-        System.out.println("Check the late book list at a certain date [6]");
-        System.out.println("Leave a review for a book [7]");
-        System.out.println("Browse the Library [8]");
-        System.out.println("Return a book [9]");
-        System.out.println("Print a book's record [10]");
-        System.out.println("Print Library statistics[11]");
-        System.out.println("Print User Statistics [12]");
-        System.out.println("Exit Program: [13]");
+        System.out.println("Add a new user: [1]");
+        System.out.println("Check out a book: [2]");
+        System.out.println("Print out the record of a specific user: [3]");
+        System.out.println("Add a new book record to the library database: [4]");
+        System.out.println("Add a new copy of a book to the library database: [5]");
+        System.out.println("Check the late book list at a certain date: [6]");
+        System.out.println("Leave a review for a book: [7]");
+        System.out.println("Browse the Library: [8]");
+        System.out.println("Return a book: [9]");
+        System.out.println("Print a book's record: [10]");
+        System.out.println("Print Library statistics: [11]");
+        System.out.println("Print User Statistics: [12]");
+        System.out.println("Print out a user's Record: [13]");
         System.out.println("Put yourself on a Wait List for a Book: [14]");
-        System.out.println("Print out User Record: [15]");
-        System.out.println("Log in as a new user: [16]");
+        System.out.println("Log in as a different user: [15]");
+        System.out.println("Exit: [16]");
         System.out.println();
         System.out.print("Please make a selection: ");
 
@@ -219,7 +221,7 @@ public class Console {
     public static void FunctionParse(int selection) {
         //adding a user to the library
         if (selection == 1) {
-            Database.AddUser();
+           Database.AddUser(false);
         }
 
         //checking out a book
@@ -277,21 +279,18 @@ public class Console {
             Database.PrintUserStatistics();
         }
 
+        //print user record
+        else if (selection == 13) {
+            Database.PrintUserRecord();
+        }
+
+        //put user on a waitlist
         else if(selection == 14) {
             Database.AddToWaitList(today);
         }
 
-        else if (selection == 13) {
-            ExitProgram();
-        }
-
-        else if(selection == 15)
+        else if (selection == 15)
         {
-            Database.PrintUserRecord();
-        }
-
-        //log out and log in as new user
-        else if (selection == 16) {
             //log out by clearing values
             System.out.println("Logging out of " + currentUser);
             System.out.println("Good bye");
@@ -320,10 +319,14 @@ public class Console {
 
             //display main menu
             MainMenu();
-        } else {
-            //error checking is done in main menu function
         }
-    }
+
+        //log out and log in as new user
+        else if (selection == 16) {
+            ExitProgram();
+
+        }
+    }//end of FunctionParse
 
 
 

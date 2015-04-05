@@ -22,7 +22,7 @@ public class Database {
     //TODO: Have user automaticlaly be added to waitlist at end of checkout
 
     /* Globals */
-    static boolean verbose = true;
+    static boolean verbose = false;
 
     /* Used for user input and input parsing */
     static Scanner in = new Scanner(System.in);
@@ -104,7 +104,7 @@ public class Database {
         System.out.print("Title: " );
         newTitle = in.nextLine();
 
-        System.out.println("How many authors are there for this new record?: ");
+        System.out.print("How many authors are there for this new record?: ");
 
         do {
             userSelection = in.nextLine();
@@ -146,7 +146,7 @@ public class Database {
         System.out.println("Is the following data correct?");
         System.out.println("Title: " + newTitle);
         System.out.println("ISBN: " + newISBN);
-        System.out.print("Author(s): ");
+        System.out.println("Author(s): ");
 
         for(int i = 0; i < numberOfAuthors; i++)
         {
@@ -202,11 +202,11 @@ public class Database {
                 st = con.prepareStatement(sql);
                 st.setString(1, newISBN);
                 st.setString(2, newTitle);
-                st.setString(3, newSummary);
-                st.setString(4, newSubject);
+                st.setString(3, newPublisher);
+                st.setString(4, newYearPub);
                 st.setString(5, newFormat);
-                st.setString(6, newYearPub);
-                st.setString(7, newPublisher);
+                st.setString(6, newSubject);
+                st.setString(7, newSummary);
                 st.executeUpdate();
             } catch (Exception e)
             {
@@ -444,7 +444,7 @@ public class Database {
 
 
         } catch (Exception e) {
-//            e.PrintStackTrace();
+            e.printStackTrace();
         }
 
         //increment waitcount in recordstable
@@ -471,7 +471,7 @@ public class Database {
     /**
      * Adds a new user to the database
      */
-    public static void AddUser()
+    public static void AddUser(boolean firsttime)
     {
         String sql;
         ResultSet r = null;
@@ -554,10 +554,10 @@ public class Database {
         }
         if(verbose)
             PrintSQLStatement(st, sql);
-
-        setLoggedInUser(newUsername);
-
-
+        if(firsttime) {
+            setLoggedInUser(newUsername);
+            Console.currentUser = newUsername;
+        }
         Console.MainMenu();
 
     }
@@ -725,6 +725,9 @@ public class Database {
         //add author
         sql = sql.concat("\n AND authorname LIKE '%" + author + "%'");
 
+        //no duplicates
+        sql = sql.concat("\n GROUP BY r.isbn");
+
         //only available copies?
         if(onlyAvailable)
             sql = sql.concat("\n AND copies > 0");
@@ -738,8 +741,10 @@ public class Database {
         if(sortByPopularity)
             sql = sql.concat("\n ORDER BY checkoutcount DESC");
 
-//        if(verbose)
-//            System.out.println("HERES YOUR JAVA QUERY!: " + sql);
+
+
+            System.out.println("HERES YOUR JAVA QUERY!: " + sql);
+
         System.out.println();
         System.out.println("====================================================");
         System.out.println("                    RESULTS");
@@ -961,11 +966,11 @@ public class Database {
         System.out.println("              LATE BOOK LIST LOOKUP");
         System.out.println("====================================================");
         System.out.println();
-        System.out.print("Month (Two Digits): ");
+        System.out.print("Month: ");
         month = in.nextLine();
-        System.out.print("Day (Two Digits): ");
+        System.out.print("Day: ");
         day = in.nextLine();
-        System.out.print("Year (Four Digits): ");
+        System.out.print("Year: ");
         year = in.nextLine();
         System.out.println();
 
@@ -1028,7 +1033,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-//                e.PrintStackTrace();
+                e.printStackTrace();
         }
 
         return found;
@@ -1053,7 +1058,7 @@ public class Database {
         System.out.println("                 CHECKOUT BOOK");
         System.out.println("====================================================");
         System.out.println();
-        System.out.print("Please enter the ISBN of the book you wish to print out: ");
+        System.out.print("Please enter the ISBN of the book you wish to check out: ");
 
         //make sure that isbn exists in table
         do {
@@ -1130,7 +1135,7 @@ public class Database {
         }
 
         //they will be removed from the waitlist count
-        if(oldestuser.matches(loggedInUser))
+        if(oldestuser != null && oldestuser.matches(loggedInUser))
         {
             //decrement waitcount in records table
             sql = "UPDATE " + RecordsTable + " SET waitcount = waitcount - 1 WHERE isbn = ?";
@@ -1138,6 +1143,21 @@ public class Database {
             try{
                 st = con.prepareStatement(sql);
                 st.setString(1, isbn);
+                st.executeUpdate();
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            //we also have to remove their waitlist entry
+//            delete from _WaitList where isbn = 12 and username = 'garin'
+            sql = "DELETE FROM " + WaitListTable + " WHERE isbn = ? AND username = ?";
+
+            try
+            {
+                st = con.prepareStatement(sql);
+                st.setString(1, isbn);
+                st.setString(2, loggedInUser);
                 st.executeUpdate();
             } catch (Exception e)
             {
@@ -1153,7 +1173,7 @@ public class Database {
         if(!availableforcheckout && oldestuser != null)
         {
             System.out.print("There is a waitlist for this book, and you are not at the top if the list" +
-                    " would you like to be added to the waitlist? [1] Yes [2] No: ");
+                    " would you like to be added to the waitlist? [1] Yes [0] No: ");
 
             //ask user for choice, check for correctness
             do {
@@ -1481,7 +1501,7 @@ public class Database {
                 st.executeUpdate();
 
             } catch (Exception e) {
-//                    e.PrintStackTrace();
+                    e.printStackTrace();
             }
 
 
@@ -1612,7 +1632,7 @@ public class Database {
 
         System.out.println();
         //Printing personal data of user
-        System.out.println("Personal data for " + lookedUpUser);
+        System.out.println("Personal data for " + lookedUpUser + ":");
 
         sql = "SELECT * FROM " + UserTable + " where username = ?";
 
@@ -1643,7 +1663,7 @@ public class Database {
 
 
         System.out.println();
-        System.out.println("Checkout History for " + lookedUpUser);
+        System.out.println("Checkout History for " + lookedUpUser + ":");
         System.out.println();
 
         //print book checkout history for user
@@ -1672,7 +1692,7 @@ public class Database {
         if (verbose)
             PrintSQLStatement(st, sql);
 
-        System.out.println("Books lost by: " + lookedUpUser);
+        System.out.println("Books lost by: " + lookedUpUser + ":");
 
         //print books lost by user
         sql = "SELECT isbn, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE username = ? AND lost = 1";
@@ -1694,12 +1714,13 @@ public class Database {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println();
 
         if (verbose)
             PrintSQLStatement(st, sql);
 
         //print books books that user is on waitlist for
-        System.out.println("Books requested for future checkout by " + lookedUpUser);
+        System.out.println("Books requested for future checkout by " + lookedUpUser + ":");
         System.out.println();
 
         sql = "SELECT r.title, w.dateadded FROM " + RecordsTable + " r, " + WaitListTable + " w WHERE w.isbn = r.isbn AND w.username = ?";
@@ -1723,6 +1744,8 @@ public class Database {
         if (verbose)
             PrintSQLStatement(st, sql);
 
+        System.out.println("Reviews by " + lookedUpUser + ":");
+
         //print reviews
         sql = "SELECT r.title, a.score, a.opinion FROM " + ReviewTable + " a, " + RecordsTable + " r WHERE r.isbn = a.isbn AND a.username = ?";
         try {
@@ -1745,6 +1768,8 @@ public class Database {
 
         if (verbose)
             PrintSQLStatement(st, sql);
+
+        System.out.println();
 
 
         //return to main menu
@@ -2373,7 +2398,7 @@ public class Database {
         //create return date
         returndate = year + "-" + month + "-" + day;
 
-        System.out.print("Was this book returned or lost? [1] yes [0] no: ");
+        System.out.print("Was this book lost? [1] yes [0] no: ");
 
         do {
             userSelection = in.nextLine();
@@ -2479,7 +2504,7 @@ public class Database {
 
                 while(r.next())
                 {
-                    System.out.print("\t" + r.getString("username"));
+                    System.out.print("\t" + r.getString("username" + "\n"));
                 }
             } catch (Exception e)
             {
@@ -2487,6 +2512,8 @@ public class Database {
             }
 
         }
+
+        System.out.println();
 
         //return to main menu
         Console.MainMenu();
