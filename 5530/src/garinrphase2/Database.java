@@ -17,9 +17,7 @@ import java.lang.*;
  */
 public class Database {
 
-    //TODO: Make database example data make sense
-    //TODO: Output Cleanup
-    //TODO: Have user automaticlaly be added to waitlist at end of checkout
+    //TODO: Must assume that knows that they have already checked out a book
 
     /* Globals */
     static boolean verbose = false;
@@ -1000,6 +998,7 @@ public class Database {
             e.printStackTrace();
         }
 
+        System.out.println();
         Console.MainMenu();
     }//end of CheckLateList
 
@@ -1627,6 +1626,7 @@ public class Database {
         if (!CheckForUser(lookedUpUser)) {
             System.out.println("User does not exist, returning to main menu");
             System.out.println();
+            Console.MainMenu();
 
         }
 
