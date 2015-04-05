@@ -278,9 +278,7 @@ public class Console {
         }
 
         else if(selection == 14) {
-
-
-            Database.AddToWaitList(ISBN, today);
+            Database.AddToWaitList(today);
         }
 
         else if (selection == 13) {

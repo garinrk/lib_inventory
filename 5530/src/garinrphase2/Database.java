@@ -17,10 +17,9 @@ import java.lang.*;
  */
 public class Database {
 
-    //TODO: Code Cleanup
     //TODO: Make database example data make sense
     //TODO: Output Cleanup
-    //TODO: Commenting
+    //TODO: Have user automaticlaly be added to waitlist at end of checkout
 
     /* Globals */
     static boolean verbose = true;
@@ -372,9 +371,9 @@ public class Database {
     /**
      * Adds user to the waitlist for a specified ISBN
      *
-     * @param isbn
+     * @param
      */
-    public static void AddToWaitList(String isbn, Date today) {
+    public static void AddToWaitList(Date today) {
 
 
         String sql;
@@ -439,13 +438,13 @@ public class Database {
             //set sql parameters
             st = con.prepareStatement(sql);
             st.setString(1, loggedInUser);
-            st.setString(2, isbn);
+            st.setString(2, ISBN);
             st.setString(3, todayDate);
             st.executeUpdate();
 
 
         } catch (Exception e) {
-            e.PrintStackTrace();
+//            e.PrintStackTrace();
         }
 
         //increment waitcount in recordstable
@@ -453,7 +452,7 @@ public class Database {
 
         try{
             st = con.prepareStatement(sql);
-            st.setString(1, isbn);
+            st.setString(1, ISBN);
             st.executeUpdate();
         } catch(Exception e)
         {
@@ -463,7 +462,7 @@ public class Database {
         if(verbose)
             PrintSQLStatement(st, sql);
 
-        System.out.println("You have been added to the Wait List for book with ISBN: " + isbn + " with a Date Added of " + todayDate);
+        System.out.println("You have been added to the Wait List for book with ISBN: " + ISBN + " with a Date Added of " + todayDate);
 
         //return to main menu
         Console.MainMenu();
@@ -557,7 +556,7 @@ public class Database {
             PrintSQLStatement(st, sql);
 
         setLoggedInUser(newUsername);
-        Main.setLoggedInUser(newUsername);
+
 
         Console.MainMenu();
 
@@ -1010,7 +1009,7 @@ public class Database {
         String sql;
         PreparedStatement st = null;
         ResultSet r = null;
-        boolean found;
+        boolean found =  false;
 
         sql = "SELECT username FROM " + WaitListTable + " where isbn = ?;";
         try {
@@ -1029,7 +1028,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-                e.PrintStackTrace();
+//                e.PrintStackTrace();
         }
 
         return found;
@@ -1186,7 +1185,7 @@ public class Database {
             //user would like to be added to a waitlist
             if(choice == 1)
             {
-                AddToWaitList(isbn, today);
+                AddToWaitList(today);
             }
             else
             {
@@ -1482,7 +1481,7 @@ public class Database {
                 st.executeUpdate();
 
             } catch (Exception e) {
-                    e.PrintStackTrace();
+//                    e.PrintStackTrace();
             }
 
 
