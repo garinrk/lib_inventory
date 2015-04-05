@@ -11,7 +11,7 @@ import java.lang.*;
 
 /**
  * CS 5530 Database Systems
- * Phase 2 Code [Bookshelf.java]
+ * Phase 2 Code [Database.java]
  *
  * @author Garin Richards, u0738045
  */
@@ -163,13 +163,13 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is an invalid option, ");
                 System.out.print("Please make a selection: ");
             }
 
             //if the user did enter a number
-            if (Main.IsNumber(userSelection)) {
+            if (Console.IsNumber(userSelection)) {
                 choice = Integer.parseInt((userSelection));
 
                 //check to see if it's a valid option
@@ -280,7 +280,7 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is not a number, ");
                 System.out.print("Please enter a number for the number of copies to add: ");
             } else {
@@ -495,7 +495,7 @@ public class Database {
         do {
             newID = in.nextLine();
 
-            if (!Main.IsNumber(newID)) {
+            if (!Console.IsNumber(newID)) {
                 System.out.print(newID + " is not a number, ");
                 System.out.print("Please enter a number for this user's ID: ");
             } else {
@@ -515,7 +515,7 @@ public class Database {
         do {
             newPhoneNumber = in.nextLine();
 
-            if (!Main.IsNumber(newID)) {
+            if (!Console.IsNumber(newID)) {
                 System.out.print(newPhoneNumber + " is not a number, ");
                 System.out.print("Please enter a number for this user's Phone Number: ");
             } else {
@@ -600,13 +600,13 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is an invalid option, ");
                 System.out.print("Please make a selection: ");
             }
 
             //if the user did enter a number
-            if (Main.IsNumber(userSelection)) {
+            if (Console.IsNumber(userSelection)) {
                 choice = Integer.parseInt((userSelection));
 
                 //check to see if it's a valid option
@@ -653,13 +653,13 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is an invalid option, ");
                 System.out.print("Please make a selection: ");
             }
 
             //if the user did enter a number
-            if (Main.IsNumber(userSelection)) {
+            if (Console.IsNumber(userSelection)) {
                 choice = Integer.parseInt((userSelection));
 
                 //check to see if it's a valid option
@@ -1179,13 +1179,13 @@ public class Database {
             do {
                 userSelection = in.nextLine();
 
-                if (!Main.IsNumber(userSelection)) {
+                if (!Console.IsNumber(userSelection)) {
                     System.out.print(userSelection + " is an invalid option, ");
                     System.out.print("Please make a selection: ");
                 }
 
                 //if the user did enter a number
-                if (Main.IsNumber(userSelection)) {
+                if (Console.IsNumber(userSelection)) {
                     choice = Integer.parseInt((userSelection));
 
                     //check to see if it's a valid option
@@ -1429,7 +1429,7 @@ public class Database {
             do {
                 userSelection = in.nextLine();
 
-                if (!Main.IsNumber(userSelection)) {
+                if (!Console.IsNumber(userSelection)) {
                     System.out.print(userSelection + " is not a number, ");
                     System.out.print("Please enter a number for this user's ID: ");
                 } else {
@@ -1454,13 +1454,13 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is an invalid option, ");
                 System.out.print("Please make a selection: ");
             }
 
             //if the user did enter a number
-            if (Main.IsNumber(userSelection)) {
+            if (Console.IsNumber(userSelection)) {
                 choice = Integer.parseInt((userSelection));
 
                 //check to see if it's a valid option
@@ -1804,7 +1804,7 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.println(userSelection + " is not a number, ");
                 System.out.print("Please enter a number [1 - 3] for your selection: ");
             } else {
@@ -2182,7 +2182,7 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is not a number, ");
                 System.out.print("Please enter the amount of books you wish to requests stats about: ");
             } else {
@@ -2204,7 +2204,7 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.println(userSelection + " is not a number, ");
                 System.out.print("Please enter a number [1 - 4] for your selection: ");
             } else {
@@ -2403,13 +2403,13 @@ public class Database {
         do {
             userSelection = in.nextLine();
 
-            if (!Main.IsNumber(userSelection)) {
+            if (!Console.IsNumber(userSelection)) {
                 System.out.print(userSelection + " is an invalid option, ");
                 System.out.print("Please make a selection: ");
             }
 
             //if the user did enter a number
-            if (Main.IsNumber(userSelection)) {
+            if (Console.IsNumber(userSelection)) {
                 choice = Integer.parseInt((userSelection));
 
                 //check to see if it's a valid option

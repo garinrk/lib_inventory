@@ -147,11 +147,11 @@ public class Console {
     }//end of Welcome
 
     /**
-     * Main menu that prompts the user with choices
+     * Console menu that prompts the user with choices
      * <p/>
      * These options specify the 13 specified functionalities of the database
      * You can find their pertinent information in their subsequent
-     * functions in Bookshelf
+     * functions in Database
      */
     public static void MainMenu() {
 
