@@ -301,7 +301,7 @@ public class Database {
             //if the query returned nothing, we need to add a new record
             if(!r.next())
             {
-                 noexistingrecord = true;
+                noexistingrecord = true;
             }
 
             //else, there already is a record.
@@ -413,7 +413,7 @@ public class Database {
         cal.setTime(today);
 
 
-       //see if user is already on waitlist for book
+        //see if user is already on waitlist for book
         found = CheckWaitList(ISBN, loggedInUser);
 
         if (found) {
@@ -629,11 +629,11 @@ public class Database {
             onlyAvailable = true;
         }
 
-//        System.out.print("Please enter Author(s) separated by a comma: ");
-//        userSelection = in.nextLine();
-//        String[] authors = userSelection.split(",");
-        System.out.print("Please enter an Author: ");
-        author = in.nextLine();
+        System.out.print("Please enter Author(s) separated by a comma: ");
+        userSelection = in.nextLine();
+        String[] authors = userSelection.split(",");
+//        System.out.print("Please enter an Author: ");
+//        author = in.nextLine();
 
         System.out.print("Please enter the publisher: ");
         publisher = in.nextLine();
@@ -713,18 +713,25 @@ public class Database {
         //add subject
         sql = sql.concat("\n AND subject LIKE '%" + subject + "%'");
 
-//        //add authors
-//        for(int i = 0; i < wordsInTitle.length; i++)
-//        {
-//            if(authors.length != 0)
-//                sql = sql.concat("\n AND authorname LIKE '%" + authors[i] + "%'");
-//        }
+        //begin to add multiple authors
+        sql = sql.concat("\n AND \n\t(");
+
+        //add authors
+        for(int i = 0; i < authors.length; i++)
+        {
+            if(authors.length == 0)
+                sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%'");
+            else if(i == authors.length - 1)
+                sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%')");
+            else
+                sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%' \n\t OR");
+        }
 
         //add author
-        sql = sql.concat("\n AND authorname LIKE '%" + author + "%'");
+//        sql = sql.concat("\n AND authorname LIKE '%" + author + "%'");
 
         //no duplicates
-        sql = sql.concat("\n GROUP BY r.isbn");
+        sql = sql.concat("\n GROUP BY a.authorname");
 
         //only available copies?
         if(onlyAvailable)
@@ -741,7 +748,7 @@ public class Database {
 
 
 
-            System.out.println("HERES YOUR JAVA QUERY!: " + sql);
+        System.out.println("HERES YOUR JAVA QUERY!: " + sql);
 
         System.out.println();
         System.out.println("====================================================");
@@ -757,6 +764,7 @@ public class Database {
             {
                 System.out.println("ISBN: " + r.getString("isbn"));
                 System.out.println("Title: " + r.getString("title"));
+                System.out.println("Author: " + r.getString("authorname"));
                 System.out.println("Publisher: " + r.getString("publisher"));
                 System.out.println("Publication Year: " + r.getString("pubyear"));
                 System.out.println("Format: " + r.getString("format"));
@@ -1032,7 +1040,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-                e.printStackTrace();
+            e.printStackTrace();
         }
 
         return found;
@@ -1500,7 +1508,7 @@ public class Database {
                 st.executeUpdate();
 
             } catch (Exception e) {
-                    e.printStackTrace();
+                e.printStackTrace();
             }
 
 
@@ -1509,7 +1517,7 @@ public class Database {
 
         }
         else
-            {
+        {
             System.out.println("Thank you for the review for " + isbnreview + ", " + loggedInUser + "!");
             System.out.println("Username: " + loggedInUser);
             System.out.println("Score: " + score);
@@ -2263,7 +2271,7 @@ public class Database {
 
         //Most checked out books
         else if (choice == 2) {
-           sql = "SELECT MAX(checkoutcount) AS maxcheckoutcount FROM " + RecordsTable;
+            sql = "SELECT MAX(checkoutcount) AS maxcheckoutcount FROM " + RecordsTable;
 
             try {
                 st = con.prepareStatement(sql);
