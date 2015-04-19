@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 import java.lang.*;
+import java.text.SimpleDateFormat;
 
 /**
  * CS 5530 Database Systems
@@ -20,7 +21,7 @@ public class Database {
     //TODO: Must assume that knows that they have already checked out a book
 
     /* Globals */
-    static boolean verbose = false;
+    static boolean verbose = true;
 
     /* Used for user input and input parsing */
     static Scanner in = new Scanner(System.in);
@@ -382,7 +383,7 @@ public class Database {
         int thisMonth = 0;
         int thisDay = 0;
         int thisYear = 0;
-        String todayDate;
+        String todayDate, time;
         boolean found = false;
 
         boolean check = false;
@@ -424,12 +425,17 @@ public class Database {
 
         sql = "INSERT INTO " + WaitListTable + " (username, isbn, dateadded) VALUES (?, ?, ?);";
 
+        //get the current time
+        java.util.Date date = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        time = sdf.format(date).toString();
+
         thisMonth = cal.get(Calendar.MONTH) + 1;
         thisDay = cal.get(Calendar.DAY_OF_MONTH);
         thisYear = cal.get(Calendar.YEAR);
 
         //create today's date
-        todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
+        todayDate = thisYear + "-" + thisMonth + "-" + thisDay + " " + time;
 
         try {
 
@@ -1053,7 +1059,7 @@ public class Database {
      */
     public static void CheckoutBook(Date today)
     {
-        String isbn, duedate, oldestuser = null, todayDate;
+        String isbn, duedate, oldestuser = null, todayDate, time;
         boolean check = false, availableforcheckout = false;
         int thisMonth = 0, thisYear = 0, thisDay = 0;
 
@@ -1089,8 +1095,15 @@ public class Database {
         thisDay = c.get(Calendar.DAY_OF_MONTH);
         thisYear = c.get(Calendar.YEAR);
 
+        //get the current time
+        java.util.Date date = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        time = sdf.format(date).toString();
+//
+        if(verbose)
+            System.out.println("The time is " + time);
 
-        todayDate = thisYear + "-" + thisMonth + "-" + thisDay;
+        todayDate = thisYear + "-" + thisMonth + "-" + thisDay + " " + time;
 
         //compute 30 days ahead
         c.add(Calendar.DATE, 30);
@@ -1101,7 +1114,7 @@ public class Database {
         int futureYear = c.get(Calendar.YEAR);
 
         //create date string that will be inserted
-        duedate = Integer.toString(futureYear) + "-" + Integer.toString(futureMonth) + "-" + Integer.toString(futureDay);
+        duedate = Integer.toString(futureYear) + "-" + Integer.toString(futureMonth) + "-" + Integer.toString(futureDay) + " " + time;
 
         sql = "SELECT username AS oldestuserforisbn FROM " + WaitListTable + " WHERE isbn = ? AND dateadded = (SELECT MIN(dateadded) from " + WaitListTable + " where isbn =  ? )";
 
