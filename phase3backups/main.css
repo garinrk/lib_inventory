@@ -1,0 +1,18 @@
+
+a:link {color:#D8D8D8;}      /* unvisited link */
+a:visited {color:#03C4FE;}  /* visited link */
+a:hover {color:#00FFFF;}  /* mouse over link */
+a:active {color:#0000FF;}  /* selected link */
+
+body{
+/*color: #0066CC*/
+background-color: #1C4D5C;
+color: #FFFFFF;
+}
+
+h1 {
+
+		font-weight: bold;
+		font-size: 20px;
+	color: #03C4FE;
+}

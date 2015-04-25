@@ -4,7 +4,7 @@
 <script LANGUAGE="javascript">
 
 function check_all_fields(form_obj){
-	// alert(form_obj.searchAttribute.value+"='"+form_obj.attributeValue.value+"'");
+	alert(form_obj.searchAttribute.value+"='"+form_obj.attributeValue.value+"'");
 	if( form_obj.attributeValue.value == ""){
 		alert("Search field should be nonempty");
 		return false;

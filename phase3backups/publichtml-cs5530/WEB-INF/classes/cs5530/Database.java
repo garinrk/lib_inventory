@@ -171,7 +171,7 @@ public class Database {
             if (Console.IsNumber(userSelection)) {
                 choice = Integer.parseInt((userSelection));
 
-                //check to see if it's a valid option
+                //check to see if it's a valid option   
                 if (choice != 0 && choice != 1) {
                     System.out.print(choice + " is an invalid option ");
                     System.out.print("please make a selection: ");
