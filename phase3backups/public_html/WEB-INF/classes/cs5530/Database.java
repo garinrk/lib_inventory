@@ -499,11 +499,11 @@ public class Database {
             st.setString(5, address);
             st.setString(6, phonenumber);
             st.executeUpdate();
-             } catch (Exception e) {
+        } catch (Exception e) {
 
         }
 
-      
+
     }
 
     /**
@@ -528,7 +528,7 @@ public class Database {
             newUsername = in.nextLine();
         }
 
-		/* User must enter a number for an ID */
+        /* User must enter a number for an ID */
         System.out.print("New ID (Number): ");
         do {
             newID = in.nextLine();
@@ -549,7 +549,7 @@ public class Database {
         newEmail = in.nextLine();
         System.out.print("New User's Phone Number: ");
 
-		/* User must enter a number for a phone number */
+        /* User must enter a number for a phone number */
         do {
             newPhoneNumber = in.nextLine();
 
@@ -757,72 +757,72 @@ public class Database {
         sql = sql.concat("\n AND \n\t(");
 
         //add authors
-        for(int i = 0; i < authors.length; i++)
-        {
-            if(authors.length == 0)
-                sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%'");
-            else if(i == authors.length - 1)
-                sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%')");
-            else
-                sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%' \n\t OR");
-        }
+            for(int i = 0; i < authors.length; i++)
+            {
+                if(authors.length == 0)
+                    sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%'");
+                else if(i == authors.length - 1)
+                    sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%')");
+                else
+                    sql = sql.concat("\n authorname LIKE '%" + authors[i] + "%' \n\t OR");
+            }
 
         //add author
 //        sql = sql.concat("\n AND authorname LIKE '%" + author + "%'");
 
         //no duplicates
-        sql = sql.concat("\n GROUP BY a.authorname");
+            sql = sql.concat("\n GROUP BY a.authorname");
 
         //only available copies?
-        if(onlyAvailable)
-            sql = sql.concat("\n AND copies > 0");
+            if(onlyAvailable)
+                sql = sql.concat("\n AND copies > 0");
 
-        if(sortByYear)
-            sql = sql.concat("\n ORDER BY pubyear DESC");
+            if(sortByYear)
+                sql = sql.concat("\n ORDER BY pubyear DESC");
 
-        if(sortByScore)
-            sql = sql.concat("\n ORDER BY avgreviewscore DESC");
+            if(sortByScore)
+                sql = sql.concat("\n ORDER BY avgreviewscore DESC");
 
-        if(sortByPopularity)
-            sql = sql.concat("\n ORDER BY checkoutcount DESC");
+            if(sortByPopularity)
+                sql = sql.concat("\n ORDER BY checkoutcount DESC");
 
 
 
-        System.out.println("HERES YOUR JAVA QUERY!: " + sql);
+            System.out.println("HERES YOUR JAVA QUERY!: " + sql);
 
-        System.out.println();
-        System.out.println("====================================================");
-        System.out.println("                    RESULTS");
-        System.out.println("====================================================");
-        System.out.println();
-        try
-        {
-            st = con.prepareStatement(sql);
-            r = st.executeQuery();
-
-            while(r.next())
+            System.out.println();
+            System.out.println("====================================================");
+            System.out.println("                    RESULTS");
+            System.out.println("====================================================");
+            System.out.println();
+            try
             {
-                System.out.println("ISBN: " + r.getString("isbn"));
-                System.out.println("Title: " + r.getString("title"));
-                System.out.println("Author: " + r.getString("authorname"));
-                System.out.println("Publisher: " + r.getString("publisher"));
-                System.out.println("Publication Year: " + r.getString("pubyear"));
-                System.out.println("Format: " + r.getString("format"));
-                System.out.println("Subject: " + r.getString("subject"));
-                System.out.println("booksummary: " + r.getString("booksummary"));
-                System.out.println("Average Review Score: " + r.getString("avgreviewscore"));
-                System.out.println("Amount of times checked out: " + r.getString("checkoutcount"));
-                System.out.println();
-                System.out.println();
+                st = con.prepareStatement(sql);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    System.out.println("ISBN: " + r.getString("isbn"));
+                    System.out.println("Title: " + r.getString("title"));
+                    System.out.println("Author: " + r.getString("authorname"));
+                    System.out.println("Publisher: " + r.getString("publisher"));
+                    System.out.println("Publication Year: " + r.getString("pubyear"));
+                    System.out.println("Format: " + r.getString("format"));
+                    System.out.println("Subject: " + r.getString("subject"));
+                    System.out.println("booksummary: " + r.getString("booksummary"));
+                    System.out.println("Average Review Score: " + r.getString("avgreviewscore"));
+                    System.out.println("Amount of times checked out: " + r.getString("checkoutcount"));
+                    System.out.println();
+                    System.out.println();
+                }
+            } catch (Exception e)
+            {
+                e.printStackTrace();
             }
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-        }
 
 
         //return to main menu
-        Console.MainMenu();
+            Console.MainMenu();
 
     }//end of browselibrary
 
@@ -991,7 +991,45 @@ public class Database {
         }
 
         return found;
-    }//end of CheckForReview
+    }//end of CheckForUser
+
+    public static boolean CheckForUserWeb(String username, Connection conn)
+    {
+        boolean found = false;
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        //construct sql query
+        String sql = "SELECT username FROM " + UserTable + " WHERE username = ?";
+
+        try {
+            st = conn.prepareStatement(sql);
+            st.setString(1, username);
+            r = st.executeQuery();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+        if(verbose)
+            PrintSQLStatement(st, sql);
+
+        //check results for if database has username
+        try {
+
+            while (r.next()) {
+                if (r.getString("username").matches(username) && found == false) {
+                    found = true;
+                    break;
+                }
+
+            }
+        } catch (Exception e) {
+
+        }
+
+        return found;
+    }
 
     /**
      * Checks for books that are checked out and are late for a specific date
@@ -1035,11 +1073,11 @@ public class Database {
             while(r.next())
             {
                 System.out.println("Book Title: "
-                        + r.getString("title") + "\tDate Due: " + r.getString("duedate") +
-                        "\tUsername: " + r.getString("username") +
-                        "\tFull Name: " + r.getString("full_name") +
-                        "\tPhone Number: " + r.getString("phonenumber") +
-                        "\tEmail: " + r.getString("email"));
+                    + r.getString("title") + "\tDate Due: " + r.getString("duedate") +
+                    "\tUsername: " + r.getString("username") +
+                    "\tFull Name: " + r.getString("full_name") +
+                    "\tPhone Number: " + r.getString("phonenumber") +
+                    "\tEmail: " + r.getString("email"));
             }
         } catch (Exception e)
         {
@@ -1227,7 +1265,7 @@ public class Database {
         if(!availableforcheckout && oldestuser != null)
         {
             System.out.print("There is a waitlist for this book, and you are not at the top if the list" +
-                    " would you like to be added to the waitlist? [1] Yes [0] No: ");
+                " would you like to be added to the waitlist? [1] Yes [0] No: ");
 
             //ask user for choice, check for correctness
             do {
@@ -1642,6 +1680,143 @@ public class Database {
         System.out.println("PREPARED STATEMENT: " + st);
         System.out.println();
     }
+
+    public static String PrintUserRecordWeb(String username, Connection con) throws Exception
+    {
+
+        String resultStr = "<h2> User Details: </h2>";
+        String personalDataSql = "SELECT * FROM " + UserTable + " where username = ?";
+        String checkoutHistorySql = "SELECT isbn, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE username = ?";
+        String lostBookSql = "SELECT isbn, title, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE username = ? AND lost = 1";
+        String bookRequestSql = "SELECT r.title, w.dateadded FROM " + RecordsTable + " r, " + WaitListTable + " w WHERE w.isbn = r.isbn AND w.username = ?";
+        String reviewSql = "SELECT r.title, a.score, a.opinion FROM " + ReviewTable + " a, " + RecordsTable + " r WHERE r.isbn = a.isbn AND a.username = ?";
+        
+        ResultSet results;
+        PreparedStatement st = null;
+
+
+        //check to see if user exists
+        if(!CheckForUserWeb(username, con))
+        {
+            resultStr = "User does not exist, please enter a valid username\n";
+            return resultStr;
+        }
+
+        //get personal data
+
+        try{
+            st = con.prepareStatement(personalDataSql);
+            st.setString(1, username);
+            results = st.executeQuery();
+
+            while(results.next()) {
+
+                resultStr += "Full Name: " + results.getString("full_name") + "<BR>";
+                resultStr += "Username: " + results.getString("username") + "<BR>";
+                resultStr += "Idenfitication Number: " + results.getString("cardid") + "<BR>";
+                resultStr += "Email: " + results.getString("email") + "<BR>";
+                resultStr += "Address: " + results.getString("address") + "<BR>";
+                resultStr += "Phone Number: " + results.getString("phonenumber" + "<BR>");
+                resultStr += "<BR><BR>";
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        resultStr += "<h2> Checkout History: </h2>";
+
+        //get checkout history
+        try{
+
+            st = con.prepareStatement(checkoutHistorySql);
+
+            //set sql parameters
+            st.setString(1, username);
+            results = st.executeQuery();
+
+            while (results.next()) {
+                resultStr += "ISBN: " + results.getString("isbn") + "<BR>";
+                resultStr += "Title: " + results.getString("title") + "<BR>";
+                resultStr += "Checkout Date: " + results.getString("checkoutdate") + "<BR>";
+                resultStr += "Return Date: " + results.getString("returndate") + "<BR>";
+            
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        resultStr += "<h2> Books lost: </h2>";
+
+        //get books lost by user
+        try{
+
+            st = con.prepareStatement(lostBookSql);
+            st.setString(1,username);
+            results = st.executeQuery();
+
+            while(results.next())
+            {
+                // System.out.println("ISBN: " + r.getString("isbn") + "\t ");
+                // System.out.println("Title: " + r.getString("title") + "\t ");
+                // System.out.println("Date marked as Lost: " + r.getString("returndate") + "\t ");
+                // System.out.println();
+                resultStr += "ISBN: " + results.getString("isbn") + "<BR>";
+                resultStr += "Title: " + results.getString("title") + "<BR>";
+                resultStr += "Date Marked as Lost: " + results.getString("returndate") + "<BR>";
+              
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        resultStr += "<h2> Books Request for Future Checkout </h2>";
+
+        //get books that the user is currently on the waitlist for
+
+        try{
+            st = con.prepareStatement(bookRequestSql);
+            st.setString(1, username);
+            results = st.executeQuery();
+
+            while(results.next())
+            {
+                resultStr += "Title: " + results.getString("title") + "<BR>";
+                resultStr += "Date Added to WaitList: " + results.getString("dateadded") + "<BR>";
+                
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        resultStr += "<h2> Reviews </h2>";
+
+        try{
+            st = con.prepareStatement(reviewSql);
+            st.setString(1, username);
+            results = st.executeQuery();
+
+            while (results.next())
+            {
+                resultStr += "Title: " + results.getString("title") + "<BR>";
+                resultStr += "Score: " + results.getString("score") + "<BR>";
+                resultStr += "Opinion: " + results.getString("opinion") + "<BR>";
+            }
+
+        } catch (Exception e) {
+
+
+        }
+
+   
+        return resultStr;
+    }//end of PrintUserRecordWeb
 
     /**
      * The following should be printed:
@@ -2167,8 +2342,8 @@ public class Database {
             {
                 System.out.println("User: " + r.getString("username"));
                 System.out.println("\t\t\t" + "Checkout Date: " +
-                        r.getString("checkoutdate") + "\t" + "Return Date: " +
-                        r.getString("returndate") + "\n");
+                    r.getString("checkoutdate") + "\t" + "Return Date: " +
+                    r.getString("returndate") + "\n");
             }
         } catch (Exception e)
         {
