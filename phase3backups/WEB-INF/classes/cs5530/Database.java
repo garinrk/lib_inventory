@@ -54,6 +54,13 @@ public class Database {
 //    static Statement statem = null;
     static Connection con = null;
 
+    /*
+    *
+    *   Constructor for access to methods
+    */
+    public Database()
+    {}
+
     /**
      * Adds a book record to the database
      *
@@ -470,6 +477,21 @@ public class Database {
 
         //return to main menu
         Console.MainMenu();
+    }
+
+    public static String AddUserWeb(String username, String idnumber, String fullname, String address, String phonenumber, String email, Statement st) throws Exception
+    {
+        String resultStr = "Success";
+        String query;
+        ResultSet results;
+
+        //query to add user to database
+        query = "INSERT INTO " + UserTable + " (username, cardid, full_name, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?)";
+
+        //fill in appropriate values
+
+
+        return resultStr;
     }
 
     /**

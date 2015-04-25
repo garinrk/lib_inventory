@@ -1,4 +1,4 @@
-package garinrphase2;
+ package garinrphase2;
 
 
 
@@ -53,6 +53,13 @@ public class Database {
     /* Related to the SQL Connection */
 //    static Statement statem = null;
     static Connection con = null;
+
+    /*
+    *
+    *   Constructor for access to methods
+    */
+    public Database()
+    {}
 
     /**
      * Adds a book record to the database
@@ -472,9 +479,25 @@ public class Database {
         Console.MainMenu();
     }
 
-    /**
-     * Adds a new user to the database
-     */
+    public static String AddUserWeb(String username, String idnumber, String fullname, String address, String phonenumber, String email, Statement st) throws Exception
+    {
+
+            String resultStr = "Success";
+            String query;
+            ResultSet results;
+
+            //query to add user to database
+            query = "INSERT INTO " + UserTable + " (username, cardid, full_name, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?)";
+
+            //fill in appropriate values
+
+
+            return resultStr;
+        }
+
+        /**
+         * Adds a new user to the database
+         */
     public static void AddUser(boolean firsttime)
     {
         String sql;
