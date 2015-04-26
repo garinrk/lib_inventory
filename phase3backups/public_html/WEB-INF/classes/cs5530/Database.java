@@ -61,6 +61,70 @@ public class Database {
     public Database()
     {}
 
+    public static String AddBookRecordWeb(String isbn, String title, String publisher, String pubYear, String format, String subject, String summary, String[] authors, Connection con){
+        
+        String insertRecordSQL =  "INSERT INTO " + RecordsTable + " (isbn, title, publisher, pubyear, format, subject, booksummary) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String addAuthorSQL = "INSERT INTO " + AuthorListTable + " (isbn, authorname) VALUES (?, ?)";
+        String resultStr = "";
+
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        //check if isbn exists
+        if(CheckForISBNWeb(isbn, con))
+        {
+            resultStr = "That isbn already exists in the database<BR>";
+            return resultStr;
+        }
+
+        //add book record
+        try{
+            st = con.prepareStatement(insertRecordSQL);
+            st.setString(1, isbn);
+            st.setString(2, title);
+            st.setString(3, publisher);
+            st.setString(4, pubYear);
+            st.setString(5, format);
+            st.setString(6, subject);
+            st.setString(7, summary);
+            st.executeUpdate();
+
+        } catch (Exception e) {
+
+        }
+
+        //add authors to author table
+        for(int i = 0; i < authors.length; i++) {
+                try {
+                    st = con.prepareStatement(addAuthorSQL);
+                    st.setString(1, isbn);
+                    st.setString(2, authors[i]);
+                    st.executeUpdate();
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+
+        resultStr += "<h2>Success!</h2><BR>A record with the following info has been added:<BR><BR>";
+        resultStr += "Title: " + title + "<BR>";
+
+        for(int i = 0; i < authors.length; i++)
+        {
+            resultStr += "Author " + (i+1) + ": " + authors[i] + "<BR>";
+        }
+        resultStr += "ISBN: " + isbn + "<BR>";
+        resultStr += "Book Summary: " + summary + "<BR>";
+        resultStr += "Publisher: " + publisher + "<BR>";
+        resultStr += "Subject: " + subject + "<BR>";
+        resultStr += "Format: " + format + "<BR>";
+        resultStr += "Year of Publication: " + pubYear + "<BR>";
+
+        return resultStr;
+    }
+
     /**
      * Adds a book record to the database
      *
@@ -2988,7 +3052,7 @@ public class Database {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         Calendar c = Calendar.getInstance();
         Date today = new Date();
-        
+
         time = timeFormat.format(today).toString();
 
         returnDate += " " + time;

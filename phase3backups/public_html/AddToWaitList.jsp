@@ -44,6 +44,7 @@
 		<br>
 		<br>
 		<input type=submit value="Add User To WaitList">
+	</form>
 
 	<%
 	} else {
