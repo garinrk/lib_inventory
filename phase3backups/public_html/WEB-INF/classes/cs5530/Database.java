@@ -2972,6 +2972,96 @@ public class Database {
         Console.MainMenu();
     }//end of PrintLibraryStatistics
 
+    public static String ReturnBookWeb(String username, String isbn, boolean lost, String returnDate, Connection con)
+    {
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        String incrementLostCountSQL = "UPDATE " + RecordsTable + " SET lostcount = lostcount + 1 WHERE isbn = ?";
+        String setBookLostSQL = "UPDATE " + CheckoutRecordTable + " SET returndate = ?, lost = 1 WHERE isbn = ? AND username = ?";
+        String setReturnDateSQL =  "UPDATE " + CheckoutRecordTable + " SET returndate = ? WHERE isbn = ? AND username = ?";
+        String incrementCopiesSQL =  "UPDATE " + InventoryTable + " SET copies = copies + 1 WHERE isbn = ?";
+        String getWaitingUserSQL = "SELECT username FROM "+ WaitListTable +" WHERE isbn = ?";
+        String resultStr = "";
+        String time;
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        Calendar c = Calendar.getInstance();
+        Date today = new Date();
+        
+        time = timeFormat.format(today).toString();
+
+        returnDate += " " + time;
+
+        if(lost)
+        {
+            //have to set book lost in checkout record
+            try{
+                st = con.prepareStatement(setBookLostSQL);
+                st.setString(1, returnDate);
+                st.setString(2, isbn);
+                st.setString(3, username);
+                st.executeUpdate();
+
+            } catch (Exception e) {
+
+            }
+
+            //increment lost count
+            try{
+                st = con.prepareStatement(incrementLostCountSQL);
+                st.setString(1,isbn);
+                st.executeUpdate();
+            } catch (Exception e) {
+
+            }
+
+        }
+        //book was not lost, properly return book
+        else
+        {
+            //set return date
+            try{
+                st = con.prepareStatement(setReturnDateSQL);
+                st.setString(1, returnDate);
+                st.setString(2, isbn);
+                st.setString(3, username);
+                st.executeUpdate();
+
+            } catch (Exception e) {
+
+            }
+
+            //put copy of book back
+             try{
+                st = con.prepareStatement(incrementCopiesSQL);
+                st.setString(1, isbn);
+                st.executeUpdate();
+            } catch (Exception e){
+                
+            }
+            resultStr += "<h2>Book Returned</h2>Waitlist:<BR>";
+            //get list of users waiting on book
+            try
+            {
+                st = con.prepareStatement(getWaitingUserSQL);
+                st.setString(1, isbn);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    resultStr += r.getString("username") + "<BR>";
+                }
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+        }
+
+        return resultStr;
+    }
+
     /**
      * Marks a user's checkout record as returned. If the book was lost, the date returned is when the book was lost
      * and the book is marked as lost. The number of copies is not incremented.
