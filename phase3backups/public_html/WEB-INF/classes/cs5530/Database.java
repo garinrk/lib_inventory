@@ -304,6 +304,105 @@ public class Database {
         Console.MainMenu();
     }//end of add book record
 
+    public static String GetRecordIDWeb(String isbn, Connection con)
+    {
+        String id = "";
+        String selectIDSQL = "SELECT r_id FROM " + RecordsTable + " WHERE isbn = ?";
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        try{
+            st = con.prepareStatement(selectIDSQL);
+            st.setString(1,isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                id = r.getString("r_id");
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        return id;
+    }
+
+    public static String AddBookCopyWeb(String isbn, String amount, Connection con)
+    {
+        boolean check;
+        boolean existingrecord = false;
+
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        String resultStr = "";
+        String getCopiesSQL = "SELECT copies FROM " + InventoryTable + " where isbn = ?";
+        String updateCopiesSQL = "UPDATE " + InventoryTable + " SET copies = copies + ? WHERE isbn = ?";;
+        String insertCopiesSQL = "INSERT INTO " + InventoryTable + " (r_id, isbn, copies) VALUES(?, ?, ?)";
+        String id = "";
+
+        //check if isbn exists in database
+        if(!CheckForISBNWeb(isbn, con))
+        {
+            resultStr = "That isbn does not exist<BR>";
+            return resultStr;
+        }
+
+        //check if there already is an entry for this in the inventory
+        try{
+            st = con.prepareStatement(getCopiesSQL);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            if(r.next())
+            {
+                existingrecord = true;
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        //there already exists a record, we have to update the amount
+        if(existingrecord)
+        {
+            
+
+            try{
+                st = con.prepareStatement(updateCopiesSQL);
+                st.setString(1, amount);
+                st.setString(2, isbn);
+                st.executeUpdate();
+
+            } catch (Exception e) {
+
+            }
+
+        }
+
+        //there is no existing record, we have to make one
+        else
+        {
+            id = GetRecordIDWeb(isbn, con);
+            try{
+                st = con.prepareStatement(insertCopiesSQL);
+                st.setString(1, id);
+                st.setString(2, isbn);
+                st.setString(3, amount);
+                st.executeUpdate();
+
+            } catch (Exception e) {
+
+            }     
+
+        }
+
+        resultStr += "Success!<BR>" + amount + " copies for isbn: " + isbn + " have been added<BR>";
+        return resultStr; 
+
+    }
+
 
     /**
      * Adds new copies of a book. If a record of a book isn't in the inventory
