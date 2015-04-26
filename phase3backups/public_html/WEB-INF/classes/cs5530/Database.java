@@ -2892,6 +2892,163 @@ public class Database {
 
     }//end of PrintUserStatistics
 
+    public static String PrintBookRecordWeb(String isbn, Connection con)
+    {
+        String resultStr = "<h2>Book record for " + isbn + " </h2><BR>";
+
+        String getBookInfoSQL = "SELECT * FROM " + RecordsTable + " WHERE isbn = ? ";
+        String getAuthorsSQL = "SELECT authorname FROM " + AuthorListTable + " WHERE isbn = ?";
+        String getLocationSQL = "SELECT copies, location FROM " + InventoryTable + " WHERE isbn = ?";
+        String getCheckoutInfoSQL = "SELECT username, checkoutdate, returndate FROM " + CheckoutRecordTable + " WHERE isbn = ?";
+        String getReviewSQL = "SELECT username, score, opinion FROM " + ReviewTable + " WHERE isbn = ? "; 
+        String getAvgSQL = "SELECT AVG(score) AS avg FROM " + ReviewTable + " WHERE isbn = ? ";
+
+        String foundisbn = "";
+        String title = "";
+        String summary = "";
+        String subject = "";
+        String format = "";
+        String pubyear = "";
+        String publisher = "";
+        String authors = "";
+        String loc = "";
+
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        boolean check;
+
+        int copies;
+
+        check = CheckForISBNWeb(isbn, con);
+
+        if(!check)
+        {
+            resultStr ="That isbn does not exist in the database<BR>";
+            return resultStr;
+        }
+
+        //get book information
+        try{
+            st = con.prepareStatement(getBookInfoSQL);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                foundisbn = r.getString("ISBN");
+                title = r.getString("title");
+                summary = r.getString("bookSummary");
+                subject = r.getString("subject");
+                format = r.getString("format");
+                pubyear = r.getString("pubyear");
+                publisher = r.getString("publisher");
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        authors +="Author(s):<BR>";
+
+        //get authors
+        try{
+            st = con.prepareStatement(getAuthorsSQL);
+            st. setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next()){
+                authors += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + r.getString("authorname") + "<BR>";
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        //put book information with authors
+        resultStr +="Title: " + title + "<BR>";
+        resultStr += authors;
+        resultStr +="ISBN: " + foundisbn + "<BR>";
+        resultStr +="Summary: " + summary + "<BR>";
+        resultStr +="Subject: " + subject + "<BR>";
+        resultStr +="Format: " + format + "<BR>";
+        resultStr +="Publisher: " + publisher + "<BR><BR><BR>";
+
+
+        //get location information
+        resultStr +="<h2>Location Information: </h2><BR>";
+
+        try{
+            st = con.prepareStatement(getLocationSQL);
+            st.setString(1,isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                resultStr += "There are " + r.getString("copies") + " copies located on shelf: " + r.getString("location");
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        //get checkout information
+        resultStr +="<BR><BR><h2>Checkout Information:</h2><BR>";
+
+        try{
+            st = con.prepareStatement(getCheckoutInfoSQL);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                resultStr += "User: " + r.getString("username");
+                resultStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                resultStr += "Checkout Date: " + r.getString("checkoutdate") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + "Return Date: " + r.getString("returndate") + "<BR>";
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        resultStr +="<BR><BR><h2>Reviews (If applicable):</h2> <BR>";
+
+        //get review information
+        try{
+            st = con.prepareStatement(getReviewSQL);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                resultStr += "<BR>User: " + r.getString("username");
+                resultStr += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                resultStr += "Score: " + r.getString("score") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + "Optional Opinion: " + r.getString("opinion") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            }
+        } catch (Exception e) {
+
+        }
+
+        //get average score
+        try{
+            st = con.prepareStatement(getAvgSQL);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                resultStr += "Average Review Score: " + r.getString("avg");
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        resultStr += "<BR><BR>";
+
+        return resultStr;
+    }
+
     /**
      * Prints record of a book:
      *
