@@ -1321,6 +1321,40 @@ public class Database {
         return found;
     }
 
+    public static String CheckLateListWeb(String date, Connection con)
+    {
+        String checkDate;
+        String resultStr = "";
+
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        String lateBookSQL = "SELECT c.title, c.duedate, c.username, u.full_name, u.phonenumber, u.email FROM " + CheckoutRecordTable + " c, " + UserTable + " u WHERE (duedate < ? AND returndate > ?) and c.username = u.username "; 
+
+        resultStr += "<h2>Late books for " + date + "</h2><br>";
+        try{
+            st = con.prepareStatement(lateBookSQL);
+            st.setString(1, date);
+            st.setString(2, date);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                resultStr += "Book Title: "
+                    + r.getString("title") + "<BR>Date Due: " + r.getString("duedate") +
+                    "<BR>Username: " + r.getString("username") +
+                    "<BR>Full Name: " + r.getString("full_name") +
+                    "<BR>Phone Number: " + r.getString("phonenumber") +
+                    "<BR>Email: " + r.getString("email") + "<BR><BR>";
+            }
+
+        } catch (Exception e) {
+            
+        }
+
+        return resultStr;
+    }
+
     /**
      * Checks for books that are checked out and are late for a specific date
      */
