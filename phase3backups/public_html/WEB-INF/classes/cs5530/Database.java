@@ -3237,9 +3237,152 @@ public class Database {
         }
 
 
-        //return to main menu
+        //return to main menu  
         Console.MainMenu();
     }//end of PrintBookRecord
+
+    public static String PrintLibraryStatisticsWeb(String amount, String selection, Connection con)
+    {
+        String resultStr = "";
+
+        String mostRequestedSQL = "SELECT MAX(waitcount) AS maxwaitcount FROM " + RecordsTable;
+        String getRecordSQL = "SELECT * FROM " + RecordsTable;
+        String mostCheckedoutSQL = "SELECT MAX(checkoutcount) AS maxcheckoutcount FROM " + RecordsTable;
+        String mostLostSQL = "SELECT MAX(lostcount) AS maxlostcount FROM " + RecordsTable;
+        String mostPopularAuthorsSQL = "";
+
+        PreparedStatement st = null;
+        ResultSet r = null;
+        String topFrequency = "";
+
+        int counter = 0;
+        int requestedAmount = Integer.parseInt(amount);
+
+        //most requested books
+        if(selection.matches("1"))
+        {
+            //get most requested number
+            try{
+                st = con.prepareStatement(mostRequestedSQL);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    topFrequency = r.getString("maxwaitcount");
+                }
+            } catch (Exception e) {
+
+            }
+
+            //get record
+
+            try{
+                st = con.prepareStatement(getRecordSQL);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    if(r.getString("waitcount").matches(topFrequency))
+                    {
+                        if(counter < requestedAmount){
+                            resultStr +="Title: " + r.getString("title") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Size of WaitList: " + topFrequency + "<BR>";
+                            counter++;
+                        }
+
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+        }//end of most requested books
+
+        //most checked out books
+        if(selection.matches("2"))
+        {
+            //get most checked out number
+
+            try{
+                st = con.prepareStatement(mostCheckedoutSQL);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    topFrequency = r.getString("maxcheckoutcount");
+                }
+            } catch (Exception e) {
+
+            }
+
+            //get record
+
+            try{
+                st = con.prepareStatement(getRecordSQL);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    if(r.getString("checkoutcount").matches(topFrequency))
+                    {
+                        if(counter < requestedAmount){
+                            resultStr +="Title: " + r.getString("title") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Checkout Count: " + topFrequency + "<BR>";
+                            counter++;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+        }//end of most checked out books
+
+        //most lost books
+        if(selection.matches("3"))
+        {  
+            //get highest lost count
+
+            try{
+                st = con.prepareStatement(mostLostSQL);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    topFrequency = r.getString("maxlostcount");
+                }
+            } catch (Exception e) {
+
+            }
+
+            //get record
+
+            try{
+                st = con.prepareStatement(getRecordSQL);
+                r = st.executeQuery();
+
+                while(r.next())
+                {
+                    if(r.getString("lostcount").matches(topFrequency))
+                    {
+                        if(counter  < requestedAmount)
+                        {
+                            resultStr +="Title: " + r.getString("title") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Lost Count: " + topFrequency + "<BR>";
+                            counter++;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+        }//end of most lost books
+
+        //most popular authors
+        if(selection.matches("4"))
+        {
+            //TODO: MISSING Construct sql query for most popular authors (instances of checkout records with the most common authors)
+        }//end of most popular authors
+
+        return resultStr;
+    }
 
     public static void PrintLibraryStatistics()
     {
