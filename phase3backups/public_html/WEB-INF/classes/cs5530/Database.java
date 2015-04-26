@@ -2071,6 +2071,107 @@ public class Database {
 
     }//end of GetRecordID
 
+    public static String LeaveReviewWeb(String username, String isbn, String review, String score, Connection con)
+    {
+        String resultStr = "";
+        String newAverage = "";
+
+        String insertReviewSQL = "INSERT INTO " + ReviewTable + " (username, ISBN, score, opinion) VALUES(?, ?, ?, ?)";
+        String getAvgSQL = "SELECT AVG(score) AS avg FROM " + ReviewTable + " WHERE isbn = ? ";
+        String setAvgSQL = "UPDATE " + RecordsTable + " SET avgreviewscore = ? WHERE isbn = ?";
+
+        boolean checkExistingISBN;
+
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        checkExistingISBN = CheckForISBNWeb(isbn, con);
+        //check to see if isbn exists
+        if(!checkExistingISBN)
+        {
+            resultStr += "This isbn does not exist<BR>";
+            return resultStr;
+        }
+
+        //check to see if user already left review
+        if(CheckForReviewWeb(username, isbn, con))
+        {
+            resultStr += "You already have a review on record for this book. You cannot review a book more than once<BR>";
+            return resultStr;
+        }
+
+        //insert review into review table
+        try{
+            st = con.prepareStatement(insertReviewSQL);
+            st.setString(1, username);
+            st.setString(2, isbn);
+            st.setString(3, score);
+            st.setString(4, review);
+            
+            st.executeUpdate();
+        } catch (Exception e) {
+
+        }
+
+        //Get average score
+        try{
+            st = con.prepareStatement(getAvgSQL);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                newAverage = r.getString("avg");
+            }
+        } catch (Exception e) {
+
+        }
+
+        //set new average score
+
+        try{
+            st = con.prepareStatement(setAvgSQL);
+            st.setString(1, newAverage);
+            st.setString(2, isbn);
+            st.executeUpdate();
+
+        } catch (Exception e) {
+
+        }
+
+        resultStr +="<h2>Review Added</h2>A review with the following has been added to the database:<BR>Username: " + username + "<BR>ISBN: " + isbn + "<BR>Score: " + score + "<BR>Opinion: " + review + "<BR>";
+        return resultStr;
+
+    }
+
+    public static boolean CheckForReviewWeb(String username, String isbn, Connection con)
+    {
+        boolean found = false;
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        String checkReviewSQL = "SELECT username FROM " + ReviewTable + " WHERE username = ? AND isbn = ?";
+
+        try{
+            st = con.prepareStatement(checkReviewSQL);
+            st.setString(1, username);
+            st.setString(2, isbn);
+            r = st.executeQuery();
+
+            if(!r.next())
+                return found;
+            else
+                found = true;
+        
+        } catch (Exception e) {
+
+        }
+
+        return found;
+
+
+    }//end of CheckForReviewWeb
+
 
     /**
      * Allows a user to leave a review for a book, only one review per book per use allowed

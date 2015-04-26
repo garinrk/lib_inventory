@@ -54,6 +54,7 @@
 
 		<br>
 		<input type=submit value="Return Book">
+	</form>
 
 	<%
 	} else {
@@ -74,13 +75,6 @@
 
 	out.println(d.ReturnBookWeb(usernameval, isbnval, isLost, returnDate, conn.con));
 	
-
-	
-
-
-//	Date today = new Date();
-
-//	out.println(d.AddToWaitListWeb(usernameval, isbnval, today, conn.con));
 
 	conn.closeStatement();
 	conn.closeConnection();
