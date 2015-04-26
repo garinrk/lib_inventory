@@ -349,8 +349,6 @@ public class Database {
         else
         {
             //there already exists a record in the inventory table, update that existing record with the new number of copies
-
-//            sql = "UPDATE " + RecordsTable + " SET checkoutcount = checkoutcount + 1 WHERE isbn = ?";
             sql = "UPDATE " + InventoryTable + " SET copies = copies + ? WHERE isbn = ?";
             try
             {
@@ -584,7 +582,6 @@ public class Database {
             st.setString(5, newAddress);
             st.setString(6, newPhoneNumber);
             st.executeUpdate();
-//            r = st.executeQuery();
 
 
         } catch (Exception e) {
@@ -1124,6 +1121,276 @@ public class Database {
         return found;
 
     }//end of CheckWaitList
+
+    public static String CheckoutBookWeb(String username, String isbn, Date today, Connection con)
+    {
+        String resultStr = "Hello World";
+        String oldestuser = null;
+        String time;
+        String duedate;
+        int month = 0, day = 0, year = 0;
+        String currentdate;
+
+        String oldestUserSQL = "SELECT username AS oldestuserforisbn FROM " + WaitListTable + " WHERE isbn = ? AND dateadded = (SELECT MIN(dateadded) from " + WaitListTable + " where isbn =  ? )";
+        String decrementWaitCountSQL = "UPDATE " + RecordsTable + " SET waitcount = waitcount - 1 WHERE isbn = ?";
+        String removeWaitListSQL = "DELETE FROM " + WaitListTable + " WHERE isbn = ? AND username = ?";
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        Calendar c = Calendar.getInstance();
+
+        boolean availableforcheckout = false;
+        boolean existingCheckout;
+
+
+        PreparedStatement st = null;
+        ResultSet results = null;
+
+        int futureMonth;
+        int futureDay;
+        int futureYear;
+
+        //get current time 
+        time = timeFormat.format(today).toString();
+
+        //compute 30 days from now
+        c.setTime(today);
+
+        //hold current date
+        month = c.get(Calendar.MONTH) + 1;
+        day = c.get(Calendar.DAY_OF_MONTH);
+        year = c.get(Calendar.YEAR);
+
+        currentdate = Integer.toString(year) + "-" + Integer.toString(month) + "-" + Integer.toString(day) + " " + time;
+
+        c.add(Calendar.DATE, 30);
+
+        //save due date 
+
+        futureMonth = c.get(Calendar.MONTH) + 1;
+        futureDay = c.get(Calendar.DAY_OF_MONTH);
+        futureYear = c.get(Calendar.YEAR);
+
+        //create date string that will be inserted
+        duedate = Integer.toString(futureYear) + "-" + Integer.toString(futureMonth) + "-" + Integer.toString(futureDay) + " " + time;
+
+        //we need to check if there is a waitlist for this book
+
+        try
+        {
+            st = con.prepareStatement(oldestUserSQL);
+            st.setString(1, isbn);
+            st.setString(2, isbn);
+            results = st.executeQuery();
+
+            if(!results.wasNull())
+            {
+                while(results.next())
+                {
+                    oldestuser = results.getString("oldestuserforisbn");
+                }
+            }
+
+
+        } catch (Exception e) {
+
+
+        }
+
+        //test oldest user
+        if(oldestuser == null)
+        {
+            //the user can check it out since no one is waiting
+            availableforcheckout = true;
+        }
+        else
+        {
+            //if there is someone waiting, we need to see if it matches the user being passed in
+            availableforcheckout = oldestuser.matches(username);
+        }
+
+        //we need to remove them from the waitlist
+        if(oldestuser != null && oldestuser.matches(username))
+        {
+
+            //decrement waitcount in records table
+            try{
+                st = con.prepareStatement(decrementWaitCountSQL);
+                st.setString(1, isbn);
+                st.executeUpdate();
+            } catch (Exception e) {
+
+            }
+
+            //remove waitlist entry
+            try{
+                st = con.prepareStatement(removeWaitListSQL);
+                st.setString(1, isbn);
+                st.setString(2, username);
+                st.executeUpdate();
+            } catch (Exception e) {
+
+            }
+
+        }
+
+        //if the book isn't available to checkout
+        if(!availableforcheckout)
+        {
+            resultStr = "You cannot check out this book because there is a waitlist and you are not at the top of the waitlist.<BR><a href=\"AddToWaitList.jsp\">You can add yourself to a wait list here.</a>";
+            return resultStr;
+        }
+
+        //the book is available for checkout!
+
+        else
+        {
+            //we need to see if the user already has the book checked out
+            existingCheckout = CheckForCheckoutRecordWeb(username, isbn, con);
+            
+
+            //if the user doesn't have an existing checkout record, go create one
+            if(!existingCheckout)
+            {
+                resultStr = CreateCheckoutRecordWeb(username, duedate, currentdate, isbn, con);
+            }
+            else
+            {
+                resultStr = "You already have a checkout record for this book.";
+                return resultStr;
+            }
+
+        }
+
+
+
+        return resultStr; 
+    }
+
+    public static boolean CheckForCheckoutRecordWeb(String username, String isbn, Connection con)
+    {
+        boolean found = false;
+        String checkForRecordsql = "SELECT username, returndate FROM " + CheckoutRecordTable + " c WHERE isbn = ? AND username = ?";
+        PreparedStatement st;
+        ResultSet r = null;
+
+        try{
+            st = con.prepareStatement(checkForRecordsql);
+            st.setString(1, isbn);
+            st.setString(2, username);
+
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                if (r.getString("username").matches(username) && !r.getString("returndate").matches("9999-12-31 23:59:59") && found == false) {
+                    found = true;
+                    break;
+                    
+                }
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        return found;
+    }
+
+    public static String CreateCheckoutRecordWeb(String username, String duedate, String today, String isbn, Connection con)
+    {
+        String resultStr = "";
+        ResultSet r;
+        PreparedStatement st = null;
+
+        String getCopiesSQL = "SELECT copies FROM " + InventoryTable + " WHERE isbn = ?";
+        String getTitleSQL = "SELECT title FROM " + RecordsTable + " WHERE isbn = ?";
+        String insertRecordSQL = "INSERT INTO " + CheckoutRecordTable + " (username, isbn, title, checkoutdate, duedate) VALUES (?, ?, ?, ?, ?)";
+        String incrementCheckoutSQL = "UPDATE " + RecordsTable + " SET checkoutcount = checkoutcount + 1 WHERE isbn = ?";
+        String decrementCopiesSQL = "UPDATE " + InventoryTable + " SET copies = copies - 1 WHERE isbn = ?";
+
+        int copies = 0;
+        String title = "";
+
+        //need to check if there are copies available to checkout
+
+        try{
+            st = con.prepareStatement(getCopiesSQL);
+            st.setString(1, isbn);
+
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                if(r.getString("copies").matches("0"))
+                {
+                    resultStr = "There are no copies available of that book to checkout...";
+                    return resultStr;
+                }
+                else
+                    copies = Integer.parseInt(r.getString("copies"));
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        //there are copies, begin bookkeeping to create a checkout record
+
+        //get title of book according to isbn
+        try{
+            st = con.prepareStatement(getTitleSQL);
+            st.setString(1, isbn);
+
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                title = r.getString("title");
+            }
+
+        } catch (Exception e) {
+
+        }
+
+        //insert checkout record into table
+        try{
+            st = con.prepareStatement(insertRecordSQL);
+            st.setString(1, username);
+            st.setString(2, isbn);
+            st.setString(3, title);
+            st.setString(4, today);
+            st.setString(5, duedate);
+            st.executeUpdate();
+
+        } catch (Exception e) {
+
+        }
+
+        //we have to increment the number of times that the book has been checked out
+
+        try{
+            st = con.prepareStatement(incrementCheckoutSQL);
+            st.setString(1, isbn);
+            st.executeUpdate();
+
+        } catch (Exception e) {
+
+        }
+
+        //decrement the number of copies of the book there is in the library
+        try{
+            st = con.prepareStatement(decrementCopiesSQL);
+            st.setString(1, isbn);
+            st.executeUpdate();
+        } catch (Exception e) {
+
+        }
+
+        resultStr += "A checkout record has been made for:<BR>User: " + username + "<BR>Book Title: " + title + "<BR>ISBN: " + isbn;
+        return resultStr;
+    }
+
 
     /**
      * Allows a user to checkout a book specified by ISBN
@@ -1760,10 +2027,7 @@ public class Database {
 
             while(results.next())
             {
-                // System.out.println("ISBN: " + r.getString("isbn") + "\t ");
-                // System.out.println("Title: " + r.getString("title") + "\t ");
-                // System.out.println("Date marked as Lost: " + r.getString("returndate") + "\t ");
-                // System.out.println();
+            
                 resultStr += "ISBN: " + results.getString("isbn") + "<BR>";
                 resultStr += "Title: " + results.getString("title") + "<BR>";
                 resultStr += "Date Marked as Lost: " + results.getString("returndate") + "<BR>";

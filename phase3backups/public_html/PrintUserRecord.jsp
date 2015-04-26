@@ -45,7 +45,7 @@
 			<input type=submit value="Lookup User Record">
 		</form>
 
-		<%
+	<%
 	}	else {
 
 	String usernameval = request.getParameter("userValue");
