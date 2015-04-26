@@ -2699,6 +2699,128 @@ public class Database {
 
     }//end of PrintUserRecord
 
+    public static String PrintUserStatisticsWeb(String amount, String selection, Connection con)
+    {
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        String resultStr = "";
+        String topFrequency = "";
+        String count = null;
+
+        String getMaxCheckoutSQL = "SELECT COUNT(username) AS maxcheckoutcount FROM " + CheckoutRecordTable + " GROUP BY username ORDER BY maxcheckoutcount DESC LIMIT 1";
+        String getUserSQL = "SELECT username, COUNT(username) AS count FROM " + CheckoutRecordTable + " GROUP BY username";
+        String getUserReviewSQL = "SELECT username, COUNT(username) AS count FROM " + ReviewTable + " GROUP BY username";
+        String getMaxReviewSQL = "SELECT COUNT(username) AS reviewcount FROM " + ReviewTable + " GROUP BY username ORDER BY reviewcount DESC LIMIT 1";
+        String getMaxLostSQL =  "SELECT COUNT(username) AS lostcount FROM " + CheckoutRecordTable + " c WHERE c.lost = 1 GROUP BY username ORDER BY lostcount DESC LIMIT 1";
+        //users who checked out the most books
+        if(selection.matches("1"))
+        {
+            //get highest number of checkout
+            try{
+                st = con.prepareStatement(getMaxCheckoutSQL);
+                r = st.executeQuery();
+
+                while(r.next()){
+                    topFrequency = r.getString("maxcheckoutcount");
+                }
+            } catch (Exception e) {
+
+            }
+
+            //get users who match that checkoutcount
+            try {
+                st = con.prepareStatement(getUserSQL);
+                r = st.executeQuery();
+
+                while(r.next()) {
+                    if(r.getString("count").matches(topFrequency))
+                    {
+                        resultStr += "User: " + r.getString("username") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Number of books checked out: " + r.getString("count") + "<BR><BR>";
+                      
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+              resultStr += "The top user checked out " + topFrequency + " books";
+
+        }//end of users who checked out the most books
+
+        //users who rated the most number of books
+        if(selection.matches("2"))
+        {
+
+             //get highest number of reviews
+            try{
+                st = con.prepareStatement(getMaxReviewSQL);
+                r = st.executeQuery();
+
+                while(r.next()){
+                    topFrequency = r.getString("reviewcount");
+                }
+            } catch (Exception e) {
+
+            }
+
+            //get users who match that reviewcount
+            try {
+                st = con.prepareStatement(getUserReviewSQL);
+                r = st.executeQuery();
+
+                while(r.next()) {
+                    if(r.getString("count").matches(topFrequency)){
+                        resultStr += "User: " + r.getString("username") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Books reviewed: " + r.getString("count") + "<BR><BR>";
+                      
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+              resultStr += "The top user reviewed " + topFrequency + " books";
+
+        }//end of users who have rated the most number of books
+
+        //users who lost the most books
+        if(selection.matches("3"))
+        {
+            //get highest number of loscount
+            try{
+                st = con.prepareStatement(getMaxLostSQL);
+                r = st.executeQuery();
+
+                while(r.next()){
+                    topFrequency = r.getString("lostcount");
+                }
+            } catch (Exception e) {
+
+            }
+
+            //get users who match that checkoutcount
+            try {
+                st = con.prepareStatement(getUserSQL);
+                r = st.executeQuery();
+
+                while(r.next()) {
+                    if(r.getString("count").matches(topFrequency))
+                    {
+                        resultStr += "User: " + r.getString("username") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Books lost: " + r.getString("count") + "<BR><BR>";
+                      
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+
+              resultStr += "The top user lost " + topFrequency + " books";
+        } //end of users who have lost the most books
+
+
+        return resultStr;
+    }
+
     /**
      * Print out specified number of users whom:
      * have checked out the most books

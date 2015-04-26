@@ -51,8 +51,8 @@ String selection = request.getParameter("statsSelection");
 cs5530.Connector conn = new Connector();
 cs5530.Database d = new Database();
 
+out.println(cs5530.Database.PrintLibraryStatisticsWeb(amountval, selection, conn.con));
 
-out.println(d.PrintLibraryStatisticsWeb(amountval, selection, conn.con));
 
 conn.closeStatement();
 conn.closeConnection();
