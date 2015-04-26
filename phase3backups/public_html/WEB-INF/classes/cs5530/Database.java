@@ -370,6 +370,136 @@ public class Database {
 
     }//end of add book copy
 
+    public static boolean CheckWaitListWeb(String isbn, String username, Connection con)
+    {
+        boolean found = false;
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        String checkListSQL = "SELECT username FROM " + WaitListTable + " where isbn = ?;";
+
+        try{
+            st = con.prepareStatement(checkListSQL);
+            st.setString(1, isbn);
+            r = st.executeQuery();
+
+            while(r.next()){
+                if (r.getString("username").matches(username) && found == false) {
+                    found = true;
+                    break;
+                }
+
+            }
+        } catch (Exception e) {
+
+        }
+
+        return found;
+    }
+
+    public static String AddToWaitListWeb(String username, String isbn, Date today, Connection con)
+    {
+        ResultSet r = null;
+        PreparedStatement st = null;
+        
+
+        String addToListSQL = "INSERT INTO " + WaitListTable + " (username, isbn, dateadded) VALUES (?, ?, ?);";
+        String updateWaitCountSQL = "UPDATE " + RecordsTable + " SET waitcount = waitcount + 1 WHERE isbn = ?";
+
+        int month = 0, day = 0, year = 0;
+        String todayDate, time;
+        boolean found = false;
+        String resultStr = "";
+
+      
+
+        //check if isbn exists
+        if(!CheckForISBNWeb(isbn, con))
+        {
+            resultStr += "That ISBN does not exist.";
+            return resultStr;
+        }
+  
+        //construct date
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(today);
+
+
+        //get the current time
+        java.util.Date date = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        time = sdf.format(date).toString();
+
+        month = cal.get(Calendar.MONTH) + 1;
+        day = cal.get(Calendar.DAY_OF_MONTH);
+        year = cal.get(Calendar.YEAR);
+
+        //create today's date
+        todayDate = year + "-" + month + "-" + day + " " + time;
+
+        //Check if user is already on waitlist
+        if(CheckWaitListWeb(isbn, username, con))
+        {
+            resultStr += "You are already on a waitlist for this book.";
+            return resultStr;
+        }
+
+        //insert waitlist record
+        try{
+            st = con.prepareStatement(addToListSQL);
+            st.setString(1, username);
+            st.setString(2, isbn);
+            st.setString(3, todayDate);
+            st.executeUpdate();
+        } catch (Exception e) {
+
+        }
+
+        //increment waitcount in records table
+        try{
+            st = con.prepareStatement(updateWaitCountSQL);
+            st.setString(1,isbn);
+            st.executeUpdate();
+
+        } catch (Exception e) {
+
+        }
+
+        //report success
+        resultStr += username + " has been added to the waitlist for ISBN " + isbn;
+
+        return resultStr;
+
+    }
+
+    public static boolean CheckForISBNWeb(String isbn, Connection con)
+    {
+        boolean found = false;
+        ResultSet r = null;
+        PreparedStatement st = null;
+
+        String isbnquery = "SELECT isbn FROM " + RecordsTable + " WHERE isbn = ?";
+
+        try{
+            st = con.prepareStatement(isbnquery);
+            st.setString(1,isbn);
+            r = st.executeQuery();
+
+            while(r.next())
+            {
+                if(r.getString("ISBN").matches(isbn))
+                {
+                    found = true;
+                    break;
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+        return found;
+    }
+
 
 
     /**
