@@ -2,7 +2,12 @@
 <html>
 
 <head>
- <link rel="stylesheet" type="text/css" href="main.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+  <link rel="stylesheet" type="text/css" href="bootstrap.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
 
  <script LANGUAGE="javascript">
 
@@ -10,7 +15,6 @@
 
 </head>
 
-<h1>Leave book review...</h1>
 
 
 
@@ -24,19 +28,21 @@
 
 
   %>
-
+<div class="jumbotron">
+  <h1 class="text-center">Leave Book Review</h1>
+</div>
   <form name="LeaveReview" method=get onsubmit="return check_all_fields(this)" action="LeaveReview.jsp">
     Username:<BR>
-    <input type=hidden name="username">
-    <input type=text name="userValue" value="simp123" onFocus="value=''">
+    <input type=hidden class="form-control" name="username">
+    <input type=text class="form-control" name="userValue" value="simp123" onFocus="value=''">
     <br>ISBN:<br>
-    <input type=hidden name="isbn">
-    <input type="text" name="isbnValue" value="1122334455667788" onFocus="value=''">
+    <input type=hidden class="form-control" name="isbn">
+    <input type=text class="form-control" name="isbnValue" value="1122334455667788" onFocus="value=''">
     <br>Review:<br>
-    <textarea name="reviewValue" cols="50" rows="2">Your review here</textarea>
+    <textarea name="reviewValue" class="form-control"  cols="50" rows="2">Your review here</textarea>
     <br>Score:<br>
 
-    <select name="scoreSelection">
+    <select class="form-control" name="scoreSelection">
       <option value="1">1</option>
       <option value="2">2</option>
       <option value="3">3</option>
@@ -49,7 +55,7 @@
       <option value="10">10</option>
     </select>
     <br><br>
-    <input type=submit value="Add Review">
+    <input type=button class="btn btn-info"  value="Add Review">
   </form>
 
   <%
@@ -74,6 +80,6 @@ conn.closeConnection();
 }
 %>
 
-<BR><a href="LeaveReview.jsp">Leave Another Review</a></p>
+<BR><a href="LeaveReview.jsp" class="btn btn-primary" role="button">Leave Another Review</a>
 </body>
 </html>

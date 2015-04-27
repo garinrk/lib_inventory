@@ -2,14 +2,14 @@
 <html>
 
 <head>
-	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+	
 
 	<script LANGUAGE="javascript">
 
 	</script>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"> -->
-
+ 
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 </head>
@@ -65,7 +65,7 @@ conn.closeConnection();
 
 
 
-<BR>
-<BR><a href="UserStats.jsp">Get More User Statistics</a></p>
+<br><BR>
+	<a href="UserStats.jsp" class="btn btn-primary" role="button">Get More Statistics</a>
 </body>
 </html>

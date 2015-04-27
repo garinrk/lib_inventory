@@ -2,7 +2,11 @@
 	<html>
 
 	<head>
-		<link rel="stylesheet" type="text/css" href="main.css" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 		<script LANGUAGE="javascript">
 
@@ -19,8 +23,6 @@
 
 	</head>
 
-	<h1>Print user record</h1>
-
 
 	<body>
 
@@ -34,15 +36,17 @@
 		%>
 
 		
-
+<div class="jumbotron">
+	<h1 class="text-center">Print User Record</h1>
+</div>
 		<form name="UserLookup" method=get onsubmit="return check_all_fields(this)" action="PrintUserRecord.jsp">
 			Please enter a username:<br>
 
 			<input type=hidden name="username">
-			<input type=text name="userValue" value="simp123" onFocus="value=''">
+			<input class="form-control" type=text name="userValue" value="simp123" onFocus="value=''">
 
 			<br><br>
-			<input type=submit value="Lookup User Record">
+			<input type=submit class="btn btn-info" value="Lookup User Record">
 		</form>
 
 	<%
@@ -61,8 +65,8 @@
 	conn.closeConnection();
 	}
 	%>
-
-	<BR><a href="PrintUserRecord.jsp"> Lookup another user </a></p>
+	<br><BR>
+	<a href="PrintUserRecord.jsp" class="btn btn-primary" role="button">Lookup Another User</a>
 
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<link rel="stylesheet" type="text/css" href="main.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
 	<script LANGUAGE="javascript">
 
@@ -17,9 +17,14 @@
 
 	</script>
 
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
 </head>
 
-<h1>Add user to waitlist</h1>
 
 
 <body>
@@ -32,18 +37,22 @@
 
 
 	%>
+
+	<div class="jumbotron">
+	<h1 class="text-center">Add user to waitlist</h1>
+</div>
 	<form name="AddToWaitList" method=get onsubmit="return check_all_fields(this)" action="AddToWaitList.jsp">
 		Username:<BR>
-		<input type=hidden name="username">
-		<input type=text name="userValue" value="simp123" onFocus="value=''">
+		<input type=hidden class="form-control" name="username">
+		<input type=text class="form-control" name="userValue" value="simp123" onFocus="value=''">
 		
 		<br>ISBN:<br>
 		
-		<input type=hidden name="isbn">
-		<input type="text" name="isbnValue" value="1122334455667788" onFocus="value=''">
+		<input type=hidden class="form-control" name="isbn">
+		<input type="text" class="form-control" name="isbnValue" value="1122334455667788" onFocus="value=''">
 		<br>
 		<br>
-		<input type=submit value="Add User To WaitList">
+		<input type=submit class="btn btn-info" value="Add User To WaitList">
 	</form>
 
 	<%
@@ -64,6 +73,6 @@
 	}
 	%>
 
-	<BR><BR><a href="AddToWaitList.jsp">Add another user to a waitlist</a></p>
+	<BR><BR><a href="AddToWaitList.jsp" class="btn btn-primary" role="button">Add another user to a waitlist</a></p>
 	</body>
 	</html>

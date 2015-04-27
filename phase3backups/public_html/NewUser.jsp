@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<link rel="stylesheet" type="text/css" href="main.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
 	<script LANGUAGE="javascript">
 
@@ -14,13 +14,17 @@
 		}
 		return true;
 	}
-
-
 	</script>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 </head> 
 
-<h1>Adding a new user to the library</h1>
+
 
 
 
@@ -40,40 +44,43 @@
 
 	%>
 
-	Please enter the required information:<br>
-	<form name="UserAdd" method=get onsubmit="return check_all_fields(this)" action="NewUser.jsp">
+	<div class="jumbotron">
+	<h1 class="text-center">Add New User</h1>
+</div>
+
+	<form role="form" name="UserAdd" method=get onsubmit="return check_all_fields(this)" action="NewUser.jsp">
 
 		<br>Unique Username<br>
-		<input type=hidden name="username">
-		<input type=text name="userValue" value="simp123" onFocus="value=''">
+		<input class="form-control" type=hidden name="username">
+		<input class="form-control" type=text name="userValue" value="simp123" onFocus="value=''">
 
 		<br>Identification Number<br>
-		<input type=hidden name="cardid">
-		<input type=text name="idValue" value="123456789" onFocus="value=''">
+		<input class="form-control" type=hidden name="cardid">
+		<input class="form-control" type=text name="idValue" value="123456789" onFocus="value=''">
 
 
 		<br>Full Name<br>
 		<!-- <input type="text" name="fullname"> -->
-		<input type=hidden name="full_name">
-		<input type=text name="nameValue" value="Homer Simpson" onFocus="value=''">
+		<input class="form-control" type=hidden name="full_name">
+		<input class="form-control" type=text name="nameValue" value="Homer Simpson" onFocus="value=''">
 
 		<br>Address<br>
 		<!-- <input type="text" name="address"> -->
-		<input type=hidden name="address">
-		<input type=text name="addressValue" value="123 Fake Street" onFocus="value=''">
+		<input class="form-control" type=hidden name="address">
+		<input class="form-control" type=text name="addressValue" value="123 Fake Street" onFocus="value=''">
 
 		<br>Phone Number<br>
 		<!-- <input type="text" name="phonenumber"> -->
-		<input type=hidden name="phonenumber">
-		<input type=text name="phoneNumberValue" value="555-555-5555" onFocus="value=''">
+		<input class="form-control" type=hidden name="phonenumber">
+		<input class="form-control" type=text name="phoneNumberValue" value="555-555-5555" onFocus="value=''">
 
 		<br>Email Address<br>
 		<!-- <input type="text" name="email"> -->
-		<input type=hidden name="email">
-		<input type=text name="emailValue" value="user@site.com" onFocus="value=''">		
+		<input class="form-control" type=hidden name="email">
+		<input class="form-control" type=text name="emailValue" value="user@site.com" onFocus="value=''">		
 
 		<br><br>
-		<input type=submit value="Add New User">
+		<input type=submit class="btn btn-info" value="Add New User">
 
 	</form>
 
@@ -106,16 +113,13 @@
 	out.println("Phone Number: " + phoneVal + "<br>");
 	out.println("Email: " + emailVal + "<br>");
 
-	%>
-	
-<!-- Close connection  -->
-<%
 conn.closeStatement();
 conn.closeConnection();
 }
 %>
+<br>
+<a href="NewUser.jsp" class="btn btn-primary" role="button">Add Another User</a>
 
-<BR><a href="NewUser.jsp"> Add another user </a></p>
 
 </body>
 </html>
