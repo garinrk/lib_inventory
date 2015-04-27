@@ -1,56 +1,64 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-<head>
-<title>5530 Library Database</title>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-	<!--Link to stylesheet -->
-	<link rel="stylesheet" type="text/css" href="main.css" />
+<head><!-- 
+	index.html for CS 5530 - Library Application Project
+	Made by Garin Richards -->
+	<title>5530 Library Database</title>
+
+	<!-- Stylesheet and bootstrap links -->
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<link rel="stylesheet" href="bootstrap.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
 </head>
 
-<h1>
-Garin Richards<br>
-CS 5530 - Database Systems<br>  
-</h1>
+<div class="jumbotron">
+	<h1 class="text-center">CS 5530 Library Application</h1>      
+	<p class="text-center">Garin Richards, CS 5530 - Database Systems</p>
+</div>
 
-Library Functionalities:
-<br>---<br>
+<div class="well">
+	<h4>User Functionalities</h4><br>
 
+</div>
+<div class="text-center">
+	<ul class="pagination">
+		<li><a href="NewUser.jsp">Add User to Database</a></li>
+		<li><a href="PrintUserRecord.jsp">Get User Record</a></li>
+		<li><a href="UserStats.jsp">Get User Record</a></li>
+		<li><a href="LeaveReview.jsp">Leave a Book Review</a></li>
+		<li><a href="AddToWaitList.jsp">Add User to Waitlist</a></li>
+	</ul>
+</div>
+<div class="well"><h4>Library Functionalities</h4></div>
+<div class="text-center">
+	<ul class="pagination">
+		<li><a href="Checkout.jsp">Checkout Book</a></li>
+		<li><a href="Return.jsp">Return Book</a></li>
+		<li><a href="AddRecord.jsp">Add Book Record</a></li>
+		<li><a href="AddCopy.jsp">Add Book Copiy</a></li>
+		<li><a href="BookRecord.jsp">Get Book Record</a></li>
+		<li><a href="Browse.jsp">Browse Library</a></li>
+		<li><a href="CheckLateList.jsp">Check the Late Book List</a></li>
+	</ul>
+</div>
 
-<a href="NewUser.jsp">Add a new user</a>-<br>
-<a href="PrintUserRecord.jsp">Print out a user's record</a>-<br>
-<br>----<br>
-
-<a href="Browse.jsp">Browse Library</a><br>
-<a href="Checkout.jsp">Checkout a book</a>-<br>
-<a href="Return.jsp">Return a book</a>-<br>
-<br>----<br>
-<a href="AddRecord.jsp">Add a new book record</a>-<br>
-<a href="AddCopy.jsp">Add a new copy of a book</a>-<br>
-<a href="BookRecord.jsp">Print out a book's record</a>-<br>
-<br>----<br>
-
-<a href="LeaveReview.jsp">Leave a review for a book</a>-<br>
-<a href="AddToWaitList.jsp">Add user to waitlist</a>-<br>
-<a href="CheckLateList.jsp">Check the late book list</a>-<br>
-<br>----<br>
-<a href="LibraryStats.jsp">Print out library stats</a>-<br>
-<a href="UserStats.jsp">Print out user stats</a><br>
-<br>----<br>
-<br><br>
-<a href="orders.sql">orders.sql</a><br>
-<a href="orders.jsp">orders.jsp</a><br>
-
-
-
-
+<div class="well"><h4>Statistics</h4></div>
+<div class="text-center">
+	<ul class="pagination">
+		<li><a href="LibraryStats.jsp">Library Statistics</a></li>
+		<li><a href="UserStats.jsp">User Statistics</a></li>
+	</ul>
+</div>
 </body>
 
 <!-- Add jQuery From the Google AJAX Libraries -->
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
 
-	<!-- jQuery Color Plugin -->
-	<script type="text/javascript" src="jquery.color.js"></script>
+<!-- jQuery Color Plugin -->
+<script type="text/javascript" src="jquery.color.js"></script>
 
-	<!-- Import The jQuery Script -->
-	<script type="text/javascript" src="jMenu.js"></script>
+<!-- Import The jQuery Script -->
+<script type="text/javascript" src="jMenu.js"></script>
 </html>
