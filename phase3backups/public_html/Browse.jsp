@@ -34,11 +34,11 @@
 
 			<div class="form-group">
 				<label for="Author(s):">Title Word(s):</label>
-				<textarea class="form-control" rows="1" name="TitleWords">TitleWord1,TitleWord2,TitleWord3...</textarea>
+				<textarea class="form-control" onFocus="value=''" rows="1" name="TitleWords">Word1,Word2,Word3</textarea>
 			</div>
 
 			<label for="Author(s):">Author(s):</label>
-			<textarea class="form-control" rows="1" name="authors">Author1,Author2,Author3</textarea>
+			<textarea class="form-control" onFocus="value=''" rows="1" name="authors">Author1,Author2,Author3</textarea>
 		</div>
 
 
@@ -56,7 +56,7 @@
 		<label><input type="radio" name="list" value="availablebooks" checked="">Books that are available for checkout</label>
 	</div>
 	<div class="radio">
-		<label><input type="radio" name="list" value="avgreview">All books in the library record system</label>
+		<label><input type="radio" name="list" value="allbooks">All books in the library record system</label>
 	</div>
 	<br>
 	Sort by...<br>
@@ -98,7 +98,9 @@
 
 <%
 
-out.println(cs5530.Database.BrowseLibraryWeb(titlewords, authors, publishervalue, subjectval, false, "testsort", conn.con  ));
+boolean allBooks = listval.matches("allbooks");
+
+out.println(cs5530.Database.BrowseLibraryWeb(titlewords, authors, publishervalue, subjectval, allBooks, sortval , conn.con  ));
 
 	
 

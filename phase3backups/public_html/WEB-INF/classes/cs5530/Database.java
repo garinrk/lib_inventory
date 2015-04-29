@@ -892,9 +892,128 @@ public class Database {
 
     public static String BrowseLibraryWeb(String[] titleWords, String[] authors, String publisher, String subject, boolean allBooks, String sortBy, Connection con)
     {
-        String resultStr = "This is a result";
+        String resultStr = "this is wrong";
+        int count = 1;
+        int numberOfTitleWords = titleWords.length;
+        int numberOfAuthors = authors.length;
 
-        return resultStr;
+        boolean entireLibrary = false;
+        boolean onlyAvailable = false;
+
+
+        boolean sortByYear = false;
+        boolean sortByScore = false;
+        boolean sortByPopularity = false;
+
+        PreparedStatement st = null;
+        ResultSet r = null;
+
+        if(sortBy.matches("pubyear"))
+            sortByYear = true;
+        if(sortBy.matches("avgreview"))
+            sortByScore = true;
+        if(sortBy.matches("popularity"));
+            sortByPopularity = true;
+
+        String sql = "SELECT * FROM " + RecordsTable +" r, " + AuthorListTable + " a, " + InventoryTable + " i WHERE r.isbn = a.isbn";
+
+        // resultStr += "You selected " + allBooks + " for showing all books<BR>";
+        // resultStr += "You selected " + sortBy + " for sorting results";
+
+        //add title words
+         for(int i = 0; i < titleWords.length; i++)
+        {
+            if(titleWords.length != 0){
+                sql = sql.concat("\n AND title LIKE %?% \n");
+                // count++;
+            }
+        }
+
+        //add publisher
+        sql = sql.concat("\n AND publisher LIKE %?% \n");
+        // count++;
+
+        sql = sql.concat("\n AND subject LIKE %?%\n");
+        // count++;
+
+        sql = sql.concat("\n AND \n\t(");
+
+        for(int i = 0; i < authors.length; i++)
+        {
+            if(authors.length == 0){
+                sql = sql.concat("\n authorname LIKE %?%");
+                // count++;
+            }
+            else if(i == authors.length - 1){
+                sql = sql.concat("\n authorname LIKE %?%");
+                // count++;
+            }
+            else{
+                sql = sql.concat("\n authorname LIKE %?% \n\t OR");
+                // count++;
+            }
+        }
+
+        //no duplicates
+        sql = sql.concat("\n GROUP BY a.authorname");
+
+        //only available copies?
+        if(onlyAvailable)
+            sql = sql.concat("\n AND copies > 0");
+
+        if(sortByYear)
+            sql = sql.concat("\n ORDER BY pubyear DESC");
+
+        if(sortByScore)
+            sql = sql.concat("\n ORDER BY avgreviewscore DESC");
+
+        if(sortByPopularity)
+            sql = sql.concat("\n ORDER BY checkoutcount DESC");
+
+        //add params to sql query
+        try{
+
+            st=con.prepareStatement(sql);
+
+            for(int i = 1; i < numberOfTitleWords+1; i++)
+            {
+                count++;
+                st.setString(i,titleWords[i]);
+            }
+
+            st.setString(count,publisher);
+            count++;
+            st.setString(count, subject);
+            count++;
+
+            for(int i = 0; i < numberOfAuthors; i++)
+            {
+                count++;
+                st.setString(count, authors[i]);
+                
+            }
+
+            r = st.executeQuery();
+
+            while (r.next())
+            {
+                resultStr += "ISBN: " + r.getString("isbn") + "<BR>";
+                resultStr += "Title: " + r.getString("title") + "<BR>";
+                resultStr += "Author: " + r.getString("authorname") + "<BR>";
+                resultStr += "Publisher: " + r.getString("publisher") + "<BR>";
+                resultStr += "Format: " + r.getString("format") + "<BR>";
+                resultStr += "Subject: " + r.getString("subject") + "<BR>";
+                resultStr += "Book Summary: " + r.getString("booksummary") + "<BR>";
+                resultStr += "Average Review Score: " + r.getString("avgreviewscore") + "<BR>";
+                resultStr += "Amount of times checked that out: " + r.getString("checkoutcount") + "<BR>";
+            }
+
+
+        } catch (Exception e){
+
+        }
+
+        return st.toString();
     }
 
     /**
