@@ -890,6 +890,13 @@ public class Database {
 
     }
 
+    public static String BrowseLibraryWeb(String[] titleWords, String[] authors, String publisher, String subject, boolean allBooks, String sortBy, Connection con)
+    {
+        String resultStr = "This is a result";
+
+        return resultStr;
+    }
+
     /**
      * Returns a number of results from the library based on a number of criteria:
      *

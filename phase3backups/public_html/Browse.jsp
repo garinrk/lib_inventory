@@ -1,50 +1,112 @@
 <%@ page language="java" import="cs5530.*" %>
 <html>
 
-	<head>
-		 <link rel="stylesheet" type="text/css" href="main.css" />
+<head>
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
-	<script LANGUAGE="javascript">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
-	</head>
+</head>
 
-	<h1>Browse Library</h1>
-
-
+<div class="jumbotron">
+	<h1 class="text-center">Browse Library</h1>
+</div>
 
 <body>
-Title Word(s):<br>
-<textarea name="titlewords" cols="50" rows="2">
-titleword1,titleword2,titleword3...
-</textarea>
-<br>
-Author(s)
-<br>	
 
-<textarea name="authorstosearchfor" cols="50" rows="2">
-author1,author2,author3...
-</textarea>
-<br>
-Publisher:<br>
-	<input type="text" name="publisher">
-<br>
-Subject:<br>
-	<input type="text" name="subject">
-<br>
+	<% 
+
+	String publisherattr = request.getParameter("publisher");
+	String subjectattr = request.getParameter("subject");
 
 
-<br><br>
-Only list...<br>
-<INPUT TYPE=RADIO NAME="availability" VALUE="availablebooks">Books that are available for checkout<BR>
-<INPUT TYPE=RADIO NAME="availability" VALUE="allbooks">All books in the library record system<BR>
-<br>
-Sort by...<br>
-<INPUT TYPE=RADIO NAME="sort" VALUE="pubyear">Year published<BR>
-<INPUT TYPE=RADIO NAME="sort" VALUE="allbooks">Average review score<BR>
-<INPUT TYPE=RADIO NAME="sort" VALUE="allbooks">Popularity<BR>
-<br>
-<input type=submit value="Search Library">
+	if(publisherattr == null){
+
+	%>
+
+<form role = "form">
+	<form role="form">
+		<div class="form-group">
+
+
+			<div class="form-group">
+				<label for="Author(s):">Title Word(s):</label>
+				<textarea class="form-control" rows="1" name="TitleWords">TitleWord1,TitleWord2,TitleWord3...</textarea>
+			</div>
+
+			<label for="Author(s):">Author(s):</label>
+			<textarea class="form-control" rows="1" name="authors">Author1,Author2,Author3</textarea>
+		</div>
+
+
+		<br>Publisher
+		<input class="form-control" type=hidden name="publisher">
+		<input class="form-control" type=text name="pubValue" value="Penguin Publishing" onFocus="value=''">
+		<br>Subject <br>
+		<input class="form-control" type=hidden name="subject">
+		<input class="form-control" type=text name="subValue" value="Sci-Fi" onFocus="value=''">
+		<br>
+
+
+	Only list...<br>
+	<div class="radio">
+		<label><input type="radio" name="list" value="availablebooks" checked="">Books that are available for checkout</label>
+	</div>
+	<div class="radio">
+		<label><input type="radio" name="list" value="avgreview">All books in the library record system</label>
+	</div>
+	<br>
+	Sort by...<br>
+
+	<div class="radio">
+		<label><input type="radio" name="sort" value="pubyear" checked="">Year Published</label>
+	</div>
+	<div class="radio">
+		<label><input type="radio" name="sort" value="avgreview">Average Review Score</label>
+	</div>
+	<div class="radio">
+		<label><input type="radio" name="sort" value="popularity">Popularity</label>
+	</div>
+	<br><br>
+	<input type=submit class="btn btn-info" value="Send Query">
+
+
+	<br><br>
+	<a href="NewUser.jsp" class="btn btn-primary" role="button">Send another Query</a>
+
+		</form>
+<%
+			} else {
+	String[] authors = request.getParameter("authors").split(",");
+	String publishervalue = request.getParameter("pubvalue");
+	String subjectval = request.getParameter("subValue");
+	String[] titlewords = request.getParameter("TitleWords").split(",");
+	String listval = request.getParameter("list");
+	String sortval = request.getParameter("sort");
+
+
+	cs5530.Connector conn = new Connector();
+	cs5530.Database d = new Database();
+
+
+%>
+<h1> Results: </h1>
+
+
+<%
+
+out.println(cs5530.Database.BrowseLibraryWeb(titlewords, authors, publishervalue, subjectval, false, "testsort", conn.con  ));
+
+	
+
+conn.closeStatement();
+conn.closeConnection();
+}
+%>
 </body>
+
+
 </html>
