@@ -1,4 +1,4 @@
-<%@ page language="java" import="cs5530.*" %>
+<%@ page language="java" import="cs5530.*, java.util.ArrayList" %>
 <html>
 
 <head>
@@ -27,85 +27,114 @@
 
 	%>
 
-<form role = "form">
-	<form role="form">
-		<div class="form-group">
-
-
+	<form role = "form">
+		<form role="form">
 			<div class="form-group">
-				<label for="Author(s):">Title Word(s):</label>
-				<textarea class="form-control" onFocus="value=''" rows="1" name="TitleWords">Word1,Word2,Word3</textarea>
+
+
+				<div class="form-group">
+					<label for="Author(s):">Title Word(s):</label>
+					<textarea class="form-control" onFocus="value=''" rows="1" name="TitleWords">Word1,Word2,Word3</textarea>
+				</div>
+
+				<label for="Author(s):">Author(s):</label>
+				<textarea class="form-control" onFocus="value=''" rows="1" name="authors">Author1,Author2,Author3</textarea>
 			</div>
 
-			<label for="Author(s):">Author(s):</label>
-			<textarea class="form-control" onFocus="value=''" rows="1" name="authors">Author1,Author2,Author3</textarea>
-		</div>
+
+			<br>Publisher
+			<input class="form-control" type=hidden name="publisher">
+			<input class="form-control" type=text name="pubValue" value="Penguin Publishing" onFocus="value=''">
+			<br>Subject <br>
+			<input class="form-control" type=hidden name="subject">
+			<input class="form-control" type=text name="subValue" value="Sci-Fi" onFocus="value=''">
+			<br>
 
 
-		<br>Publisher
-		<input class="form-control" type=hidden name="publisher">
-		<input class="form-control" type=text name="pubValue" value="Penguin Publishing" onFocus="value=''">
-		<br>Subject <br>
-		<input class="form-control" type=hidden name="subject">
-		<input class="form-control" type=text name="subValue" value="Sci-Fi" onFocus="value=''">
-		<br>
+			Only list...<br>
+			<div class="radio">
+				<label><input type="radio" name="list" value="availablebooks" checked="">Books that are available for checkout</label>
+			</div>
+			<div class="radio">
+				<label><input type="radio" name="list" value="allbooks">All books in the library record system</label>
+			</div>
+			<br>
+			Sort by...<br>
+
+			<div class="radio">
+				<label><input type="radio" name="sort" value="pubyear" checked="">Year Published</label>
+			</div>
+			<div class="radio">
+				<label><input type="radio" name="sort" value="avgreview">Average Review Score</label>
+			</div>
+			<div class="radio">
+				<label><input type="radio" name="sort" value="popularity">Popularity</label>
+			</div>
+			<br><br>
+			<input type=submit class="btn btn-info" value="Send Query">
 
 
-	Only list...<br>
-	<div class="radio">
-		<label><input type="radio" name="list" value="availablebooks" checked="">Books that are available for checkout</label>
-	</div>
-	<div class="radio">
-		<label><input type="radio" name="list" value="allbooks">All books in the library record system</label>
-	</div>
-	<br>
-	Sort by...<br>
-
-	<div class="radio">
-		<label><input type="radio" name="sort" value="pubyear" checked="">Year Published</label>
-	</div>
-	<div class="radio">
-		<label><input type="radio" name="sort" value="avgreview">Average Review Score</label>
-	</div>
-	<div class="radio">
-		<label><input type="radio" name="sort" value="popularity">Popularity</label>
-	</div>
-	<br><br>
-	<input type=submit class="btn btn-info" value="Send Query">
-
-
-	<br><br>
-	<a href="NewUser.jsp" class="btn btn-primary" role="button">Send another Query</a>
+			<br><br>
+			<a href="NewUser.jsp" class="btn btn-primary" role="button">Send another Query</a>
 
 		</form>
-<%
-			} else {
+		<%
+	} else {
 	String[] authors = request.getParameter("authors").split(",");
-	String publishervalue = request.getParameter("pubvalue");
+	String publishervalue = request.getParameter("pubValue");
 	String subjectval = request.getParameter("subValue");
 	String[] titlewords = request.getParameter("TitleWords").split(",");
 	String listval = request.getParameter("list");
 	String sortval = request.getParameter("sort");
+	int authorCount = authors.length;
+	int titleCount = titlewords.length;
+	boolean allBooks = listval.matches("allbooks");
+	out.println("The value of sortval: " + sortval + " <BR>");
 
+
+	ArrayList<String> params = new ArrayList<String>();
+
+for(int i = 0; i < titlewords.length; i++)
+	{
+		params.add(titlewords[i]);
+	}
+
+	//add parameters to arraylist
+	for(int i = 0; i < authors.length; i++)
+	{
+		params.add(authors[i]);
+		
+	}
+
+
+	
+	//add publsiher
+	params.add(publishervalue);
+
+	//add subject
+	params.add(subjectval);
+
+	
 
 	cs5530.Connector conn = new Connector();
 	cs5530.Database d = new Database();
 
 
-%>
-<h1> Results: </h1>
+	%>
+	<h1> Results: </h1>
 
 
-<%
-
-boolean allBooks = listval.matches("allbooks");
-
-out.println(cs5530.Database.BrowseLibraryWeb(titlewords, authors, publishervalue, subjectval, allBooks, sortval , conn.con  ));
+	<%
 
 	
 
-conn.closeStatement();
-conn.closeConnection();
+	out.println(cs5530.Database.BrowseLibraryWeb(titleCount, authorCount, params, allBooks, sortval, conn.con ));
+	//out.println(cs5530.Database.BrowseLibraryWeb(titlewords, authors, publishervalue, subjectval, allBooks, sortval , conn.con  ));
+
+
+
+	conn.closeStatement();
+	conn.closeConnection();
 }
 %>
 </body>
