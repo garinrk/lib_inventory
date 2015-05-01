@@ -774,15 +774,13 @@ public static void AddUserWeb(String username, String idnumber, String fullname,
 {
     boolean success;
     String sql;
-    ResultSet results;
+    int results;
     PreparedStatement st;
 
     sql = "INSERT INTO " + UserTable + " (username, cardid, full_name, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?)";
 
-  
 
-
-        try {
+   try {
 //set sql parameters
             st = con.prepareStatement(sql);
             st.setString(1, username);
@@ -792,10 +790,14 @@ public static void AddUserWeb(String username, String idnumber, String fullname,
             st.setString(5, address);
             st.setString(6, phonenumber);
             st.executeUpdate();
+
+            
       
         } catch (Exception e) {
 
         }
+
+    
 
 }
 

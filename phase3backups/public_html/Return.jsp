@@ -78,12 +78,16 @@ cs5530.Connector conn = new Connector();
 if(usernameval != "" && isbnval != "" && lost != "" && year != "" && month != "" && day != "" ){
 
 if(lost.equals("1"))
-isLost = true;
+	isLost = true;
 else
-isLost = false;
+	isLost = false;
 
 out.println(cs5530.Database.ReturnBookWeb(usernameval, isbnval, isLost, returnDate, conn.con));
 
+if(isLost)
+{
+	out.println("Book marked as lost");
+}
 
 conn.closeStatement();
 conn.closeConnection();

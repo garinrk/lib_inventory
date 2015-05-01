@@ -74,7 +74,7 @@ out.println("<BR><BR><h3>No empty fields, please try again</h3>");
 }
 
 %>
-
+<br>
 <a href="AddToWaitList.jsp" class="btn btn-primary" role="button">Add another user to a waitlist</a></p>
 <div class="text-center"> 
 	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>

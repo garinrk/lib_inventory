@@ -55,7 +55,7 @@ String usernameval = request.getParameter("userValue");
 cs5530.Connector conn = new Connector();
 
 if(usernameval != ""){
-//call function
+
 out.println(cs5530.Database.PrintUserRecordWeb(usernameval, conn.con));
 
 

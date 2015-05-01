@@ -51,7 +51,7 @@ Spring 2015
 		<input type="text" class="form-control" name="isbnValue">
 		<br>
 		Author(s):<br>
-		<textarea name="authorsValue" class="form-control" cols="50" rows="2">Comma Separated Example: Author1,Author2,Author3
+		<textarea name="authorsValue" class="form-control" cols="50" rows="2" onFocus="value=''">Comma Separated Example: Author1,Author2,Author3
 		</textarea>
 		<br>
 		Summary:<br>

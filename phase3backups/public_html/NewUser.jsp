@@ -85,15 +85,17 @@ Spring 2015
 
 	else {
 		boolean existing = cs5530.Database.CheckForUserWeb(userNameVal, conn.con);
+		
 
 		if(existing){
 
 		out.println("There already exists a user with that username in the database");
 
-		conn.closeStatement();
-		conn.closeConnection();
+	//	conn.closeStatement();
+	//	conn.closeConnection();
 
 		}
+
 		else {
 
 		cs5530.Database.AddUserWeb(userNameVal, idVal, nameVal, addressVal, phoneVal, emailVal, conn.con);
@@ -113,7 +115,7 @@ Spring 2015
 
 
 %>
-
+<br>
 <a href="NewUser.jsp" class="btn btn-primary" role="button">Add Another User</a>
 	<div class="text-center"> 
 		<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
