@@ -772,28 +772,30 @@ public static void AddToWaitList(Date today) {
 
 public static void AddUserWeb(String username, String idnumber, String fullname, String address, String phonenumber, String email, Connection con) throws Exception
 {
-    String resultStr = "Success";
+    boolean success;
     String sql;
     ResultSet results;
     PreparedStatement st;
-//query to add user to database
+
     sql = "INSERT INTO " + UserTable + " (username, cardid, full_name, email, address, phonenumber) VALUES (?, ?, ?, ?, ?, ?)";
 
+  
 
-    try {
+
+        try {
 //set sql parameters
-        st = con.prepareStatement(sql);
-        st.setString(1, username);
-        st.setString(2, idnumber);
-        st.setString(3, fullname);
-        st.setString(4, email);
-        st.setString(5, address);
-        st.setString(6, phonenumber);
-        st.executeUpdate();
-    } catch (Exception e) {
+            st = con.prepareStatement(sql);
+            st.setString(1, username);
+            st.setString(2, idnumber);
+            st.setString(3, fullname);
+            st.setString(4, email);
+            st.setString(5, address);
+            st.setString(6, phonenumber);
+            st.executeUpdate();
+      
+        } catch (Exception e) {
 
-    }
-
+        }
 
 }
 
@@ -976,29 +978,32 @@ try{
         st.setString(i+1, "%" + params.get(i) + "%");
     }
 
-   // r = st.executeQuery();
+   r = st.executeQuery();
 
-    // while (r.next())
-    // {
-    //     resultStr += "ISBN: " + r.getString("isbn") + "<BR>";
-    //     resultStr += "Title: " + r.getString("title") + "<BR>";
-    //     resultStr += "Author: " + r.getString("authorname") + "<BR>";
-    //     resultStr += "Publisher: " + r.getString("publisher") + "<BR>";
-    //     resultStr += "Format: " + r.getString("format") + "<BR>";
-    //     resultStr += "Subject: " + r.getString("subject") + "<BR>";
-    //     resultStr += "Book Summary: " + r.getString("booksummary") + "<BR>";
-    //     resultStr += "Average Review Score: " + r.getString("avgreviewscore") + "<BR>";
-    //     resultStr += "Amount of times checked that out: " + r.getString("checkoutcount") + "<BR>";
-    // }
+    while (r.next())
+    {
+        resultStr += "----------------------<BR><BR>";
+        resultStr += "ISBN: " + r.getString("isbn") + "<BR>";
+        resultStr += "Title: " + r.getString("title") + "<BR>";
+        resultStr += "Author: " + r.getString("authorname") + "<BR>";
+        resultStr += "Publisher: " + r.getString("publisher") + "<BR>";
+        resultStr += "Year Published: " + r.getString("pubyear") + "<BR>";
+        resultStr += "Format: " + r.getString("format") + "<BR>";
+        resultStr += "Subject: " + r.getString("subject") + "<BR>";
+        resultStr += "Book Summary: " + r.getString("booksummary") + "<BR>";
+        resultStr += "Average Review Score: " + r.getString("avgreviewscore") + "<BR>";
+        resultStr += "Amount of times checked that out: " + r.getString("checkoutcount") + "<BR>";
+    }
 
 
 } catch (Exception e){
 
 }
 
-        // return sql;
-return st.toString();
-// return test;
+//         return sql;
+// // // return st.toString();
+// // // return test;
+return resultStr;
     }
 
 /**
@@ -1407,16 +1412,6 @@ public static boolean CheckForUserWeb(String username, Connection conn)
         st = conn.prepareStatement(sql);
         st.setString(1, username);
         r = st.executeQuery();
-    } catch (Exception e) {
-        e.printStackTrace();
-
-    }
-
-    if(verbose)
-        PrintSQLStatement(st, sql);
-
-//check results for if database has username
-    try {
 
         while (r.next()) {
             if (r.getString("username").matches(username) && found == false) {
@@ -1426,9 +1421,9 @@ public static boolean CheckForUserWeb(String username, Connection conn)
 
         }
     } catch (Exception e) {
+        e.printStackTrace();
 
     }
-
     return found;
 }
 
@@ -1562,7 +1557,7 @@ public static boolean CheckWaitList(String isbn, String username)
 
 public static String CheckoutBookWeb(String username, String isbn, Date today, Connection con)
 {
-    String resultStr = "Hello World";
+    String resultStr = "";
     String oldestuser = null;
     String time;
     String duedate;
@@ -1579,6 +1574,17 @@ public static String CheckoutBookWeb(String username, String isbn, Date today, C
     boolean availableforcheckout = false;
     boolean existingCheckout;
 
+    if(!CheckForISBNWeb(isbn,con))
+    {
+        resultStr += "That ISBN does not exist";
+        return resultStr;
+    }
+
+    if(!CheckForUserWeb(username, con))
+    {
+        resultStr += "That user does not exist";
+        return resultStr;
+    }
 
     PreparedStatement st = null;
     ResultSet results = null;
@@ -3821,6 +3827,19 @@ public static String ReturnBookWeb(String username, String isbn, boolean lost, S
     Date today = new Date();
 
     time = timeFormat.format(today).toString();
+
+    if(!CheckForISBNWeb(isbn,con))
+    {
+        resultStr += "That ISBN does not exist";
+        return resultStr;
+    }
+
+    if(!CheckForUserWeb(username, con))
+    {
+        resultStr += "That user does not exist";
+        return resultStr;
+    }
+
 
     returnDate += " " + time;
 

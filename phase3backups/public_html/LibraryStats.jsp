@@ -1,12 +1,17 @@
 <%@ page language="java" import="cs5530.*" %>
 <html>
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+-->
+
 
 <head>
 	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
-
-	<script LANGUAGE="javascript">
-
-	</script>
 
 </head>
 
@@ -33,7 +38,7 @@
 </div>
 
 
-	<form name="GetLibraryStats" method=get onsubmit="return check_all_fields(this)" action="LibraryStats.jsp">
+	<form name="GetLibraryStats" method=get action="LibraryStats.jsp">
 		Number of books (N) :<BR>
 		<input type=hidden class="form-control" name="numberofbooks">
 		<input type=text class="form-control" name="booksValue" value="2" onFocus="value=''">
@@ -58,15 +63,12 @@ String amountval = request.getParameter("booksValue");
 String selection = request.getParameter("statsSelection");
 
 cs5530.Connector conn = new Connector();
-cs5530.Database d = new Database();
 
 out.println(cs5530.Database.PrintLibraryStatisticsWeb(amountval, selection, conn.con));
 
 
 conn.closeStatement();
 conn.closeConnection();
-
-
 
 }
 %>

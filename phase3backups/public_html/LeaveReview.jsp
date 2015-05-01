@@ -1,6 +1,15 @@
 <%@ page language="java" import="cs5530.*" %>
 <html>
 
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+-->
+
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
  
@@ -8,15 +17,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
-
- <script LANGUAGE="javascript">
-
- </script>
-
 </head>
-
-
-
 
 <body>
 
@@ -26,20 +27,20 @@
 
   if(usernameattr == null){
 
-
   %>
-<div class="jumbotron">
-  <h1 class="text-center">Leave Book Review</h1>
-</div>
-  <form name="LeaveReview" method=get onsubmit="return check_all_fields(this)" action="LeaveReview.jsp">
+  <div class="jumbotron">
+    <h1 class="text-center">Leave Book Review</h1>
+  </div>
+
+  <form name="LeaveReview" method=get action="LeaveReview.jsp">
     Username:<BR>
     <input type=hidden class="form-control" name="username">
-    <input type=text class="form-control" name="userValue" value="simp123" onFocus="value=''">
+    <input type=text class="form-control" name="userValue"onFocus="value=''">
     <br>ISBN:<br>
     <input type=hidden class="form-control" name="isbn">
-    <input type=text class="form-control" name="isbnValue" value="1122334455667788" onFocus="value=''">
+    <input type=text class="form-control" name="isbnValue"onFocus="value=''">
     <br>Review:<br>
-    <textarea name="reviewValue" class="form-control"  cols="50" rows="2">Your review here</textarea>
+    <textarea name="reviewValue" class="form-control"  cols="50" rows="2"></textarea>
     <br>Score:<br>
 
     <select class="form-control" name="scoreSelection">
@@ -55,7 +56,7 @@
       <option value="10">10</option>
     </select>
     <br><br>
-    <input type=button class="btn btn-info"  value="Add Review">
+    <input type=submit class="btn btn-info" value="Leave Review">
   </form>
 
   <%
@@ -67,15 +68,11 @@ String reviewval = request.getParameter("reviewValue");
 String score = request.getParameter("scoreSelection");
 
 cs5530.Connector conn = new Connector();
-cs5530.Database d = new Database();
 
-
-out.println(d.LeaveReviewWeb(usernameval, isbnval, reviewval, score, conn.con));
+out.println(cs5530.Database.LeaveReviewWeb(usernameval, isbnval, reviewval, score, conn.con));
 
 conn.closeStatement();
 conn.closeConnection();
-
-
 
 }
 %>

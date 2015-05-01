@@ -1,14 +1,22 @@
 <%@ page language="java" import="cs5530.*, java.util.ArrayList" %>
 <html>
 
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+ -->
 <head>
-	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+	
+<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
 </head>
 
 <div class="jumbotron">
@@ -34,11 +42,11 @@
 
 				<div class="form-group">
 					<label for="Author(s):">Title Word(s):</label>
-					<textarea class="form-control" onFocus="value=''" rows="1" name="TitleWords">Word1,Word2,Word3</textarea>
+					<textarea class="form-control" onFocus="value=''" rows="1" name="TitleWords">Comma Separated Example: Word1,Word2,Word3</textarea>
 				</div>
 
 				<label for="Author(s):">Author(s):</label>
-				<textarea class="form-control" onFocus="value=''" rows="1" name="authors">Author1,Author2,Author3</textarea>
+				<textarea class="form-control" onFocus="value=''" rows="1" name="authors">Comma Separated Example: Author1,Author2,Author3</textarea>
 			</div>
 
 
@@ -74,8 +82,7 @@
 			<input type=submit class="btn btn-info" value="Send Query">
 
 
-			<br><br>
-			<a href="NewUser.jsp" class="btn btn-primary" role="button">Send another Query</a>
+
 
 		</form>
 		<%
@@ -89,54 +96,48 @@
 	int authorCount = authors.length;
 	int titleCount = titlewords.length;
 	boolean allBooks = listval.matches("allbooks");
-	out.println("The value of sortval: " + sortval + " <BR>");
-
 
 	ArrayList<String> params = new ArrayList<String>();
 
-for(int i = 0; i < titlewords.length; i++)
+	for(int i = 0; i < titlewords.length; i++)
 	{
-		params.add(titlewords[i]);
-	}
+	params.add(titlewords[i]);
+}
 
-	//add parameters to arraylist
-	for(int i = 0; i < authors.length; i++)
-	{
-		params.add(authors[i]);
-		
-	}
+//add parameters to arraylist
+for(int i = 0; i < authors.length; i++)
+{
+	params.add(authors[i]);
 
-
-	
-	//add publsiher
-	params.add(publishervalue);
-
-	//add subject
-	params.add(subjectval);
-
-	
-
-	cs5530.Connector conn = new Connector();
-	cs5530.Database d = new Database();
-
-
-	%>
-	<h1> Results: </h1>
-
-
-	<%
-
-	
-
-	out.println(cs5530.Database.BrowseLibraryWeb(titleCount, authorCount, params, allBooks, sortval, conn.con ));
-	//out.println(cs5530.Database.BrowseLibraryWeb(titlewords, authors, publishervalue, subjectval, allBooks, sortval , conn.con  ));
+}
 
 
 
-	conn.closeStatement();
-	conn.closeConnection();
+//add publsiher
+params.add(publishervalue);
+
+//add subject
+params.add(subjectval);
+
+
+
+cs5530.Connector conn = new Connector();
+
+%>
+<h1> Results: </h1>
+
+
+<%
+
+out.println(cs5530.Database.BrowseLibraryWeb(titleCount, authorCount, params, allBooks, sortval, conn.con ));
+
+conn.closeStatement();
+conn.closeConnection();
 }
 %>
+
+<br><br>
+<a href="Browse.jsp" class="btn btn-primary" role="button">Browse Again</a>
 </body>
 
 

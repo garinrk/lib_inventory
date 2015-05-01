@@ -1,27 +1,27 @@
 <%@ page language="java" import="cs5530.*, java.util.*, java.text.SimpleDateFormat"%>
 <html>
 
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+ -->
+
 <head>
-	<link rel="stylesheet" type="text/css" href="main.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
-	<script LANGUAGE="javascript">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	function check_all_fields(form_obj){
-		alert(form_obj.searchAttribute.value+"='"+form_obj.attributeValue.value+"'");
-		if( form_obj.attributeValue.value == ""){
-			alert("No empty fields!");
-			return false;
-		}
-		return true;
-	}
-
-
-	</script>
-
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 </head>
 
-<h1>Checking out a book...</h1>
-
+<div class="jumbotron">
+<h1 class="text-center">Checking out a book...</h1>
+</div>
 
 <body>
 
@@ -30,18 +30,18 @@
 	if(usernameattr	== null){
 
 	%>
-	<form name="CheckoutBook" method=get onsubmit="return check_all_fields(this)" action="Checkout.jsp">
+	<form role="form" name="CheckoutBook" method=get action="Checkout.jsp">
 		Username:<BR>
-		<input type=hidden name="username">
-		<input type=text name="userValue" value="simp123" onFocus="value=''">
+		<input type=hidden class="form-control" name="username">
+		<input type=text class="form-control" name="userValue" value="simp123" onFocus="value=''">
 		
 		<br>ISBN of book to checkout:<br>
 		
 		<input type=hidden name="isbn">
-		<input type="text" name="isbnValue" value="1122334455667788" onFocus="value=''">
+		<input type="text" class="form-control" name="isbnValue" value="1122334455667788" onFocus="value=''">
 		<br>
 		<br>
-		<input type=submit value="Checkout Book">
+		<input type=submit class="btn btn-info"  value="Checkout Book">
 	</form>
 
 	<%
@@ -56,15 +56,20 @@
 	Date today = new Date();
 	SimpleDateFormat ft = new SimpleDateFormat("MM/dd/yyyy");
 
-	out.println(d.CheckoutBookWeb(usernameval, isbnval, today, conn.con));
-
+	if(isbnval != "" || usernameval != ""){
+		out.println(d.CheckoutBookWeb(usernameval, isbnval, today, conn.con));
+	}
+	else
+	{
+		out.println("No empty fields, please try again");
+	}
 	
 
 	conn.closeStatement();
 	conn.closeConnection();
 	}
 	%>
-
-<BR><BR><a href="Checkout.jsp">Checkout another book</a></p>
+<br>
+<a href="Checkout.jsp"  class="btn btn-primary" role="button">Checkout another book</a></p>
 </body>
 </html>

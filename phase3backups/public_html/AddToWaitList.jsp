@@ -1,21 +1,17 @@
 <%@ page language="java" import="cs5530.*, java.util.*" %>
 <html>
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+-->
+
 
 <head>
 	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
-
-	<script LANGUAGE="javascript">
-
-	function check_all_fields(form_obj){
-		alert(form_obj.searchAttribute.value+"='"+form_obj.attributeValue.value+"'");
-		if( form_obj.attributeValue.value == ""){
-			alert("No empty fields!");
-			return false;
-		}
-		return true;
-	}
-
-	</script>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1">
  
@@ -41,15 +37,15 @@
 	<div class="jumbotron">
 	<h1 class="text-center">Add user to waitlist</h1>
 </div>
-	<form name="AddToWaitList" method=get onsubmit="return check_all_fields(this)" action="AddToWaitList.jsp">
+	<form name="AddToWaitList" method=get action="AddToWaitList.jsp">
 		Username:<BR>
 		<input type=hidden class="form-control" name="username">
-		<input type=text class="form-control" name="userValue" value="simp123" onFocus="value=''">
+		<input type=text class="form-control" name="userValue" onFocus="value=''">
 		
 		<br>ISBN:<br>
 		
-		<input type=hidden class="form-control" name="isbn">
-		<input type="text" class="form-control" name="isbnValue" value="1122334455667788" onFocus="value=''">
+	<!-- 	<input type=hidden class="form-control" name="isbn"> -->
+		<input type="text" class="form-control" name="isbnValue" onFocus="value=''">
 		<br>
 		<br>
 		<input type=submit class="btn btn-info" value="Add User To WaitList">
