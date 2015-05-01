@@ -29,7 +29,7 @@ Spring 2015
 
   %>
   <div class="jumbotron">
-    <h1 class="text-center">Leave Book Review</h1>
+    <h1 class="text-center">Add Review</h1>
   </div>
 
   <form name="LeaveReview" method=get action="LeaveReview.jsp">
@@ -67,16 +67,27 @@ String isbnval = request.getParameter("isbnValue");
 String reviewval = request.getParameter("reviewValue");
 String score = request.getParameter("scoreSelection");
 
+if(usernameval != "" && isbnval != "" && reviewval != "")
+{
+
+
 cs5530.Connector conn = new Connector();
 
 out.println(cs5530.Database.LeaveReviewWeb(usernameval, isbnval, reviewval, score, conn.con));
 
 conn.closeStatement();
 conn.closeConnection();
-
+}
+else
+{
+  out.println("<BR><BR><h3>No empty fields, please try again</h3>");
+}
 }
 %>
 
-<BR><a href="LeaveReview.jsp" class="btn btn-primary" role="button">Leave Another Review</a>
+<a href="LeaveReview.jsp" class="btn btn-primary" role="button">Leave Another Review</a>
+  <div class="text-center"> 
+    <BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+    </div>
 </body>
 </html>

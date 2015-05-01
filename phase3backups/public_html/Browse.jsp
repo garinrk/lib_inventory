@@ -8,10 +8,10 @@ For Phase 3 of Semester Project
 CS 5530 - Database Systems - University of Utah
 Spring 2015
 
- -->
+-->
 <head>
-	
-<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -52,10 +52,10 @@ Spring 2015
 
 			<br>Publisher
 			<input class="form-control" type=hidden name="publisher">
-			<input class="form-control" type=text name="pubValue" value="Penguin Publishing" onFocus="value=''">
+			<input class="form-control" type=text name="pubValue">
 			<br>Subject <br>
 			<input class="form-control" type=hidden name="subject">
-			<input class="form-control" type=text name="subValue" value="Sci-Fi" onFocus="value=''">
+			<input class="form-control" type=text name="subValue" >
 			<br>
 
 
@@ -97,6 +97,9 @@ Spring 2015
 	int titleCount = titlewords.length;
 	boolean allBooks = listval.matches("allbooks");
 
+	if(publishervalue != "" && subjectval != "" && authors.length != 0 && titlewords.length != 0)
+	{
+
 	ArrayList<String> params = new ArrayList<String>();
 
 	for(int i = 0; i < titlewords.length; i++)
@@ -134,11 +137,15 @@ out.println(cs5530.Database.BrowseLibraryWeb(titleCount, authorCount, params, al
 conn.closeStatement();
 conn.closeConnection();
 }
+else{
+out.println("<BR><BR><h3>No empty fields, please try again</h3>");
+}
+}
 %>
 
-<br><br>
 <a href="Browse.jsp" class="btn btn-primary" role="button">Browse Again</a>
+<div class="text-center"> 
+	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+	</div>
 </body>
-
-
 </html>

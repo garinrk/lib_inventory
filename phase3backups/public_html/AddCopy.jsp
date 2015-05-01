@@ -1,19 +1,30 @@
 <%@ page language="java" import="cs5530.*" %>
 <html>
 
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+ -->
+
 <head>
-	<link rel="stylesheet" type="text/css" href="main.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
-	<script LANGUAGE="javascript">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 </head>
 
-
+<div class="jumbotron">
+<h1 class="text-center">Add Book Copy</h1>
+</div>
 
 <body>
-	<h1>Adding book copy...</h1>
 
 	<% String isbnattr = request.getParameter("isbn");
 
@@ -24,34 +35,41 @@
 		<br>
 		ISBN:
 		<br>
-		<input type=hidden name="isbn">
-		<input type="text" name="isbnValue">
+		<input type=hidden  class="form-control"  name="isbn">
+		<input type="text"  class="form-control" name="isbnValue">
 		<br>
 		Number of copies:
 		<br>
-		<input type="text" name="copiesValue">
+		<input type="text" class="form-control" name="copiesValue">
 		<br>
 		<br>
-		<input type=submit value="Add Copies">
+		<input type=submit class="btn btn-info" value="Add Copies">
 
 	</form>
 
 	<% } else {
-	cs5530.Connector conn = new Connector();
-	cs5530.Database d = new Database();
+	
+
 	String isbn = request.getParameter("isbnValue");
 	String amount = request.getParameter("copiesValue");
 
-
-	out.println(d.AddBookCopyWeb(isbn, amount, conn.con));
+	if(isbn != "" && amount != ""){
+	cs5530.Connector conn = new Connector();
+	out.println(cs5530.Database.AddBookCopyWeb(isbn, amount, conn.con));
 
 
 
 	conn.closeStatement();
 	conn.closeConnection();	
 	}
+	else{out.println("<BR><BR><h3>No empty fields, please try again</h3>");
+		}
+}
 	%>
 
-<BR><a href="AddCopy.jsp">Add another copy of a book</a></p>
+<a href="AddCopy.jsp" class="btn btn-primary" role="button">Add another copy of a book</a></p>
+<div class="text-center"> 
+	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+	</div>
 </body>
 </html>

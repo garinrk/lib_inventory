@@ -8,7 +8,7 @@ For Phase 3 of Semester Project
 CS 5530 - Database Systems - University of Utah
 Spring 2015
 
- -->
+-->
 
 <head>
 	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
@@ -22,7 +22,7 @@ Spring 2015
 </head>
 
 <div class="jumbotron">
-<h1 class="text-center">Returning a book...</h1>
+	<h1 class="text-center">Return a Book</h1>
 </div>
 
 
@@ -40,64 +40,71 @@ Spring 2015
 		Username:<BR>
 		<input type=hidden  class="form-control" name="username">
 		<input type=text  class="form-control" name="userValue" onFocus="value=''">
-		
+
 		<br>ISBN:<br>
-		
+
 		<input type=hidden  class="form-control" name="isbn">
 		<input type="text"  class="form-control" name="isbnValue" onFocus="value=''">
-	
+
 		<br>Month<br>
 		<input type="text"  class="form-control" name="monthValue" onFocus="value=''">
-		 Day
+		Day
 		<input type="text"  class="form-control" name="dayValue"  onFocus="value=''"> Year
 		<input type="text"  class="form-control" name="yearValue" onFocus="value=''">
 		<br>Mark book as:
 		<input type="radio"   name=lostvalue value="0" checked/>Returned
 		<input type="radio"  name=lostvalue value="1"/>Lost
-		
+
 
 		<br>
-		<input type=submit class="btn btn-default"value="Return Book">
+		<input type=submit class="btn btn-info" value="Return Book">
 	</form>
 
 	<%
-	} else {
+} else {
 
-	String usernameval = request.getParameter("userValue");
-	String isbnval = request.getParameter("isbnValue");
-	String lost = request.getParameter("lostvalue");
-	String year = request.getParameter("yearValue");
-	String month = request.getParameter("monthValue");
-	String day = request.getParameter("dayValue");
-	String returnDate = year + "-" + month + "-" + day;
-	boolean isLost = false;
+String usernameval = request.getParameter("userValue");
+String isbnval = request.getParameter("isbnValue");
+String lost = request.getParameter("lostvalue");
+String year = request.getParameter("yearValue");
+String month = request.getParameter("monthValue");
+String day = request.getParameter("dayValue");
+String returnDate = year + "-" + month + "-" + day;
+boolean isLost = false;
 
-	cs5530.Connector conn = new Connector();
+cs5530.Connector conn = new Connector();
 
 
-	if(usernameval != "" && isbnval != "" && lost != "" && year != "" && month != "" && day != "" ){
+if(usernameval != "" && isbnval != "" && lost != "" && year != "" && month != "" && day != "" ){
 
-		if(lost.equals("1"))
-			isLost = true;
-		else
-			isLost = false;
+if(lost.equals("1"))
+isLost = true;
+else
+isLost = false;
 
-		out.println(cs5530.Database.ReturnBookWeb(usernameval, isbnval, isLost, returnDate, conn.con));
-		
+out.println(cs5530.Database.ReturnBookWeb(usernameval, isbnval, isLost, returnDate, conn.con));
 
-		conn.closeStatement();
-		conn.closeConnection();
-	}
-	else
-	{
-		out.println("No empty fields allowed, please try again.");
 
-		conn.closeStatement();
-		conn.closeConnection();
-	}
+conn.closeStatement();
+conn.closeConnection();
 }
-	%>
+else
+{
+	out.println("<BR><BR><h3>No empty fields, please try again</h3>");
 
-	<BR><a class="btn btn-primary" href="Return.jsp">Return another book</a></p>
-	</body>
-	</html>
+	conn.closeStatement();
+	conn.closeConnection();
+}
+}
+%>
+
+<a class="btn btn-primary" href="Return.jsp">Return another book</a></p>
+
+<div class="text-center"> 
+	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+	</div>
+
+
+
+</body>
+</html>

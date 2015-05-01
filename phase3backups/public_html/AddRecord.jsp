@@ -1,15 +1,29 @@
 <%@ page language="java" import="cs5530.*" %>
 <html>
 
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+ -->
+
 <head>
-	<link rel="stylesheet" type="text/css" href="main.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
-	<script LANGUAGE="javascript">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
+	
 </head>
 
+<div class="jumbotron">
+<h1 class="text-center">Add Book Record</h1>
+</div>
 
 
 
@@ -24,44 +38,44 @@
 
 	%>
 
-	<form name="AddBookRecord" method=get action="AddRecord.jsp">
-		<h1>Adding a Book Record...</h1>
+	<form role="form" name="AddBookRecord" method=get action="AddRecord.jsp">
+
 		Title:
 		<br>
-		<input type=hidden name="title">	
-		<input type="text" name="titleValue">
+		<input type=hidden class="form-control" name="title">	
+		<input type="text" class="form-control" name="titleValue">
 		<br>
 		ISBN:
 		<br>
-		<input type=hidden name="isbn">
-		<input type="text" name="isbnValue">
+		<input type=hidden class="form-control" name="isbn">
+		<input type="text" class="form-control" name="isbnValue">
 		<br>
 		Author(s):<br>
-		<textarea name="authorsValue" cols="50" rows="2">author1,author2,author3...
+		<textarea name="authorsValue" class="form-control" cols="50" rows="2">Comma Separated Example: Author1,Author2,Author3
 		</textarea>
 		<br>
 		Summary:<br>
-		<textarea name="summaryValue" cols="50" rows="2">Place summary here...
+		<textarea name="summaryValue" class="form-control" cols="50" rows="2">
 		</textarea>
 		<br>
 		Publisher:<br>
-		<input type=hidden name="publisher">
-		<input type="text" name="publisherValue">
+		<input type=hidden class="form-control" name="publisher">
+		<input type="text" class="form-control" name="publisherValue">
 		<br>
 		Subject:<br>
-		<input type=hidden name="subject">
-		<input type="text" name="subjectValue">
+		<input type=hidden class="form-control" name="subject">
+		<input type="text" class="form-control" name="subjectValue">
 		<br>
 		Format:<br>
-		<input type=hidden name="format">
-		<input type="text" name="formatValue">
+		<input type=hidden class="form-control" name="format">
+		<input type="text" class="form-control" name="formatValue">
 		<br>
 		Year Of Publication:<br>
-		<input type=hidden name="pubyear">
-		<input type="text" name="pubyearValue">
+		<input type=hidden class="form-control" name="pubyear">
+		<input type="text" class="form-control" name="pubyearValue">
 		<br>
 		<br>
-		<input type=submit value="Add Record">
+		<input type=submit class="btn btn-info"  value="Add Record">
 
 	</form>
 
@@ -76,15 +90,24 @@
 	String format = request.getParameter("formatValue");
 	String pubYear = request.getParameter("pubyearValue");
 
-	cs5530.Connector conn = new Connector();
-	cs5530.Database d = new Database();
+	if(title != "" && isbn != "" && summary != "" && publisher != "" && subject != "" && format != "" && pubYear != ""){
 
-	out.println(d.AddBookRecordWeb(isbn,title,publisher,pubYear, format, subject, summary, authors, conn.con));
+	cs5530.Connector conn = new Connector();
+
+	out.println(cs5530.Database.AddBookRecordWeb(isbn,title,publisher,pubYear, format, subject, summary, authors, conn.con));
 	conn.closeStatement();
 	conn.closeConnection();
 }
+else{
+out.println("<BR><BR><h3>No empty fields, please try again</h3>");
+	
+}
+}
 %>
 
-<BR><a href="AddRecord.jsp">Add another book record</a></p>
+<a href="AddRecord.jsp" class="btn btn-primary" role="button">Add another book record</a></p>
+<div class="text-center"> 
+	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+	</div>
 </body>
 </html>

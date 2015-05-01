@@ -8,7 +8,7 @@ For Phase 3 of Semester Project
 CS 5530 - Database Systems - University of Utah
 Spring 2015
 
- -->
+-->
 
 <head>
 	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
@@ -20,7 +20,7 @@ Spring 2015
 </head>
 
 <div class="jumbotron">
-<h1 class="text-center">Checking out a book...</h1>
+	<h1 class="text-center">Checkout a Book</h1>
 </div>
 
 <body>
@@ -33,43 +33,45 @@ Spring 2015
 	<form role="form" name="CheckoutBook" method=get action="Checkout.jsp">
 		Username:<BR>
 		<input type=hidden class="form-control" name="username">
-		<input type=text class="form-control" name="userValue" value="simp123" onFocus="value=''">
-		
+		<input type=text class="form-control" name="userValue" >
+
 		<br>ISBN of book to checkout:<br>
-		
+
 		<input type=hidden name="isbn">
-		<input type="text" class="form-control" name="isbnValue" value="1122334455667788" onFocus="value=''">
+		<input type="text" class="form-control" name="isbnValue" >
 		<br>
 		<br>
 		<input type=submit class="btn btn-info"  value="Checkout Book">
 	</form>
 
 	<%
-	} else {
+} else {
 
-	String usernameval = request.getParameter("userValue");
-	String isbnval = request.getParameter("isbnValue");
+String usernameval = request.getParameter("userValue");
+String isbnval = request.getParameter("isbnValue");
 
-	cs5530.Connector conn = new Connector();
-	cs5530.Database d = new Database();
+cs5530.Connector conn = new Connector();
 
-	Date today = new Date();
-	SimpleDateFormat ft = new SimpleDateFormat("MM/dd/yyyy");
+Date today = new Date();
+SimpleDateFormat ft = new SimpleDateFormat("MM/dd/yyyy");
 
-	if(isbnval != "" || usernameval != ""){
-		out.println(d.CheckoutBookWeb(usernameval, isbnval, today, conn.con));
-	}
-	else
-	{
-		out.println("No empty fields, please try again");
-	}
-	
+if(isbnval != "" && usernameval != ""){
+out.println(cs5530.Database.CheckoutBookWeb(usernameval, isbnval, today, conn.con));
+}
+else
+{
+	out.println("<BR><BR><h3>No empty fields, please try again</h3>");
+}
 
-	conn.closeStatement();
-	conn.closeConnection();
-	}
-	%>
-<br>
+
+conn.closeStatement();
+conn.closeConnection();
+}
+%>
+
 <a href="Checkout.jsp"  class="btn btn-primary" role="button">Checkout another book</a></p>
+<div class="text-center"> 
+	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+	</div>
 </body>
 </html>

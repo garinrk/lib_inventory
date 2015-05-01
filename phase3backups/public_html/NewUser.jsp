@@ -41,24 +41,24 @@ Spring 2015
 
 	<form role="form" name="UserAdd" method=get action="NewUser.jsp">
 
-		<br>Unique Username EX: "MrSimpson"<br>
+		<br>Unique Username<br>
 		<input class="form-control" type=hidden name="username">
 		<input class="form-control" type=text name="userValue" >
 
-		<br>Identification Number EX: "1234"<br>
+		<br>Identification Number<br>
 		<input class="form-control" type=text name="idValue"  >
 
 
-		<br>Full Name EX: "Homer Simpson"<br>
+		<br>Full Name <br>
 		<input class="form-control" type=text name="nameValue">
 
-		<br>Address Ex: "742 Evergreen Terrace"<br>
+		<br>Address <br>
 		<input class="form-control" type=text name="addressValue">
 
-		<br>Phone Number Ex: 555-8707<br>
+		<br>Phone Number<br>
 		<input class="form-control" type=text name="phoneNumberValue">
 
-		<br>Email Address EX: "CEO@MrPlow.com<br>
+		<br>Email Address<br>
 		<input class="form-control" type=text name="emailValue">		
 
 		<br><br>
@@ -80,7 +80,7 @@ Spring 2015
 	cs5530.Connector conn = new Connector();
 
 	if(userNameVal == "" || idVal == "" || nameVal == "" || addressVal == "" || phoneVal == "" || emailVal == "") {
-		out.println("There was an empty field, please try again");
+		out.println("<BR><BR><h3>No empty fields, please try again</h3>");
 	}
 
 	else {
@@ -113,8 +113,11 @@ Spring 2015
 
 
 %>
-<br>
+
 <a href="NewUser.jsp" class="btn btn-primary" role="button">Add Another User</a>
+	<div class="text-center"> 
+		<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+		</div>
 
 
 </body>

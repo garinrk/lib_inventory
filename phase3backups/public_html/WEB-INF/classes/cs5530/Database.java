@@ -3276,7 +3276,7 @@ public static String PrintBookRecordWeb(String isbn, Connection con)
 
         while(r.next())
         {
-            resultStr += "Average Review Score: " + r.getString("avg");
+            resultStr += "<BR>Average Review Score: " + r.getString("avg");
         }
 
     } catch (Exception e) {

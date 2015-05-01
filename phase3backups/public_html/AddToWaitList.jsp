@@ -14,10 +14,10 @@ Spring 2015
 	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1">
- 
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 </head>
 
@@ -35,16 +35,15 @@ Spring 2015
 	%>
 
 	<div class="jumbotron">
-	<h1 class="text-center">Add user to waitlist</h1>
-</div>
+		<h1 class="text-center">Add User to Waitlist</h1>
+	</div>
 	<form name="AddToWaitList" method=get action="AddToWaitList.jsp">
 		Username:<BR>
 		<input type=hidden class="form-control" name="username">
 		<input type=text class="form-control" name="userValue" onFocus="value=''">
-		
+
 		<br>ISBN:<br>
-		
-	<!-- 	<input type=hidden class="form-control" name="isbn"> -->
+
 		<input type="text" class="form-control" name="isbnValue" onFocus="value=''">
 		<br>
 		<br>
@@ -52,23 +51,33 @@ Spring 2015
 	</form>
 
 	<%
-	} else {
+} else {
 
-	String usernameval = request.getParameter("userValue");
-	String isbnval = request.getParameter("isbnValue");
+String usernameval = request.getParameter("userValue");
+String isbnval = request.getParameter("isbnValue");
 
-	cs5530.Connector conn = new Connector();
-	cs5530.Database d = new Database();
+if(usernameval != "" && isbnval != ""){
+cs5530.Connector conn = new Connector();
+cs5530.Database d = new Database();
 
-	Date today = new Date();
+Date today = new Date();
 
-	out.println(d.AddToWaitListWeb(usernameval, isbnval, today, conn.con));
+out.println(d.AddToWaitListWeb(usernameval, isbnval, today, conn.con));
 
-	conn.closeStatement();
-	conn.closeConnection();
-	}
-	%>
+conn.closeStatement();
+conn.closeConnection();
+}
 
-	<BR><BR><a href="AddToWaitList.jsp" class="btn btn-primary" role="button">Add another user to a waitlist</a></p>
-	</body>
-	</html>
+else{
+out.println("<BR><BR><h3>No empty fields, please try again</h3>");
+}
+}
+
+%>
+
+<a href="AddToWaitList.jsp" class="btn btn-primary" role="button">Add another user to a waitlist</a></p>
+<div class="text-center"> 
+	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+	</div>
+</body>
+</html>

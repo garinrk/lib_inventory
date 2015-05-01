@@ -1,17 +1,30 @@
 <%@ page language="java" import="cs5530.*" %>
 <html>
 
+<!-- 
+
+Author: Garin Richards
+For Phase 3 of Semester Project
+CS 5530 - Database Systems - University of Utah
+Spring 2015
+
+ -->
+
 <head>
-	<link rel="stylesheet" type="text/css" href="main.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
 
-	<script LANGUAGE="javascript">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 </head>
 
 
 
+<div class="jumbotron">
+<h1 class="text-center">Get Book Record</h1>
+</div>
 
 <body>
 
@@ -24,14 +37,14 @@
 
 	%>
 
-	<h1>Print Book Record...</h1>
 
-	<form name="GetRecord" method=get onsubmit="return check_all_fields(this)" action="BookRecord.jsp">
+
+	<form role ="form" name="GetRecord" method=get action="BookRecord.jsp">
 		<br>ISBN:<br>
-		<input type=hidden name="isbn">
-		<input type="text" name="isbnValue" value="1122334455667788" onFocus="value=''">
+		<input type=hidden class="form-control" name="isbn">
+		<input type="text" name="isbnValue" class="form-control">
 
-		<BR><input type=submit value="Get Book Record">
+		<BR><input type=submit class="btn btn-info" value="Get Book Record">
 	</form>
 
 
@@ -41,20 +54,28 @@
 
 String isbnval = request.getParameter("isbnValue");
 
+if(isbnval != ""){
 
 cs5530.Connector conn = new Connector();
-cs5530.Database d = new Database();
 
-out.println(d.PrintBookRecordWeb(isbnval, conn.con));
+
+out.println(cs5530.Database.PrintBookRecordWeb(isbnval, conn.con));
 
 conn.closeStatement();
 conn.closeConnection();
-
+}
+else{
+	out.println("<BR><BR><h3>No empty fields, please try again</h3>");
+}
 
 
 }
 %>
 
-<a href="BookRecord.jsp">Print Another Book Record</a></p>
+<a href="BookRecord.jsp" class="btn btn-primary" role="button">Print Another Book Record</a></p>
+<div class="text-center"> 
+	<BR><a class="btn btn-success" href="index.html">Library Home</a></p>
+	</div>
+
 </body>
 </html>
