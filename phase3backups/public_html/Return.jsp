@@ -39,18 +39,18 @@ Spring 2015
 	<form role="form" name="ReturnBook" method=get action="Return.jsp">
 		Username:<BR>
 		<input type=hidden  class="form-control" name="username">
-		<input type=text  class="form-control" name="userValue" onFocus="value=''">
+		<input type=text  class="form-control" name="userValue">
 
 		<br>ISBN:<br>
 
 		<input type=hidden  class="form-control" name="isbn">
-		<input type="text"  class="form-control" name="isbnValue" onFocus="value=''">
+		<input type="text"  class="form-control" name="isbnValue">
 
 		<br>Month<br>
-		<input type="text"  class="form-control" name="monthValue" onFocus="value=''">
+		<input type="text"  class="form-control" name="monthValue">
 		Day
-		<input type="text"  class="form-control" name="dayValue"  onFocus="value=''"> Year
-		<input type="text"  class="form-control" name="yearValue" onFocus="value=''">
+		<input type="text"  class="form-control" name="dayValue"> Year
+		<input type="text"  class="form-control" name="yearValue" >
 		<br>Mark book as:
 		<input type="radio"   name=lostvalue value="0" checked/>Returned
 		<input type="radio"  name=lostvalue value="1"/>Lost

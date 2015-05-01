@@ -41,7 +41,7 @@ Spring 2015
 	<form name="GetLibraryStats" method=get action="LibraryStats.jsp">
 		Number of books (N) :<BR>
 		<input type=hidden class="form-control" name="numberofbooks">
-		<input type=text class="form-control" name="booksValue" onFocus="value=''">
+		<input type=text class="form-control" name="booksValue">
 		<BR>
 			<BR>Stats to return: 
 				<select class="form-control" name="statsSelection">

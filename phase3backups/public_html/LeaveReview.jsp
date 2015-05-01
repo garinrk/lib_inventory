@@ -35,10 +35,10 @@ Spring 2015
   <form name="LeaveReview" method=get action="LeaveReview.jsp">
     Username:<BR>
     <input type=hidden class="form-control" name="username">
-    <input type=text class="form-control" name="userValue"onFocus="value=''">
+    <input type=text class="form-control" name="userValue">
     <br>ISBN:<br>
     <input type=hidden class="form-control" name="isbn">
-    <input type=text class="form-control" name="isbnValue"onFocus="value=''">
+    <input type=text class="form-control" name="isbnValue">
     <br>Review:<br>
     <textarea name="reviewValue" class="form-control"  cols="50" rows="2"></textarea>
     <br>Score:<br>

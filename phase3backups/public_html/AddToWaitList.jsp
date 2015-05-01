@@ -40,11 +40,11 @@ Spring 2015
 	<form name="AddToWaitList" method=get action="AddToWaitList.jsp">
 		Username:<BR>
 		<input type=hidden class="form-control" name="username">
-		<input type=text class="form-control" name="userValue" onFocus="value=''">
+		<input type=text class="form-control" name="userValue">
 
 		<br>ISBN:<br>
 
-		<input type="text" class="form-control" name="isbnValue" onFocus="value=''">
+		<input type="text" class="form-control" name="isbnValue">
 		<br>
 		<br>
 		<input type=submit class="btn btn-info" value="Add User To WaitList">

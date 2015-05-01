@@ -55,8 +55,7 @@ Spring 2015
 		</textarea>
 		<br>
 		Summary:<br>
-		<textarea name="summaryValue" class="form-control" cols="50" rows="2">
-		</textarea>
+		<textarea name="summaryValue" class="form-control" cols="50" rows="2"></textarea>
 		<br>
 		Publisher:<br>
 		<input type=hidden class="form-control" name="publisher">
