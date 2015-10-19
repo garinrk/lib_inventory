@@ -21,10 +21,10 @@ import java.text.*;
 
 public class Console {
 
-    /* Sooper Sekret Database credentials */
-    private static String DBUSER = "cs5530u18";
-    private static String DBPASS = "f96qb5pr";
-    private static String DBURL = "Jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
+    /* Database Credentials */
+    private static String DBUSER = "USER";
+    private static String DBPASS = "PASS";
+    private static String DBURL = "URL";
     static Statement stmt;
 
     private static Date today = new Date();
